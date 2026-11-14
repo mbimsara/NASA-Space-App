@@ -629,6 +629,16 @@ main.landing-main,
   display: grid;
   gap: 13px;
 }
+.data-copy li svg {
+  width: 17px;
+  height: 17px;
+  flex: none;
+}
+.prototype-note > svg {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
 .data-copy li {
   display: flex;
   gap: 10px;
