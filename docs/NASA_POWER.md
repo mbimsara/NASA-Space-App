@@ -71,7 +71,7 @@ python -m scripts.compare_climate --input .cache/nasa-power/normalized-2015-2025
 
 These files have already been generated locally during verification; do not repeat downloads unnecessarily. This compares each 2025 calendar month with the equal-year-weighted 2015–2024 mean for that calendar month. The target year must be outside the reference years. Complete months are required separately for temperature and rainfall; output lists the actual contributing years. At least two complete reference years are needed per variable/month. A zero rainfall reference returns null percentage difference. Inspect coverage before interpreting differences.
 
-This is a descriptive historical reference, not an official climate normal, trend attribution, or forecast. Leap-day contributions remain part of February totals; February lengths can therefore affect rainfall-total comparisons. No cross-region climate twin score is computed yet.
+This is a descriptive historical reference, not an official climate normal, trend attribution, or forecast. Leap-day contributions remain part of February totals; February lengths can therefore affect rainfall-total comparisons. The historical comparison itself does not compute climate twin scores; the experimental finder below is a separate stage.
 
 Live verification returned all 4,018 days for both variables, 2015–2025. For the demonstration grid point, January 2025 rainfall was approximately 137.20% above the 2015–2024 January average, while July was approximately 82.52% below its July average. Different months need not move in the same direction. These values are sample analysis outputs, not a claim of field conditions.
 
@@ -103,4 +103,4 @@ Do not redownload existing local files. These are illustrative points near the n
 
 Sixteen offline tests cover the current module set. Raw and derived provider downloads remain under ignored `.cache/`; code, tests, and documentation can be shared without committing those files.
 
-Next steps: review comparison scales and method; record attribution/use terms; agree chart/API fields with Shehani and Dulanjaya; agree rainfall period/units with Bhagya before adding a water-budget model.
+The [climate handoff](CLIMATE_HANDOFF.md) now provides integration helpers and reproducible synthetic examples. [Attribution notes](ATTRIBUTION.md) record verified NASA credit guidance. Remaining team decisions: review comparison scales/method, agree final HTTP/chart contracts, and approve rainfall-period/units and agronomic formulas with Bhagya.
