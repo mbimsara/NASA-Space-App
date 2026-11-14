@@ -2,6 +2,127 @@
   "schema_version": "0.1",
   "catalog_version": "0.1-draft",
   "status": "research_pending",
-  "region": "Sri Lanka — demonstration region to confirm",
-  "crops": []
+  "region": "Sri Lanka — Dry & Intermediate Zones (Demonstration Focus: Anuradhapura / Matale)",
+  "crops": [
+    {
+      "id": "rice",
+      "name": "Paddy Rice",
+      "family": "Poaceae",
+      "season_labels": ["maha", "yala"],
+      "water_demand_mm_per_cycle": 1050.0,
+      "sources": [
+        {
+          "url": "https://doa.gov.lk/rrdi/",
+          "accessed_on": "2026-11-14",
+          "notes": "Department of Agriculture Sri Lanka, Rice Research and Development Institute (RRDI Bathalagoda). Seasonal water requirement for lowland puddle rice averages 900-1250 mm. Lowland Low Humic Gley (LHG) and alluvial soils across Dry and Intermediate Zones (Anuradhapura, Polonnaruwa, Matale). Limitation: Cultivation in Yala requires secure major irrigation tank storage; during water deficits, pulses/OFCs are prioritized over double-cropped rice."
+        }
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "mung-bean",
+      "name": "Mung Bean",
+      "family": "Fabaceae",
+      "season_labels": ["yala", "maha"],
+      "water_demand_mm_per_cycle": 350.0,
+      "sources": [
+        {
+          "url": "https://doa.gov.lk/fcrdi-mahailluppallama/",
+          "accessed_on": "2026-11-14",
+          "notes": "Department of Agriculture Sri Lanka, Field Crops Research and Development Institute (FCRDI Mahailluppallama). Short-duration pulse (60-65 days) with seasonal water demand 300-400 mm. Highly recommended for Yala in rice fallows on residual moisture and well-drained Reddish Brown Earths (RBE). Assumption: Fixes atmospheric nitrogen via Rhizobium; requires well-drained conditions and fails in stagnant waterlogging."
+        }
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "maize",
+      "name": "Maize",
+      "family": "Poaceae",
+      "season_labels": ["maha", "yala"],
+      "water_demand_mm_per_cycle": 550.0,
+      "sources": [
+        {
+          "url": "https://doa.gov.lk/fcrdi-mahailluppallama/",
+          "accessed_on": "2026-11-14",
+          "notes": "Department of Agriculture Sri Lanka, FCRDI Mahailluppallama. Crop cycle 105-115 days. Water requirement estimated at 500-650 mm. Suited for upland well-drained RBE soils in Dry and Intermediate Zones (Anuradhapura, Matale upland). Limitation: Sensitive to waterlogging at germination and vegetative phases; high nitrogen demand."
+        }
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "groundnut",
+      "name": "Groundnut",
+      "family": "Fabaceae",
+      "season_labels": ["maha", "yala"],
+      "water_demand_mm_per_cycle": 500.0,
+      "sources": [
+        {
+          "url": "https://doa.gov.lk/fcrdi-mahailluppallama/",
+          "accessed_on": "2026-11-14",
+          "notes": "Department of Agriculture Sri Lanka, FCRDI Mahailluppallama. Crop duration 90-105 days. Estimated water requirement 450-600 mm. Thrives in sandy loams and light-textured RBEs. Moderate drought tolerance. Limitation: Sensitive to heavy clays and poor drainage; harvesting is impeded in hard-setting soils."
+        }
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "cowpea",
+      "name": "Cowpea",
+      "family": "Fabaceae",
+      "season_labels": ["yala", "maha"],
+      "water_demand_mm_per_cycle": 350.0,
+      "sources": [
+        {
+          "url": "https://doa.gov.lk/fcrdi-mahailluppallama/",
+          "accessed_on": "2026-11-14",
+          "notes": "Department of Agriculture Sri Lanka, FCRDI Mahailluppallama. Duration 70-80 days. Water requirement 300-400 mm. Highly drought resilient; well-suited for late Maha and Yala rainfed or semi-irrigated upland fields across Anuradhapura and Matale dry belts. Effective green manure and nitrogen fixer."
+        }
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "finger-millet",
+      "name": "Finger Millet (Kurakkan)",
+      "family": "Poaceae",
+      "season_labels": ["maha", "yala"],
+      "water_demand_mm_per_cycle": 350.0,
+      "sources": [
+        {
+          "url": "https://doa.gov.lk/fcrdi-mahailluppallama/",
+          "accessed_on": "2026-11-14",
+          "notes": "Department of Agriculture Sri Lanka, FCRDI Mahailluppallama. Traditional hardy coarse grain. Duration 75-90 days. Estimated water demand 300-450 mm. Exceptional drought tolerance on marginal and upland soils in Sri Lanka Dry Zone. Low fertilizer requirement; useful for climate risk mitigation."
+        }
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "black-gram",
+      "name": "Black Gram (Undu)",
+      "family": "Fabaceae",
+      "season_labels": ["yala", "maha"],
+      "water_demand_mm_per_cycle": 350.0,
+      "sources": [
+        {
+          "url": "https://doa.gov.lk/fcrdi-mahailluppallama/",
+          "accessed_on": "2026-11-14",
+          "notes": "Department of Agriculture Sri Lanka, FCRDI Mahailluppallama. Duration 70-80 days. Water demand 300-400 mm. Traditional pulse cultivated extensively in Dry Zone rice-fallow systems during Yala. Excellent biological nitrogen fixation and soil health benefits."
+        }
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "chilli",
+      "name": "Chilli",
+      "family": "Solanaceae",
+      "season_labels": ["maha", "yala"],
+      "water_demand_mm_per_cycle": 600.0,
+      "sources": [
+        {
+          "url": "https://doa.gov.lk/fcrdi-mahailluppallama/",
+          "accessed_on": "2026-11-14",
+          "notes": "Department of Agriculture Sri Lanka, FCRDI Mahailluppallama. Duration 120-150 days. Water requirement 500-700 mm. High-value cash crop suited for well-drained RBE soils in Dry and Intermediate Zones. Highly susceptible to viral leaf curl complex and anthracnose; strictly requires rotation away from Solanaceae."
+        }
+      ],
+      "review_status": "draft"
+    }
+  ]
 }
