@@ -42,4 +42,65 @@ python scripts/validate_data.py
 
 Offline tests cover leap days/month boundaries, valid zeros, fill values, absent dates, incomplete rainfall totals, wrong units/periods and invalid request inputs. Live access is tested separately and never required by CI.
 
-Next steps: verify product spatial resolution and attribution; agree chart/API fields with Shehani and Dulanjaya; agree rainfall period/units with Bhagya before adding climate indicators or water scenarios.
+## Historical indicators and rainfall scenario
+
+Run the next stage without another provider request:
+
+```powershell
+python -m scripts.analyze_climate --input .cache/nasa-power/normalized-2025.json --output .cache/nasa-power/climate-2025.json --rainfall-change-pct -30
+```
+
+Use your own normalized filename if different. Choose a new output name when rerunning; existing results are protected. Optional exploration settings are `--dry-below-mm 1`, `--warm-at-or-above-c 30`, and `--rain-at-or-above-mm 20`. These defaults are interface exploration choices, not researched crop risk thresholds. Daily mean temperature cannot establish maximum-temperature heat stress.
+
+The historical output counts valid days below/above these explicit thresholds and the longest contiguous observed dry run. Missing rainfall breaks runs and flags the resulting maximum as a lower bound. All-missing data yields null counts, not a false zero.
+
+The scenario uniformly scales available daily rainfall and returns daily/monthly/full-period baseline differences. Missing values remain missing, full-period totals remain null when incomplete, and historical observations are never mutated. This does not simulate shifted rainfall timing, effective rainfall, crop demand, irrigation deficit, or rotation ranking; those require Bhagya's reviewed water model.
+
+Verified on the saved full-year dataset: 174 days below 1 mm/day, 20 days at or above 20 mm/day, 23-day longest observed run below 1 mm/day, and one day with mean temperature at or above 30 C. These are descriptive counts for this gridded series. A -30% scenario gives 1310.778 mm versus 1872.54 mm baseline, a difference of -561.762 mm.
+
+Nine offline tests now cover the adapter and climate functions, including baseline preservation, incomplete coverage, threshold boundaries, invalid scenario settings, and out-of-order dates. CI runs them with the shared-data checks.
+
+## Multi-year monthly comparison
+
+Retrieve once and reuse the normalized file:
+
+```powershell
+python -m scripts.nasa_power --start 2015-01-01 --end 2025-12-31 --output .cache/nasa-power/normalized-2015-2025.json
+python -m scripts.compare_climate --input .cache/nasa-power/normalized-2015-2025.json --output .cache/nasa-power/comparison-2025.json --reference-start 2015 --reference-end 2024 --target-year 2025
+```
+
+These files have already been generated locally during verification; do not repeat downloads unnecessarily. This compares each 2025 calendar month with the equal-year-weighted 2015–2024 mean for that calendar month. The target year must be outside the reference years. Complete months are required separately for temperature and rainfall; output lists the actual contributing years. At least two complete reference years are needed per variable/month. A zero rainfall reference returns null percentage difference. Inspect coverage before interpreting differences.
+
+This is a descriptive historical reference, not an official climate normal, trend attribution, or forecast. Leap-day contributions remain part of February totals; February lengths can therefore affect rainfall-total comparisons. No cross-region climate twin score is computed yet.
+
+Live verification returned all 4,018 days for both variables, 2015–2025. For the demonstration grid point, January 2025 rainfall was approximately 137.20% above the 2015–2024 January average, while July was approximately 82.52% below its July average. Different months need not move in the same direction. These values are sample analysis outputs, not a claim of field conditions.
+
+NASA's [meteorological source documentation](https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/) verifies the MERRA-2 grid at 0.5 degrees latitude by 0.625 degrees longitude. The adapter includes that metadata for MERRA2-only responses; older saved outputs may still contain null and can be regenerated deliberately. Thirteen offline tests cover retrieval normalization, threshold indicators, scenarios and reference comparisons.
+
+## Experimental climate twin finder
+
+`backend/services/climate_twins.py` compares supplied NASA POWER histories over the same reference years. Only complete months for both variables in every reference year are accepted. Source products, time standard and data kind must match; target/duplicate coordinates are excluded. It does not automatically discover or download global candidates.
+
+For each location, calculate 12 mean monthly rainfall totals and 12 mean monthly temperatures, weighting years equally. The distance is:
+
+```text
+rain_rms = sqrt(mean((candidate_month_rain - target_month_rain)^2))
+temperature_rms = sqrt(mean((candidate_month_temperature - target_month_temperature)^2))
+distance = sqrt((rain_rms / rain_scale_mm)^2 + (temperature_rms / temperature_scale_c)^2)
+```
+
+Defaults of 100 mm and 1 C are explicit exploratory scaling choices, not scientifically calibrated importance weights. Lower distance means closer under this metric; it is not a percentage match, probability, yield prediction, or crop-suitability score. The output preserves differences by month, provenance and rejected-candidate reasons. Monthly averages omit extremes, soil, topography and irrigation. Nearby sites may share a source grid cell.
+
+Two permitted Sri Lankan demo candidates have been retrieved from NASA POWER, each with all 3,653 days during 2015–2024:
+
+```powershell
+python -m scripts.nasa_power --latitude 6.12 --longitude 81.12 --start 2015-01-01 --end 2024-12-31 --output .cache/nasa-power/hambantota-2015-2024.json
+python -m scripts.nasa_power --latitude 9.66 --longitude 80.03 --start 2015-01-01 --end 2024-12-31 --output .cache/nasa-power/jaffna-2015-2024.json
+python -m scripts.find_climate_twins --target .cache/nasa-power/normalized-2015-2025.json --candidate "Hambantota=.cache/nasa-power/hambantota-2015-2024.json" --candidate "Jaffna=.cache/nasa-power/jaffna-2015-2024.json" --start-year 2015 --end-year 2024 --output .cache/nasa-power/twins-2015-2024.json
+```
+
+Do not redownload existing local files. These are illustrative points near the named locations, not surveyed farm boundaries. Among these two candidates only, the verified distance was 1.3502 for Hambantota and 1.4653 for Jaffna against the original demo point. This is an experimental regional demonstration, not a global best-match claim. Expanding the candidate set requires the owner's source/location restrictions and a reviewed comparison method.
+
+Sixteen offline tests cover the current module set. Raw and derived provider downloads remain under ignored `.cache/`; code, tests, and documentation can be shared without committing those files.
+
+Next steps: review comparison scales and method; record attribution/use terms; agree chart/API fields with Shehani and Dulanjaya; agree rainfall period/units with Bhagya before adding a water-budget model.

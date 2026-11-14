@@ -82,6 +82,6 @@ Keep crop rotation central. SoilRevive and FarmRecovery are planning modes that 
 
 ## Current status
 
-NASA POWER daily retrieval, normalization, monthly summaries and offline tests are implemented. Web application implementation and crop-model research are pending. See [adapter usage and verified results](docs/NASA_POWER.md).
+NASA POWER daily retrieval, normalization, monthly summaries, configurable historical threshold indicators, hypothetical rainfall scaling, multi-year monthly comparisons, an experimental supplied-location climate twin finder, and offline tests are implemented. Web application implementation and crop-model research are pending. See [adapter usage and verified results](docs/NASA_POWER.md).
 
 See the [six-member implementation plan](IMPLEMENTATION_PLAN.md) for responsibilities, Tharuka's UI/UX design assignment, integration contracts, milestones, and acceptance checks.

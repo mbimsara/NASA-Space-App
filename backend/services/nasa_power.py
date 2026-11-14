@@ -90,13 +90,16 @@ def normalize(raw, start, end, retrieved_at=None, source_url=None):
         "retrieved_at": retrieved_at, "source_url": source_url,
         "documentation_url": DOCS, "competition_resource_url": CHALLENGE,
         "parameter_metadata": metadata, "provider_fill_value": fill,
-        "spatial_resolution": None,
+        "spatial_resolution": {
+            "latitude_degrees": 0.5, "longitude_degrees": 0.625,
+            "source": "https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/",
+        } if header["sources"] == ["MERRA2"] else None,
         "summary": summarize(rows),
         "monthly": [{"month": month, **summarize(group)} for month, group in months.items()],
         "daily": rows,
         "limitations": [
             "Gridded environmental estimates, not measurements of this individual field.",
-            "Spatial resolution must be verified from product documentation before field-scale interpretation.",
+            "Meteorological grid resolution is regional; farm coordinates do not imply field-scale precision.",
             "Temperature means use valid days; check coverage before comparisons.",
             "Rain totals integrate daily rates over one-day intervals; incomplete periods have null totals.",
             "Monthly entries cover requested dates only, which may be partial calendar months.",

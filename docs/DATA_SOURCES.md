@@ -17,7 +17,7 @@ Additional listed candidates include SRTM, ECOSTRESS, GLDAS/NLDAS, FAO GAEZ, and
 
 ## Verified NASA POWER adapter
 
-See [usage and verification](NASA_POWER.md). Official documentation: https://power.larc.nasa.gov/docs/services/api/temporal/daily/ . Response metadata identifies MERRA2, API v2.10.3, T2M in C, PRECTOTCORR in mm/day, fill value -999 and UTC. These are gridded source estimates, not direct field measurements. Product-specific spatial resolution remains pending verification, so the adapter returns null rather than inventing a field resolution. Access used no API key. Attribution/use terms still need recording before public release.
+See [usage and verification](NASA_POWER.md). Official documentation: https://power.larc.nasa.gov/docs/services/api/temporal/daily/ . Response metadata identifies MERRA2, API v2.10.3, T2M in C, PRECTOTCORR in mm/day, fill value -999 and UTC. These are gridded source estimates, not direct field measurements. NASA's [meteorology source documentation](https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/) confirms a 0.5-degree latitude by 0.625-degree longitude MERRA-2 grid; the adapter reports this only for responses identifying MERRA2 alone, otherwise null. Access used no API key. Attribution/use terms still need recording before public release.
 
 Before implementing an adapter, record its official documentation URL, product/version, access/authentication method, permitted use/attribution, variables/units, spatial/temporal resolution, coverage/latency, missing-value/quality flags, aggregation method, retrieval date, cache policy, and known limitations. Do not copy unverified specifications into the UI.
 
