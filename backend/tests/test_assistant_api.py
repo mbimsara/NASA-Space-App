@@ -93,7 +93,8 @@ def test_outdated_analysis(client, baseline, farm):
 def test_invalid_request_and_unsupported_language(client, baseline, changes):
     response = ask(client, baseline, **changes)
     assert response.status_code == 422
-    assert response.json()["error"]["code"] == "VALIDATION_ERROR"
+    expected_code = "UNSUPPORTED_LANGUAGE" if "language" in changes else "VALIDATION_ERROR"
+    assert response.json()["error"]["code"] == expected_code
 
 
 def test_unsupported_recommendations_do_not_generate_advice(client, baseline):

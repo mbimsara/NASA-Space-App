@@ -379,3 +379,8 @@ and reuses Akash's unchanged English-only explanation service. It returns
 `role`, `content`, `source_ids`, `limitations`, `status`, `language` and
 `assumptions` without external AI or NASA calls. See
 [requests, synthetic responses, supported questions and limitations](ASSISTANT.md).
+
+The [frontend/backend integration report](FRONTEND_INTEGRATION.md) records the
+tested branch snapshots, real HTTP checks, frontend test/build results, the
+assistant language-error compatibility fix and exact frontend coordination items.
+It distinguishes synthetic testing, live NASA retrieval and pending browser E2E.

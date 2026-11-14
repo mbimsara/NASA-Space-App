@@ -29,6 +29,10 @@ app = FastAPI(
 @app.exception_handler(RequestValidationError)
 async def validation_error_handler(request, exc):
     fields = {}
+    unsupported_language = request.url.path == "/api/v1/assistant/messages" and any(
+        error["loc"] == ("body", "language") and error["type"] == "literal_error"
+        for error in exc.errors()
+    )
 
     for error in exc.errors():
         location = [
@@ -42,8 +46,8 @@ async def validation_error_handler(request, exc):
         status_code=422,
         content={
             "error": {
-                "code": "VALIDATION_ERROR",
-                "message": "Invalid request data.",
+                "code": "UNSUPPORTED_LANGUAGE" if unsupported_language else "VALIDATION_ERROR",
+                "message": "Only English ('en') is supported by the assistant." if unsupported_language else "Invalid request data.",
                 "fields": fields
             }
         }

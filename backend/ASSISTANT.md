@@ -51,7 +51,7 @@ existing water budgets, hypothetical scenarios, observations and provenance.
 infer a rank from array order or claim that heuristic scores are measurements.
 
 Only `language: "en"` is supported. Sinhala (`si`), Tamil (`ta`) and other
-languages return 422 / `VALIDATION_ERROR`; no English text is labeled as another
+languages return 422 / `UNSUPPORTED_LANGUAGE`; no English text is labeled as another
 language. Translation and any future external LLM require a separate design.
 
 Requests for crop recommendations, forecasts, yield predictions, fabricated
@@ -96,7 +96,8 @@ differences, never recalculate climate effects.
 | Unknown farm, analysis, scenario or selected-result candidate | 404 / `NOT_FOUND` |
 | Cross-farm, mismatched or inconsistent persisted references | 409 / `CONTEXT_CONFLICT` |
 | Analysis input version differs from current farm | 409 / `VERSION_CONFLICT` |
-| Unsupported language or invalid body | 422 / `VALIDATION_ERROR` |
+| Unsupported language | 422 / `UNSUPPORTED_LANGUAGE` |
+| Invalid body | 422 / `VALIDATION_ERROR` |
 | Missing/malformed persisted data, failed normalization or database failure | 503 / `SERVICE_UNAVAILABLE` |
 
 No new tables, migrations or message persistence are added. The endpoint reads
