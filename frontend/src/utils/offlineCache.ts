@@ -5,8 +5,9 @@
  * Owner: Shehani. Offline editing waits for Dulanjaya's sync contract.
  */
 import type { FarmEnvelope, SavedPlan } from "../types/api";
+import { PLAN_CACHE_KEY } from "../api/config";
 
-const KEY = "agrosphere_offline_plans";
+const KEY = PLAN_CACHE_KEY;
 export const MAX_CACHED_PLANS = 10;
 
 export interface CachedPlan {

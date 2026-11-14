@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { api } from "../api";
+import { ApiClientError } from "../api/client";
 import { isAbortError } from "../api/requestGuard";
 import { useLatestRequest } from "../hooks/useLatestRequest";
 import { LoadingSpinner } from "../components/ui/LoadingSpinner";
@@ -46,7 +47,7 @@ export function PlanPage() {
     } catch (err) {
       if (!ticket.isCurrent() || isAbortError(err)) return;
       // Read-only offline viewing: fall back to this device's last saved copy.
-      const cached = getCachedPlan(planId);
+      const cached = err instanceof ApiClientError && err.status === 0 ? getCachedPlan(planId) : null;
       if (cached) {
         setPlan(cached.plan);
         setFarm(cached.farm);

@@ -67,6 +67,7 @@ export function RotationPage() {
   const weightTotal = weights.water + weights.soil + weights.climate;
 
   const runRotation = async () => {
+    if (!observationId || !canWrite || !(weightTotal > 0) || !loadedCatalog.ok) return;
     const ticket = guard.next();
     setLoading(true);
     setError(null);
@@ -194,7 +195,7 @@ export function RotationPage() {
           type="button"
           className="btn btn-primary"
           onClick={runRotation}
-          disabled={loading || !(weightTotal > 0) || !canWrite || !observationId}
+          disabled={loading || !(weightTotal > 0) || !canWrite || !observationId || !loadedCatalog.ok}
         >
           {loading ? t("common.loading") : analysis ? t("rotation.rerun") : t("rotation.run")}
         </button>

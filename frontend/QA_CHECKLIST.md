@@ -1,5 +1,8 @@
 # Frontend workflow QA checklist
 
+Task 4 run evidence and real-browser commands: [LIVE_MODE_TASK4.md](../docs/LIVE_MODE_TASK4.md).
+Live HTTP is now the default; the synthetic demo requires explicit `VITE_USE_FIXTURES=true`.
+
 Owner: Shehani. Run before each integration merge and at feature freeze. Record date, build/commit, mode (fixtures or live API), device, and any failures as GitHub issues with reproduction steps.
 
 ## Automated (must pass)

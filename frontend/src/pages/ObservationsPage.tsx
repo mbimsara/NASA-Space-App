@@ -46,11 +46,12 @@ export function ObservationsPage() {
       const ticket = guard.next();
       setLoading(true);
       setError(null);
+      setObs(null);
       api
         .getObservations(farm.id, from, to, ticket.signal)
         .then((res) => {
           // Never display a response for another farm.
-          if (!ticket.isCurrent() || res.farm_id !== farm.id) return;
+          if (!ticket.isCurrent() || res.farm_id !== farm.id || res.input_version !== farm.input_version) return;
           setObs(res);
           setLatestObservation({ farmId: farm.id, observationId: res.observation_id, inputVersion: res.input_version });
         })
@@ -61,7 +62,7 @@ export function ObservationsPage() {
           if (ticket.isCurrent()) setLoading(false);
         });
     },
-    [farm.id, guard, setLatestObservation],
+    [farm.id, farm.input_version, guard, setLatestObservation],
   );
 
   useEffect(() => {

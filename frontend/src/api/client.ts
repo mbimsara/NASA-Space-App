@@ -8,6 +8,7 @@
  */
 
 import axios from "axios";
+import { configuration } from "./config";
 import demoFarmProfile from "../../../data/fixtures/farm.synthetic.json";
 import type { AxiosError, AxiosRequestConfig } from "axios";
 import type {
@@ -26,7 +27,7 @@ import type {
 // Base client
 // ---------------------------------------------------------------------------
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
+const BASE_URL = configuration.apiBaseUrl;
 
 const http = axios.create({
   baseURL: BASE_URL,
@@ -61,7 +62,7 @@ function handleAxiosError(err: unknown): never {
     if (axErr.response) {
       const data = axErr.response.data;
       const envelope: ApiError =
-        data && typeof data === "object" && "error" in data
+        data && typeof data === "object" && data.error && typeof data.error.code === "string" && typeof data.error.message === "string"
           ? data
           : { error: { code: axErr.response.status >= 500 ? "UNAVAILABLE" : "HTTP_ERROR", message: axErr.message } };
       throw new ApiClientError(axErr.response.status, envelope);

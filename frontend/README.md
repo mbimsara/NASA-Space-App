@@ -7,11 +7,13 @@ React 19 + TypeScript app implementing the core farmer journey: farm setup → o
 Node 24 (tested with v24.13.0) and npm 11.
 
 ```bash
-npm install
+npm ci
 npm run dev        # http://localhost:5173
 npm test           # vitest unit tests
 npm run typecheck  # tsc (single-threaded to limit memory use)
 npm run build
+npm run lint
+npm run test:e2e   # real browser + isolated FastAPI/Vite test servers
 ```
 
 ## Configuration
@@ -21,9 +23,22 @@ Copy `.env.example` to `.env.local`. Values are public; never put provider keys 
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `VITE_API_BASE_URL` | `http://localhost:8000/api/v1` | Dulanjaya's API |
-| `VITE_USE_FIXTURES` | `true` (anything except `false`) | Use synthetic fixtures stored in browser `localStorage`. Set `false` to call the API. |
+| `VITE_USE_FIXTURES` | `false` | Live HTTP by default. Only literal `true` enables the synthetic demonstration; invalid values are rejected. |
 
 Fixture mode shows a persistent ribbon and `synthetic` badges. Fixture data is never NASA data or approved agronomy.
+
+Live mode uses `VITE_USE_FIXTURES=false` and
+`VITE_API_BASE_URL=http://localhost:8000/api/v1`. Start FastAPI on port 8000 and
+Vite on port 5173. No error path switches to fixtures. Set
+`VITE_USE_FIXTURES=true` and restart Vite for the separate synthetic demonstration.
+
+Persisted selections, drafts and offline plan caches are isolated by mode/API URL.
+Legacy unscoped data is ignored, not deleted or imported into live mode. Cached
+plans are shown only on connection failures, with their original provenance and
+an offline-copy label; 404/409/422/503 responses remain visible errors.
+
+See [Task 4 verification](../docs/LIVE_MODE_TASK4.md) for setup, real-browser
+commands, live NASA evidence and scientific limitations.
 
 ## Libraries
 
@@ -48,7 +63,7 @@ React Router 6 (routing), Zustand (selected farm/analysis state, persisted), Zod
 
 - Every result is accepted only for the selected farm (analysis) or the selected baseline (scenario), so late responses are dropped.
 - `PATCH /farms/{id}` sends `expected_input_version`. A changed profile marks analyses outdated, and saving an outdated analysis is blocked in the UI.
-- The observation chart expects `time_series: [{date, rainfall_mm, mean_temperature_c}]`. Confirm field names with Matheesha.
+- The observation chart consumes live `daily` records through `toChartPoints`; legacy fixture `time_series` remains supported.
 - The backend should store `input_snapshot` and `analysis_snapshot` with saved plans (see `SavedPlan` in `src/types/api.ts`).
 
 ## Design

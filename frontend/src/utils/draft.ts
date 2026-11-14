@@ -9,8 +9,9 @@
  * - Draft is keyed per farmId (or "new" for a new farm)
  */
 import type { FarmFormValues } from "./validation";
+import { configuration } from "../api/config";
 
-const DRAFT_KEY_PREFIX = "agrosphere_farm_draft_";
+const DRAFT_KEY_PREFIX = `agrosphere_farm_draft_${configuration.namespace}_`;
 
 export function saveDraft(farmId: string | "new", values: Partial<FarmFormValues>): void {
   try {
