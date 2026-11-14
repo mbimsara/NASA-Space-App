@@ -5,6 +5,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { localizeToolMessage } from "../../i18n/toolMessages";
 import {
   ACTION_KINDS,
   initialEntries,
@@ -94,7 +95,7 @@ export function ActionCalendar({ planId, seasons }: Props) {
                     />
                     {errors[e.id] && (
                       <span id={`cal-err-${e.id}`} className="field-error" role="alert">
-                        {errors[e.id]}
+                        {localizeToolMessage(errors[e.id], t)}
                       </span>
                     )}
                   </div>

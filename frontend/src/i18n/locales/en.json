@@ -1,5 +1,6 @@
 {
   "nav": {
+    "search": "Search fields, plans, or insights…",
     "home": "Home",
     "farms": "My Farms",
     "newFarm": "New Farm",
@@ -355,7 +356,43 @@
     "noSourcesYet": "Add a source record above to link it here.",
     "notApplicable": "Not applicable — remove",
     "limitationsTitle": "Unknown inputs and data limitations",
-    "syntheticInputs": "Synthetic inputs in use: these results are arithmetic examples, not Sri Lankan market or yield evidence."
+    "syntheticInputs": "Synthetic inputs in use: these results are arithmetic examples, not Sri Lankan market or yield evidence.",
+    "messages": {
+      "nonNegative": "Must be a non-negative number",
+      "bothBounds": "Enter both low and high, or leave both unknown",
+      "ordered": "Low must not exceed high",
+      "sourceRequired": "Link at least one source to this input",
+      "currency": "Use a 3-letter currency code, e.g. LKR",
+      "area": "Area must be greater than zero",
+      "areaUnit": "Unsupported area unit",
+      "sourceId": "Source ID is required",
+      "sourceLabel": "Source label is required",
+      "reference": "Enter an http(s) URL or a document reference",
+      "date": "Use YYYY-MM-DD",
+      "accessDate": "Access date cannot be before the quoted date",
+      "sourceArea": "Market or production area is required",
+      "period": "Unit and period are required",
+      "kind": "Choose farmer-entered, observed, researched or synthetic",
+      "category": "Category name is required",
+      "yieldUnknown": "Yield scenario range is unknown",
+      "priceUnknown": "Price range is unknown",
+      "noCosts": "No cost categories entered",
+      "totalUnknown": "Total cost and net are unknown while any cost category is unknown",
+      "breakEvenUnknown": "Break-even price is unknown when the minimum yield is 0",
+      "synthetic": "Some inputs are synthetic examples, not Sri Lankan market or yield evidence.",
+      "differentAreas": "Inputs come from different market/production areas; check that they are comparable.",
+      "differentGrades": "Inputs refer to different crop varieties/grades; check that they are comparable.",
+      "periodAssumption": "Period: one crop cycle. Costs and yields are per hectare per cycle; price is farm-gate currency per kg.",
+      "netAssumption": "Net range uses conservative interval arithmetic: low = lowest revenue − highest cost; high = highest revenue − lowest cost. Endpoints are not equally likely and are not confidence intervals.",
+      "rounding": "Results are rounded for display only.",
+      "unknownSource": "Unknown source reference: {{value}}",
+      "duplicateSource": "Duplicate source ID \"{{value}}\"",
+      "unknownCost": "Cost \"{{value}}\" is unknown",
+      "omitted": "Not entered (not assumed zero): {{value}}.",
+      "unlinked": "Sources not linked to any input: {{value}}.",
+      "spec": "Specification v{{version}} ({{ref}}); formulas approved by Bhagya with implementation conditions.",
+      "areaConversion": "Area {{value}} {{unit}} = {{ha}} ha."
+    }
   },
   "common": {
     "loading": "Loading...",
@@ -418,7 +455,38 @@
     "water": "Water demand / cycle",
     "review": "Review",
     "emptyNoteFixture": "The crop catalog has no approved crops yet; plans shown here are synthetic fixtures, not recommendations.",
-    "emptyNoteLive": "The crop catalog has no approved crops yet, so the live engine returns no plans until crops are approved."
+    "emptyNoteLive": "The crop catalog has no approved crops yet, so the live engine returns no plans until crops are approved.",
+    "empty": "Catalog is empty; research and approval are required before recommendations.",
+    "draftNote": "{{count}} crop(s) are drafts and will not be used for recommendations.",
+    "unknownWaterNote": "{{count}} crop(s) have unknown water demand (null, not zero).",
+    "status": {
+      "reviewed": "Reviewed",
+      "research_pending": "Research pending"
+    },
+    "identifier": "ID",
+    "messages": {
+      "required": "Missing required field",
+      "unexpected": "Unexpected field",
+      "object": "Catalog must be a JSON object",
+      "version": "Must be \"0.1\"",
+      "string": "Must be a non-empty string",
+      "status": "Must be \"research_pending\" or \"reviewed\"",
+      "array": "Must be an array",
+      "cropObject": "Crop entry must be an object",
+      "cropId": "Missing or empty crop identifier",
+      "duplicate": "Duplicate crop ID \"{{id}}\" (also at crops[{{index}}])",
+      "nullableString": "Must be a non-empty string or null (unknown)",
+      "strings": "Must be an array of strings",
+      "duplicateSeasons": "Duplicate season labels",
+      "water": "Invalid unit/value: must be a positive number of millimetres per cycle, or null when unknown",
+      "sourceObject": "Source must be an object",
+      "url": "Invalid source URL (http/https required)",
+      "review": "Must be \"draft\" or \"approved\"",
+      "sourceRequired": "Approved crops need at least one source",
+      "seasonRequired": "Approved crops need at least one season",
+      "familyRequired": "Approved crops need a reviewed family",
+      "reviewed": "A reviewed catalog needs at least one crop and all crops approved"
+    }
   },
   "irrigationNotice": {
     "title": "Water screening unavailable:",
@@ -453,7 +521,9 @@
       "soil_test": "Soil test",
       "harvest": "Harvest",
       "other": "Other"
-    }
+    },
+    "invalidDate": "Use a valid date (YYYY-MM-DD)",
+    "harvestDate": "Harvest must be on or after the season's planting date"
   },
   "roadmap": {
     "title": "Planned features",

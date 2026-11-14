@@ -19,6 +19,7 @@ import {
   type SourceRecord,
 } from "../finance/calculator";
 import { todayIso } from "../utils/validation";
+import { localizeToolMessage } from "../i18n/toolMessages";
 
 const toNum = (s: string) => (s.trim() === "" ? null : Number(s));
 const KINDS: SourceKind[] = ["farmer_entered", "observed", "researched", "synthetic"];
@@ -153,7 +154,7 @@ export function FinancePage() {
       }),
     [currency, farm.profile.area_ha, cropLabel, costs, yieldRange, yieldSources, price, priceSources, sources],
   );
-  const e = outcome.errors;
+  const e = Object.fromEntries(Object.entries(outcome.errors).map(([key, message]) => [key, localizeToolMessage(message, t)]));
   const r = outcome.result;
   const money = (x: Range | null) =>
     x === null
@@ -308,7 +309,7 @@ export function FinancePage() {
               ) : null}
               <RangeInputs
                 id={`cost-${i}`}
-                label={`${c.name || t("financial.category")} (${currency}/ha)`}
+                label={`${c.key ? t(`financial.categories.${c.key}`, { defaultValue: c.name }) : c.name || t("financial.category")} (${currency}/ha)`}
                 value={c.per_ha}
                 onChange={(per_ha) => setCosts((cs) => cs.map((x, j) => (j === i ? { ...x, per_ha } : x)))}
                 error={e[`costs.${i}`] ?? e[`costs.${i}.low`] ?? e[`costs.${i}.high`] ?? e[`costs.${i}.name`]}
@@ -342,7 +343,7 @@ export function FinancePage() {
               style={{ fontWeight: 400 }}
               onClick={() => setCosts((cs) => [...cs, { key: s.key, name: s.name, per_ha: emptyRange(), source_ids: [] }])}
             >
-              + {s.name}
+              + {t(`financial.categories.${s.key}`, { defaultValue: s.name })}
             </button>
           ))}
         </div>
@@ -428,7 +429,7 @@ export function FinancePage() {
                 <strong>{t("financial.limitationsTitle")}</strong>
                 <ul style={{ margin: "4px 0 0" }}>
                   {[...r.unknowns, ...r.limitations].map((u, i) => (
-                    <li key={i}>{u}</li>
+                    <li key={i}>{localizeToolMessage(u, t)}</li>
                   ))}
                 </ul>
               </div>
@@ -437,7 +438,7 @@ export function FinancePage() {
               <summary style={{ cursor: "pointer" }}>{t("common.assumptions")}</summary>
               <ul>
                 {r.assumptions.map((a, i) => (
-                  <li key={i}>{a}</li>
+                  <li key={i}>{localizeToolMessage(a, t)}</li>
                 ))}
               </ul>
             </details>

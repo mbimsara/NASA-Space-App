@@ -15,6 +15,10 @@
 .app-shell .topbar .language-switcher { display: flex; align-items: center; flex: none; }
 .app-shell .topbar .language-switcher label { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .app-shell .topbar .language-switcher select { height: 40px; min-width: 104px; margin: 0; padding: 0 10px; font-size: 13px; }
+.app-shell[data-theme] { font-family: var(--sans); }
+:root:lang(si) .app-shell .side-nav a, :root:lang(ta) .app-shell .side-nav a { height: auto; min-height: 42px; padding-block: 10px; }
+:root:lang(si) .app-shell .journey, :root:lang(ta) .app-shell .journey { flex-wrap: wrap; gap: 16px; }
+:root:lang(si) .app-shell .journey ol, :root:lang(ta) .app-shell .journey ol { flex-wrap: wrap; row-gap: 14px; }
 @media (max-width: 1250px) {
   .app-shell .topbar { gap: 12px; padding-inline: 16px; }
   .app-shell .topbar .search { flex-basis: 210px; }

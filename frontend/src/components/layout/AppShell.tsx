@@ -102,8 +102,8 @@ export function AppShell() {
             <Icon name="overview" />
             <input
               type="search"
-              aria-label="Search fields, plans, or insights"
-              placeholder="Search fields, plans, or insights..."
+              aria-label={t("nav.search")}
+              placeholder={t("nav.search")}
             />
           </div>
           <div className="top-actions">

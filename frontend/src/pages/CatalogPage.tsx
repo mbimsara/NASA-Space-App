@@ -5,6 +5,7 @@
  */
 import { useTranslation } from "react-i18next";
 import { loadedCatalog } from "../catalog";
+import { localizeToolMessage } from "../i18n/toolMessages";
 
 export function CatalogPage() {
   const { t } = useTranslation();
@@ -21,7 +22,7 @@ export function CatalogPage() {
           <div>
             {t("catalog.summary", {
               version: catalog.catalog_version,
-              status: catalog.status,
+              status: t(`catalog.status.${catalog.status}`, { defaultValue: catalog.status }),
               region: catalog.region,
               count: catalog.crops.length,
               approved: loadedCatalog.approvedCrops.length,
@@ -33,7 +34,7 @@ export function CatalogPage() {
       {notes.length > 0 && (
         <ul className="notice notice-info" style={{ paddingLeft: 32 }}>
           {notes.map((n, i) => (
-            <li key={i}>{n}</li>
+            <li key={i}>{localizeToolMessage(n, t)}</li>
           ))}
         </ul>
       )}
@@ -53,7 +54,7 @@ export function CatalogPage() {
                   <td>
                     <code>{iss.path}</code>
                   </td>
-                  <td>{iss.message}</td>
+                  <td>{localizeToolMessage(iss.message, t)}</td>
                 </tr>
               ))}
             </tbody>
@@ -66,7 +67,7 @@ export function CatalogPage() {
           <table className="data">
             <thead>
               <tr>
-                <th scope="col">ID</th>
+                <th scope="col">{t("catalog.identifier")}</th>
                 <th scope="col">{t("catalog.name")}</th>
                 <th scope="col">{t("catalog.family")}</th>
                 <th scope="col">{t("catalog.seasons")}</th>
@@ -83,9 +84,9 @@ export function CatalogPage() {
                   </td>
                   <td>{c.name}</td>
                   <td>{c.family ?? t("common.unknown")}</td>
-                  <td>{c.season_labels.join(", ") || "—"}</td>
+                  <td>{c.season_labels.map((season) => t(`rotation.seasonLabel.${season}`, { defaultValue: season })).join(", ") || "—"}</td>
                   <td>{c.water_demand_mm_per_cycle === null ? t("common.unknown") : `${c.water_demand_mm_per_cycle} mm`}</td>
-                  <td>{c.review_status}</td>
+                  <td>{t(`catalog.status.${c.review_status}`, { defaultValue: c.review_status })}</td>
                   <td>
                     {c.sources.map((s, i) => (
                       <div key={i}>
