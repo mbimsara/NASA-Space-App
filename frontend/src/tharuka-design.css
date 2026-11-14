@@ -998,6 +998,14 @@ html, body, #root { overflow-x: hidden; }
   border-bottom: 1px solid #ffffff12;
   flex-shrink: 0;
 }
+.side-brand-logo {
+  display: block;
+  width: 100%;
+  max-width: 206px;
+  height: auto;
+  max-height: 64px;
+  object-fit: contain;
+}
 .side-brand .brand-mark {
   background: #ffffff12;
   color: #72e2b1;

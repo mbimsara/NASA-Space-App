@@ -47,12 +47,7 @@ export function Sidebar({ open, onNavigate, id }: Props) {
   return (
     <aside id={id} className={`sidebar${open ? " open mobile-open" : ""}`} aria-label={t("nav.main")}>
       <Link to="/" className="side-brand" onClick={onNavigate}>
-        <span className="brand-mark">
-          <Icon name="leaf" />
-        </span>
-        <span>
-          AgroSphere <b>AI</b>
-        </span>
+        <img className="side-brand-logo" src="/images/agrosphere-logo-transparent.png" alt="AgroSphere AI" />
       </Link>
 
       <Link to="/" className="farm-switch" onClick={onNavigate} aria-label={t("nav.switchFarm")}>
