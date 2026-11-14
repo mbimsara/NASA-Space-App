@@ -60,3 +60,12 @@ Old snapshots remain readable at `/api/v1/observations/{observation_id}`. Failed
 staleness are separate: the future-analysis reference helper permits historical IDs for matching
 current inputs but rejects ownership/version conflicts. Future analysis saves must recheck
 input versions when committing. No crop calculations are added. See [backend details](../backend/README.md#climate-observations).
+# Implemented rotation boundary
+
+The farm rotation POST now validates the current farm and immutable observation,
+adapts explicit season labels and exclusions to Bhagya's unchanged vendored engine,
+and appends `rotation_analyses` with original input/catalog snapshots. Saving
+atomically rechecks the farm version. Water calculations await matching seasonal
+climate periods and approved crops; no missing inputs are synthesized. See
+[integration details](../backend/ROTATIONS.md) and
+[engine provenance](../backend/agrosphere_rotation/VENDORED.md).

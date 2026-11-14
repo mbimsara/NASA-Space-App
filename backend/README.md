@@ -354,3 +354,10 @@ metadata, partial/all-missing coverage, valid zeros, unchanged farm behavior, an
 to Matheesha's fetch/normalize functions. Cache tests also cover repeated requests, expiry,
 provider/storage failures, version/coordinate changes, concurrent fills, process restarts,
 and future analysis reference validation. No live provider data is required.
+# Crop rotation integration
+
+`POST /api/v1/farms/{farm_id}/rotations` now persists versioned analyses using
+Bhagya's pinned rotation package. See [request/response examples, persistence,
+errors and approval limitations](ROTATIONS.md). The current research-pending
+catalog returns an explained empty candidates list; numerical water budgets
+await a compatible seasonal observation contract.

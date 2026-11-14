@@ -86,3 +86,12 @@ Scenario responses include `scenario_id`, `baseline_analysis_id`, parameters, re
 ```
 
 Use 400 for malformed requests, 404 for unknown resources, 409 for version/context conflicts, 422 for field/domain validation, and 503 for unavailable dependencies. Avoid exposing credentials/provider internals. Validate coordinate ranges, chronological dates, compatible units, catalog IDs, supported languages, three-to-five seasons, nonnegative weights with positive total, and relationships among farm/analysis/scenario/candidate IDs. Normalize priority weights on the server and return the effective weights.
+# Implemented rotation integration update
+
+`POST /api/v1/farms/{farm_id}/rotations` is implemented. See
+[backend rotation contract](../backend/ROTATIONS.md) for full details. The
+count-only request remains accepted; optional `season_labels` supplies explicit
+season identity. Missing labels or no approved crops produce an explained empty
+analysis. Unknown water metrics and unavailable scores remain null. Analyses are
+stored with original inputs, catalog contents and engine provenance. Scenario,
+assistant and saved-plan endpoints remain proposed.
