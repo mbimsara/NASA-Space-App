@@ -89,6 +89,43 @@ class ClimateInput:
             observation_end=summary["end"],
         )
 
+    @classmethod
+    def from_season_inputs(
+        cls,
+        season: dict,
+        *,
+        irrigation_mm: float = 0,
+        rainfall_change_percent: float = 0,
+    ) -> "ClimateInput":
+        """Consume Matheesha's PR #1 ``season_inputs`` handoff.
+
+        The handoff deliberately leaves agronomic calculations null. This
+        adapter accepts only complete rainfall coverage and retains ownership of
+        scenario and water-budget calculations in this package.
+        """
+
+        expected = season.get("expected_days")
+        valid = season.get("rain_valid_days")
+        if type(expected) is not int or expected <= 0:
+            raise ValueError("season expected_days must be a positive integer")
+        if valid != expected or season.get("rainfall_total_mm") is None:
+            raise ValueError("complete seasonal rainfall coverage is required")
+        if season.get("effective_rainfall_mm") is not None:
+            raise ValueError("effective rainfall must use Bhagya's approved model")
+        if season.get("crop_water_demand_mm") is not None:
+            raise ValueError("crop water demand must use Bhagya's approved catalog")
+        if season.get("irrigation_deficit_mm") is not None:
+            raise ValueError("irrigation deficit must be calculated by the rotation engine")
+
+        return cls(
+            rainfall_mm=season["rainfall_total_mm"],
+            irrigation_mm=irrigation_mm,
+            rainfall_change_percent=rainfall_change_percent,
+            source="NASA POWER season_inputs (modeled gridded estimate)",
+            observation_start=season["start"],
+            observation_end=season["end"],
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class WaterBudget:

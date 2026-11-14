@@ -103,3 +103,55 @@ def test_nasa_power_incomplete_rainfall_is_not_used() -> None:
     with pytest.raises(ValueError, match="complete-period"):
         ClimateInput.from_nasa_power(normalized)
 
+
+def test_climate_input_accepts_complete_matheesha_season_handoff() -> None:
+    season = {
+        "start": "2025-01-01",
+        "end": "2025-01-31",
+        "expected_days": 31,
+        "rain_valid_days": 31,
+        "temperature_valid_days": 30,
+        "rainfall_total_mm": 221.69,
+        "mean_temperature_c": 24.4,
+        "effective_rainfall_mm": None,
+        "crop_water_demand_mm": None,
+        "irrigation_deficit_mm": None,
+    }
+
+    result = ClimateInput.from_season_inputs(
+        season,
+        irrigation_mm=50,
+        rainfall_change_percent=-20,
+    )
+
+    assert result.rainfall_mm == pytest.approx(221.69)
+    assert result.irrigation_mm == 50
+    assert result.rainfall_change_percent == -20
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("rain_valid_days", 30, "complete seasonal rainfall"),
+        ("effective_rainfall_mm", 180, "Bhagya's approved model"),
+        ("crop_water_demand_mm", 400, "Bhagya's approved catalog"),
+        ("irrigation_deficit_mm", 100, "rotation engine"),
+    ],
+)
+def test_season_handoff_rejects_incomplete_or_precomputed_agronomy(
+    field: str, value: float, message: str
+) -> None:
+    season = {
+        "start": "2025-01-01",
+        "end": "2025-01-31",
+        "expected_days": 31,
+        "rain_valid_days": 31,
+        "rainfall_total_mm": 221.69,
+        "effective_rainfall_mm": None,
+        "crop_water_demand_mm": None,
+        "irrigation_deficit_mm": None,
+    }
+    season[field] = value
+
+    with pytest.raises(ValueError, match=message):
+        ClimateInput.from_season_inputs(season)

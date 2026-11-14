@@ -82,6 +82,26 @@ Matheesha's adapter returns `null` for the total and this engine rejects it.
 Never replace it with `rainfall_available_days_mm`, and never interpret NASA
 POWER as an individual-field measurement.
 
+Matheesha's open PR #1 also provides `season_inputs(...)`. Its output is
+supported directly:
+
+```python
+from agrosphere_rotation import ClimateInput, calculate_water_budget
+from backend.services.climate_handoff import season_inputs
+
+season = season_inputs(observations, "2025-01-01", "2025-01-31")
+climate = ClimateInput.from_season_inputs(
+    season,
+    irrigation_mm=100,
+    rainfall_change_percent=-20,
+)
+budget = calculate_water_budget(crop_demand_mm=400, climate=climate)
+```
+
+The adapter rejects incomplete rainfall coverage. It also rejects any
+precomputed effective rainfall, crop demand, or irrigation deficit so those
+agronomic decisions cannot silently bypass Bhagya's reviewed model.
+
 The requested POWER dates must cover the same period as the crop-demand value.
 Before integration, Bhagya and Matheesha still need to agree on:
 
