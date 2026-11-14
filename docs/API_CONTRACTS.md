@@ -17,6 +17,7 @@ Farm mutation input follows [the farm schema](../data/schemas/farm.schema.json).
 | PATCH `/farms/{id}` | `expected_input_version` and a complete replacement `profile` | 200: envelope with incremented version; 409 on version conflict |
 | GET `/farms/{id}/observations?start=YYYY-MM-DD&end=YYYY-MM-DD` | Inclusive dates; start <= end | Observation summary below |
 | GET `/observations/{observation_id}` | Persistent observation ID | 200: original immutable observation envelope; 404 if absent |
+| POST `/observations/{observation_id}/rainfall-scenarios` | `rainfall_change_pct` from -100 to 100 | Hypothetical uniform scaling of the stored daily rainfall baseline; missing values are preserved and the snapshot is unchanged |
 | POST `/farms/{id}/rotations` | `input_version`, `observation_id`, `seasons`, `catalog_version`, `priority_weights` | Immutable rotation analysis |
 | POST `/analyses/{id}/scenarios` | `rainfall_change_pct` from -100 to 100 for the prototype | New hypothetical scenario linked to baseline, recalculated candidates and deltas |
 | POST `/assistant/messages` | `farm_id`, `analysis_id`, optional `scenario_id`/`candidate_id`, `language` (`en`, `si`, `ta`), `message` | Explanation, source IDs, limitations; server verifies context IDs belong together |
