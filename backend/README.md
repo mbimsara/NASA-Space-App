@@ -11,9 +11,10 @@ FastAPI with synchronous SQLAlchemy and SQLite. Implemented endpoints:
 | GET | `/api/v1/farms/{farm_id}/observations?start=YYYY-MM-DD&end=YYYY-MM-DD` | Retrieve a fresh cached snapshot or fetch and persist NASA POWER observations |
 | GET | `/api/v1/observations/{observation_id}` | Read the original persisted observation snapshot |
 | POST | `/api/v1/observations/{observation_id}/rainfall-scenarios` | Uniformly scale stored daily rainfall for a labeled hypothetical sensitivity test |
+| POST | `/api/v1/farms/{farm_id}/rotations` | Validate context, invoke the shared rotation engine, and persist an immutable analysis |
 
 See [API contracts](../docs/API_CONTRACTS.md) for fields, units, and errors.
-Rotation-analysis scenarios, assistant, and plan endpoints remain planned. POWER observations, database-backed caching, stable snapshot IDs, and observation-based rainfall scenarios are implemented. Live retrieval and cache reuse were verified on 2026-11-14.
+Analysis scenarios, assistant, and plan endpoints remain planned. POWER observations, database-backed caching, stable snapshot IDs, observation-based rainfall scenarios, and crop-rotation analyses are implemented. Live retrieval and cache reuse were verified on 2026-11-14.
 
 ## Installation
 
@@ -24,7 +25,7 @@ Windows PowerShell:
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -r backend/requirements.txt
+python -m pip install -e . -r backend/requirements.txt
 # Optional: configure values before starting the server.
 Copy-Item .env.example .env
 cd backend
@@ -35,7 +36,7 @@ Linux/macOS:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r backend/requirements.txt
+python -m pip install -e . -r backend/requirements.txt
 # Optional: configure values before starting the server.
 cp .env.example .env
 cd backend
@@ -302,7 +303,18 @@ valid provider results use the same cache lifetime and retain their coverage dis
 SMAP, historical risk indicators, forecasts, scenarios, crop recommendations, and rotation
 endpoints are not exposed by this route.
 
-### References for future crop rotation analysis
+### Crop rotation analysis
+
+`POST /api/v1/farms/{farm_id}/rotations` is implemented and stores an immutable
+analysis snapshot. It validates the farm version, persisted observation
+ownership/version, ordered season labels, and catalog version before invoking
+the shared `agrosphere_rotation` package. Only approved catalog entries are
+eligible, so the current research-pending catalog returns a successful empty
+candidate list with explicit reasons. A single historical observation window is
+not duplicated across multiple future seasons; season water fields stay unknown
+until dated inputs exist for each season.
+
+### Rotation analysis references
 
 A future analysis can persist a foreign-key reference to `observation_snapshots.id` and
 use the saved `farm_profile`, `input_version`, and `payload` without refetching NASA data.

@@ -1,6 +1,6 @@
 # API contracts — proposed v0.1
 
-Owner: Dulanjaya. Reviewers: all module owners. Farm POST/GET/PATCH endpoints are implemented, along with GET `/api/v1/health`. The observations endpoint is also implemented through Matheesha's NASA POWER adapter. Rotation/scenario, assistant, and saved-plan endpoints below remain proposed. Use `/api/v1` and JSON; freeze changes together before independent development.
+Owner: Dulanjaya. Reviewers: all module owners. Farm POST/GET/PATCH, health, observations, and rotation-analysis endpoints are implemented. Observations use Matheesha's NASA POWER adapter; rotations call Bhagya's shared domain package and persist immutable snapshots. Scenario, assistant, and saved-plan endpoints below remain proposed. Use `/api/v1` and JSON; freeze changes together before independent development.
 
 The implemented climate functions and proposed serializer are documented in [the climate handoff](CLIMATE_HANDOFF.md). Its committed synthetic bundle is the current integration example. The observation serializer exposes separate temperature/rain coverage and the adapter's explicit `rainfall_total_mm` field; the simplified example below predates that implementation. Dulanjaya should adopt/review that payload when implementing the route rather than assume the abbreviated example is a complete schema.
 

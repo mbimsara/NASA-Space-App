@@ -64,7 +64,7 @@ PowerShell:
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -r backend/requirements.txt
+python -m pip install -e . -r backend/requirements.txt
 Copy-Item .env.example .env
 Set-Location backend
 python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
@@ -75,7 +75,7 @@ On Linux or macOS:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r backend/requirements.txt
+python -m pip install -e . -r backend/requirements.txt
 cp .env.example .env
 cd backend
 python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
@@ -89,8 +89,9 @@ database is created under `backend/` when the server is started there.
 - OpenAPI document: <http://127.0.0.1:8000/openapi.json>
 
 Currently implemented HTTP routes cover health, farm create/read/update, NASA
-POWER observation retrieval, and stored observation snapshots. Rotation,
-scenario, assistant, and saved-plan HTTP routes still need to be connected.
+POWER observation retrieval, stored observation snapshots, and immutable crop-
+rotation analyses. Scenario, assistant, and saved-plan HTTP routes still need to
+be connected.
 See the [complete backend guide](backend/README.md) for configuration, request
 examples, cache behavior, database paths, and tests.
 
@@ -215,6 +216,6 @@ showing fabricated results.
 
 ## Current status
 
-The frontend core journey, FastAPI health/farm/observation APIs, SQLite persistence, NASA POWER and SMAP processing, and the rotation-scoring domain package are implemented with automated tests. The frontend currently defaults to synthetic fixtures. Rotation, scenario, assistant, and saved-plan HTTP services remain to be connected before switching the frontend to the live API.
+The frontend core journey, FastAPI health/farm/observation/rotation APIs, SQLite persistence, NASA POWER and SMAP processing, and the rotation-scoring domain package are implemented with automated tests. The frontend currently defaults to synthetic fixtures. Scenario, assistant, and saved-plan HTTP services remain to be connected before switching the complete frontend journey to the live API.
 
 See the [six-member implementation plan](IMPLEMENTATION_PLAN.md) for responsibilities, Tharuka's UI/UX design assignment, integration contracts, milestones, and acceptance checks.
