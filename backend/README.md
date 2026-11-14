@@ -16,7 +16,7 @@ FastAPI with synchronous SQLAlchemy and SQLite. Implemented endpoints:
 | GET | `/api/v1/scenarios/{scenario_id}` | Reopen a persisted scenario snapshot |
 
 See [API contracts](../docs/API_CONTRACTS.md) for fields, units, and errors.
-Assistant and plan endpoints remain planned. POWER observations, database-backed caching, stable snapshot IDs, observation-based rainfall scenarios, crop-rotation analyses, and analysis climate scenarios are implemented. Analysis scenarios never modify the saved analysis or the NASA observation snapshot; seasons whose baseline water inputs are unknown keep scenario water and `scenario_resilience` as `null`. Live retrieval and cache reuse were verified on 2026-11-14.
+Assistant and immutable saved-plan endpoints are implemented; see [the integration handoff](../docs/ASSISTANT_SAVED_PLANS_INTEGRATION.md) for contracts and offline regression commands. POWER observations, database-backed caching, stable snapshot IDs, observation-based rainfall scenarios, crop-rotation analyses, and analysis climate scenarios are implemented. Analysis scenarios never modify the saved analysis or the NASA observation snapshot; seasons whose baseline water inputs are unknown keep scenario water and `scenario_resilience` as `null`. Live retrieval and cache reuse were verified on 2026-11-14.
 
 ## Installation
 

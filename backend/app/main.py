@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from app.api.routes import climate, health, farms, observations, rotations, scenarios
+from app.api.routes import climate, health, farms, observations, rotations, scenarios, assistant, plans
 from app.config import settings
 from app.database.connection import Base, engine
 from app.models import farm
@@ -28,6 +28,15 @@ app = FastAPI(
 
 @app.exception_handler(RequestValidationError)
 async def validation_error_handler(request, exc):
+    if request.url.path == "/api/v1/assistant/messages" and any(
+        error["loc"] == ("body", "language") and error["type"] == "literal_error"
+        for error in exc.errors()
+    ):
+        return JSONResponse(status_code=422, content={"error": {
+            "code": "UNSUPPORTED_LANGUAGE",
+            "message": "Only English is supported until translations are reviewed.",
+            "fields": {"language": "Supported language: en."},
+        }})
     fields = {}
 
     for error in exc.errors():
@@ -65,6 +74,8 @@ app.include_router(observations.snapshot_router, prefix="/api/v1")
 app.include_router(climate.router, prefix="/api/v1")
 app.include_router(rotations.router, prefix="/api/v1")
 app.include_router(scenarios.router, prefix="/api/v1")
+app.include_router(assistant.router, prefix="/api/v1")
+app.include_router(plans.router, prefix="/api/v1")
 
 
 app.add_middleware(
