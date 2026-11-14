@@ -10,7 +10,7 @@
 
 ## Local setup status
 
-This repository contains planning documents, schemas, and synthetic fixtures. There is no runnable application yet. Do not expect `npm install` or a backend start command to work until the application scaffolds are merged.
+This repository contains planning documents, schemas, synthetic fixtures, and a standalone NASA POWER adapter. There is no runnable web application yet. See [adapter commands](docs/NASA_POWER.md); do not expect `npm install` or a backend server start command to work until the application scaffolds are merged.
 
 - Frontend owner: Shehani; initialize React/TypeScript in `frontend/` and document exact prerequisites and commands there.
 - Backend owner: Dulanjaya; initialize FastAPI in `backend/`, select persistence, and document environment setup, migrations, and startup there.

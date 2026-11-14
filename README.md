@@ -6,7 +6,7 @@ AgroSphere combines Earth observations, farmer inputs, and local agronomy to hel
 
 ## Start here
 
-The repository currently contains development plans, shared data contracts, and synthetic fixtures. There is no runnable frontend/backend yet.
+The repository contains development plans, shared data contracts, synthetic fixtures, and a [working NASA POWER Python adapter](docs/NASA_POWER.md). The web frontend and HTTP backend have not been implemented yet.
 
 | Resource | Purpose |
 | --- | --- |
@@ -82,6 +82,6 @@ Keep crop rotation central. SoilRevive and FarmRecovery are planning modes that 
 
 ## Current status
 
-Product scope documented. Application implementation has not started.
+NASA POWER daily retrieval, normalization, monthly summaries and offline tests are implemented. Web application implementation and crop-model research are pending. See [adapter usage and verified results](docs/NASA_POWER.md).
 
 See the [six-member implementation plan](IMPLEMENTATION_PLAN.md) for responsibilities, Tharuka's UI/UX design assignment, integration contracts, milestones, and acceptance checks.

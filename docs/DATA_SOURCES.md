@@ -1,13 +1,23 @@
 # Data source register
 
-Owner: Matheesha. Documentation support: Tharuka. This register contains candidates, not verified integrations or confirmed specifications.
+Owner: Matheesha. Documentation support: Tharuka. NASA POWER is integrated as a standalone Python adapter; other products remain research candidates.
+
+## Source selection policy
+
+Use resources listed on the [competition resources page](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/?tab=resources), verified in the browser on 2026-11-14. Per the project owner's instruction, do not add China-related data providers, datasets, locations, or examples. Current integration uses the NASA POWER endpoint and a Sri Lankan demonstration point only. No additional source is approved merely because it appears in an older plan.
 
 | Candidate | Intended investigation | Status |
 | --- | --- | --- |
-| NASA POWER | Weather/climate variables useful for the initial location/time summary | Access, variables, aggregation and resolution to verify |
+| NASA POWER | Daily T2M and PRECTOTCORR via AG community, UTC | Live 2025 demo retrieval verified; see adapter guide |
 | GPM | Precipitation observations | Product/version, access, coverage and resolution to verify |
 | SMAP | Regional soil-moisture context | Product, quality flags, coverage and field-scale limitations to verify |
-| HLS | Vegetation/land-surface history | Access, cloud masking, processing effort and useful time coverage to verify |
+| Landsat / MODIS / VIIRS | Competition-listed vegetation/land-surface history | Specific products, access and quality processing to verify; HLS is not currently approved |
+
+Additional listed candidates include SRTM, ECOSTRESS, GLDAS/NLDAS, FAO GAEZ, and partner resources Sentinel-2/ERA5. Evaluate geographic coverage and relevance before adding integrations; many other resources on the page focus on the United States.
+
+## Verified NASA POWER adapter
+
+See [usage and verification](NASA_POWER.md). Official documentation: https://power.larc.nasa.gov/docs/services/api/temporal/daily/ . Response metadata identifies MERRA2, API v2.10.3, T2M in C, PRECTOTCORR in mm/day, fill value -999 and UTC. These are gridded source estimates, not direct field measurements. Product-specific spatial resolution remains pending verification, so the adapter returns null rather than inventing a field resolution. Access used no API key. Attribution/use terms still need recording before public release.
 
 Before implementing an adapter, record its official documentation URL, product/version, access/authentication method, permitted use/attribution, variables/units, spatial/temporal resolution, coverage/latency, missing-value/quality flags, aggregation method, retrieval date, cache policy, and known limitations. Do not copy unverified specifications into the UI.
 
