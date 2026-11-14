@@ -354,5 +354,32 @@
     "seasons": "Seasons",
     "water": "Water demand / cycle",
     "review": "Review"
+  },
+  "landing": {
+    "eyebrow": "Earth intelligence for every field",
+    "title": "Grow with the planet,",
+    "titleAccent": "not against it.",
+    "description": "Bring Earth observations and your farm knowledge together. Explore crop rotations, understand your water needs, and plan the next season with context.",
+    "explore": "Explore your farm",
+    "how": "See how it works",
+    "challenge": "Built for NASA Space Apps 2026 · Field Shift",
+    "fieldNote": "A longer view of your land",
+    "fieldTitle": "Beyond one harvest.",
+    "fieldDescription": "Compare seasons, crops, and climate conditions in one connected workspace.",
+    "fieldFooter": "Your inputs. Clear sources. Visible uncertainty.",
+    "sourceLabel": "Earth observation sources",
+    "sourceNote": "Regional context, with coverage and limitations",
+    "platformKicker": "One connected platform",
+    "platformTitle": "Make room for a better next season.",
+    "observeTitle": "Understand your field",
+    "observeDescription": "Explore rainfall and temperature histories with source metadata, missing days, and regional context.",
+    "planTitle": "Plan beyond one harvest",
+    "planDescription": "Explore multi-season crop comparisons and water trade-offs in the clearly labeled synthetic demo.",
+    "understandTitle": "See the reasoning",
+    "understandDescription": "Inspect assumptions and limitations alongside results. Keep local knowledge part of every decision.",
+    "status": "Try the synthetic demo to explore the full journey. Live farm and NASA POWER observations are available; rotation, scenario, assistant, and saved-plan API connections are still in progress. Crop entries remain drafts.",
+    "workspaceKicker": "Your workspace",
+    "workspaceTitle": "Pick up where you left off.",
+    "footer": "Earth data. Local knowledge. Thoughtful farming."
   }
 }
