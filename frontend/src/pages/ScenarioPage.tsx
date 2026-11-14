@@ -24,6 +24,7 @@ import { IrrigationUnknownNotice } from "../components/ui/IrrigationUnknownNotic
 import { SeasonWaterTable } from "../components/rotations/SeasonWaterTable";
 import { asSeasonRanges } from "../utils/format";
 import { BaselineVsScenario } from "../components/scenarios/BaselineVsScenario";
+import { ObservationRainfallCard } from "../components/scenarios/ObservationRainfallCard";
 
 export function ScenarioPage() {
   const { t } = useTranslation();
@@ -125,6 +126,7 @@ export function ScenarioPage() {
         <>
           <SyntheticDataBanner dataKind={scenario.data_kind} />
           <BaselineVsScenario baseline={baseline} scenario={scenario} />
+          {scenario.observation_rainfall && <ObservationRainfallCard rain={scenario.observation_rainfall} />}
           {(() => {
             const c = scenario.candidates.find((x) => x.candidate_id === selectedCandidateId) ?? scenario.candidates[0];
             if (!c) return null;

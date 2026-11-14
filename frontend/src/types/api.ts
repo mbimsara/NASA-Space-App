@@ -245,6 +245,20 @@ export interface ScenarioResult {
   /** Scenarios are always hypothetical; fixtures report "synthetic". */
   data_kind: DataKind;
   created_at?: string;
+  /** Live API only: whole observation period, original NASA rainfall vs the scaled scenario (null = incomplete). */
+  observation_rainfall?: {
+    period_start: string;
+    period_end: string;
+    expected_days: number;
+    valid_days: number;
+    baseline_rainfall_mm: number | null;
+    scenario_rainfall_mm: number | null;
+    difference_mm: number | null;
+  };
+  /** Live API only: true when the farm profile changed after the baseline analysis. */
+  baseline_outdated?: boolean;
+  assumptions?: string[];
+  source_refs?: string[];
 }
 
 // ---------------------------------------------------------------------------

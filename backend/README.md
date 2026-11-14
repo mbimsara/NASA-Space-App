@@ -12,9 +12,11 @@ FastAPI with synchronous SQLAlchemy and SQLite. Implemented endpoints:
 | GET | `/api/v1/observations/{observation_id}` | Read the original persisted observation snapshot |
 | POST | `/api/v1/observations/{observation_id}/rainfall-scenarios` | Uniformly scale stored daily rainfall for a labeled hypothetical sensitivity test |
 | POST | `/api/v1/farms/{farm_id}/rotations` | Validate context, invoke the shared rotation engine, and persist an immutable analysis |
+| POST | `/api/v1/analyses/{analysis_id}/scenarios` | Apply a hypothetical `rainfall_change_pct` (-100 to 100) to a saved analysis, recompute season water budgets and scores, and persist a scenario snapshot (201) |
+| GET | `/api/v1/scenarios/{scenario_id}` | Reopen a persisted scenario snapshot |
 
 See [API contracts](../docs/API_CONTRACTS.md) for fields, units, and errors.
-Analysis scenarios, assistant, and plan endpoints remain planned. POWER observations, database-backed caching, stable snapshot IDs, observation-based rainfall scenarios, and crop-rotation analyses are implemented. Live retrieval and cache reuse were verified on 2026-11-14.
+Assistant and plan endpoints remain planned. POWER observations, database-backed caching, stable snapshot IDs, observation-based rainfall scenarios, crop-rotation analyses, and analysis climate scenarios are implemented. Analysis scenarios never modify the saved analysis or the NASA observation snapshot; seasons whose baseline water inputs are unknown keep scenario water and `scenario_resilience` as `null`. Live retrieval and cache reuse were verified on 2026-11-14.
 
 ## Installation
 

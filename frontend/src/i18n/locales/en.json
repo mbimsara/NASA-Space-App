@@ -262,6 +262,9 @@
     "choosePlan": "Plan to inspect",
     "saveScenarioPlan": "Save this plan with the scenario",
     "saveScenarioHelp": "Saves the selected plan together with this hypothetical scenario's results.",
+    "observationRainfall": "Observed rainfall: baseline vs scenario",
+    "observationPeriod": "Observation period {{start}} to {{end}} ({{valid}}/{{expected}} days with rainfall data).",
+    "observationUnchanged": "The original NASA observation is kept unchanged; the scenario only scales a copy.",
     "impactUnknown": "For some plans the climate effect is unknown (for example, irrigation is unknown). A score change of 0 does not mean the scenario has no impact."
   },
   "assistant": {
