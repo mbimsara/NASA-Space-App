@@ -91,10 +91,16 @@ def _metadata(record, extra=None):
     return record
 
 
-def _period(value):
+def _period(value, *, allow_label=False):
     if value is None:
         return {"start": None, "end": None}
+    if allow_label and isinstance(value, str):
+        if not value.strip():
+            raise ValueError("Period labels must be nonempty strings.")
+        return {"label": value, "start": None, "end": None}
     result = _record(value, "period")
+    if result.get("label") is not None and (not isinstance(result["label"], str) or not result["label"].strip()):
+        raise ValueError("Period labels must be nonempty strings.")
     for key in ("start", "end"):
         item = result.get(key)
         if item is not None and (not isinstance(item, str) or date.fromisoformat(item).isoformat() != item):
@@ -118,10 +124,14 @@ def normalize_water_budget(value, *, period=None, metadata=None):
                            ("demand_basis", "basis")):
         _alias(record, target, source)
     if period is not None:
-        if record.get("period") is not None and record["period"] != _plain(period):
+        if record.get("period") is not None and _period(record["period"], allow_label=True) != _period(_plain(period), allow_label=True):
             raise ValueError("Conflicting budget periods.")
         record["period"] = _plain(period)
-    record["period"] = _period(record.get("period"))
+    record["period"] = _period(record.get("period"), allow_label=True)
+    if record.get("season_index") is not None and (type(record["season_index"]) is not int or record["season_index"] < 1):
+        raise ValueError("Budget season_index must be a positive integer or null.")
+    if record.get("crop_id") is not None and (not isinstance(record["crop_id"], str) or not record["crop_id"].strip()):
+        raise ValueError("Budget crop_id must be a nonempty string or null.")
     if record.get("unit", "mm") != "mm":
         raise ValueError("Water depths must be supplied in mm; no conversion is performed.")
     record["unit"] = "mm"
@@ -185,7 +195,8 @@ def _candidate(value, identifier=None):
         for component in components.values():
             component = _record(component, "score component")
             _number(component.get("value"), "component value")
-            _number(component.get("weight"), "component weight", nonnegative=True)
+            for key in ("weight", "requested_weight", "effective_weight"):
+                _number(component.get(key), f"component {key}", nonnegative=True)
             if component.get("direction") not in (None, "higher_is_better", "lower_is_better"):
                 raise ValueError("Unknown score direction.")
         record["score_components"] = components
@@ -205,6 +216,17 @@ def _candidate(value, identifier=None):
     record["constraint_checks"] = checks
     if record.get("water_budget") is not None:
         record["water_budget"] = normalize_water_budget(record["water_budget"])
+    if record.get("water_budget_range") is not None:
+        supplied_ranges = record["water_budget_range"]
+        ranges = supplied_ranges if isinstance(supplied_ranges, list) else [supplied_ranges]
+        ranges = [normalize_water_budget(budget) for budget in ranges]
+        if "water_budgets" in record:
+            existing_budgets = [normalize_water_budget(budget) for budget in
+                                _list(record["water_budgets"], "water_budgets")]
+            if existing_budgets != ranges:
+                raise ValueError("Conflicting water_budgets and water_budget_range values.")
+        record["water_budgets"] = ranges
+        record["water_budget_range"] = ranges if isinstance(supplied_ranges, list) else ranges[0]
     if "water_budgets" in record:
         budgets = []
         for budget in _list(record["water_budgets"], "water_budgets"):
@@ -214,9 +236,59 @@ def _candidate(value, identifier=None):
                              if step["season_index"] == budget["season_index"]), None)
                 if step is None or (budget.get("crop_id") is not None and step["crop_id"] != budget["crop_id"]):
                     raise ValueError("Water budget does not match its supplied sequence step.")
+            elif budget.get("crop_id") is not None and record.get("sequence") and not any(
+                    step["crop_id"] == budget["crop_id"] for step in record["sequence"]):
+                raise ValueError("Water budget crop_id is not present in its candidate sequence.")
             budgets.append(budget)
         record["water_budgets"] = budgets
     return record
+
+
+def _difference(value, identifier=None):
+    """Normalize supplied deltas only; never subtract scores or infer ranks."""
+    record = _metadata(_record(value, "candidate difference"))
+    if identifier is not None:
+        if record.get("candidate_id") is not None and record["candidate_id"] != identifier:
+            raise ValueError("Difference candidate_id disagrees with its mapping key.")
+        record["candidate_id"] = identifier
+    if not isinstance(record.get("candidate_id"), str) or not record["candidate_id"].strip():
+        raise ValueError("Differences require supplied candidate IDs.")
+    _alias(record, "score_delta", "score_change")
+    _number(record.get("score_delta"), "score difference")
+    for key in ("rank_baseline", "rank_scenario"):
+        if record.get(key) is not None and (type(record[key]) is not int or record[key] < 1):
+            raise ValueError("Supplied difference ranks must be positive integers or null.")
+    return record
+
+
+def _normalize_differences(record, candidate_ids=None):
+    """Keep legacy lists and the frontend's candidate-keyed mapping compatible."""
+    rows = None
+    if record.get("differences") is not None:
+        rows = [_difference(row) for row in _list(record["differences"], "differences")]
+    if record.get("baseline_differences") is not None:
+        supplied = _record(record["baseline_differences"], "baseline_differences")
+        if any(not isinstance(identifier, str) or not identifier.strip() for identifier in supplied):
+            raise ValueError("Difference mapping keys must be supplied nonempty candidate IDs.")
+        converted = [_difference(row, identifier) for identifier, row in supplied.items()]
+        if rows is not None:
+            def comparable(items):
+                if len({row["candidate_id"].casefold() for row in items}) != len(items):
+                    raise ValueError("Difference candidate IDs must be unique, including case variants.")
+                return {row["candidate_id"]: {key: value for key, value in row.items()
+                                               if key != "score_change"} for row in items}
+            if comparable(rows) != comparable(converted):
+                raise ValueError("Conflicting differences and baseline_differences values.")
+        rows = converted
+    if rows is not None:
+        identifiers = [row["candidate_id"] for row in rows]
+        if len({identifier.casefold() for identifier in identifiers}) != len(identifiers):
+            raise ValueError("Difference candidate IDs must be unique, including case variants.")
+        # Preserve legacy-list selection/error semantics. New candidate-keyed
+        # records must agree with the supplied scenario candidate identities.
+        if record.get("baseline_differences") is not None and candidate_ids is not None and set(identifiers) - set(candidate_ids):
+            raise ValueError("Differences reference an unknown candidate ID.")
+        record["differences"] = rows
 
 
 def normalize_rotation(result, *, candidate_ids=None, metadata=None, water_budgets=None):
@@ -233,6 +305,7 @@ def normalize_rotation(result, *, candidate_ids=None, metadata=None, water_budge
     if supplied is None:
         if candidate_ids is not None or water_budgets:
             raise ValueError("Cannot bind IDs or budgets to unavailable candidate results.")
+        _normalize_differences(record)
         return record
     rows = _list(supplied, "candidates")
     ids = _plain(candidate_ids)
@@ -256,6 +329,7 @@ def normalize_rotation(result, *, candidate_ids=None, metadata=None, water_budge
     if set(bindings) - set(actual_ids):
         raise ValueError("Water budgets reference an unknown candidate ID.")
     record["candidates"] = candidates
+    _normalize_differences(record, actual_ids)
     return record
 
 

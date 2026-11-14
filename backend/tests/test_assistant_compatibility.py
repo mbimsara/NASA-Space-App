@@ -201,7 +201,7 @@ class CompatibilityTests(unittest.TestCase):
                  {"irrigation_mm": -1}, {"crop_demand_mm": True},
                  {"balance_mm": float("nan")}, {"unit": "liters"},
                  {"period": {"start": "2026-08-31", "end": "2026-05-01"}},
-                 {"period": "3-season cycle"})
+                 {"period": " "}, {"period": 3})
         for case in cases:
             with self.subTest(case=case), self.assertRaises((TypeError, ValueError)):
                 normalize_water_budget(case)

@@ -102,9 +102,16 @@ def _water(budget, delta=False, deficit_only=False, trace=None):
                 values += f"; {label}: {_number(budget[key], '%')}"
     if delta:
         return f"{prefix}: {values}."
-    period = _record(budget.get("period"))
+    supplied_period = budget.get("period")
+    period = {"label": supplied_period} if isinstance(supplied_period, str) else _record(supplied_period)
+    dates = f"{_text(period.get('start'))} to {_text(period.get('end'))}"
+    period_text = dates
+    if period.get("label") is not None:
+        period_text = f"{period['label']}; dates: {dates}"
+        if trace is not None and not all(period.get(key) for key in ("start", "end")):
+            trace.limitation("The water-budget period is a descriptive label; exact dates were not fully supplied and have not been inferred.")
     answer = (
-        f"{prefix} period: {_text(period.get('start'))} to {_text(period.get('end'))}; {values}. "
+        f"{prefix} period: {period_text}; {values}. "
         f"Effective rainfall assumption: {_text(budget.get('effective_rainfall_assumption'))}."
     )
     if any(key in budget for key in ("balance_mm", "balance_low_mm", "balance_high_mm")):
@@ -118,6 +125,21 @@ def _water(budget, delta=False, deficit_only=False, trace=None):
     if any(budget.get(key) for key in ("source_refs", "assumptions", "limitations")):
         answer += " " + _metadata(budget)
     return answer
+
+
+def _score_component(name, component):
+    component = _record(component)
+    parts = [f"{name}: value {_number(component.get('value'))}"]
+    separate_weights = any(key in component for key in ("requested_weight", "effective_weight"))
+    if separate_weights:
+        parts.extend([
+            f"requested weight {_number(component.get('requested_weight'))}",
+            f"effective weight {_number(component.get('effective_weight'))}",
+        ])
+    if "weight" in component or not separate_weights:
+        parts.append(f"weight {_number(component.get('weight'))}")
+    parts.append(f"direction {_text(component.get('direction'))}")
+    return ", ".join(parts)
 
 
 def _candidates(record, selected, views=None, deficit_only=False, trace=None):
@@ -161,9 +183,7 @@ def _candidates(record, selected, views=None, deficit_only=False, trace=None):
                 for step in map(_record, _items(candidate.get("sequence")))
             ]
             components = [
-                f"{name}: value {_number(_record(component).get('value'))}, "
-                f"weight {_number(_record(component).get('weight'))}, "
-                f"direction {_text(_record(component).get('direction'))}"
+                _score_component(name, component)
                 for name, component in _record(candidate.get("score_components")).items()
             ]
             lines.extend([
@@ -178,7 +198,7 @@ def _candidates(record, selected, views=None, deficit_only=False, trace=None):
                 missing.append("Supplied crop sequence: unknown.")
             if "score_components" not in candidate:
                 missing.append("Score components: unknown.")
-            if "water_budget" not in candidate and "water" not in views:
+            if "water_budget" not in candidate and "water_budgets" not in candidate and "water" not in views:
                 missing.append(_water(None))
             if missing:
                 lines.append("Missing candidate information: " + " ".join(missing))
@@ -241,12 +261,19 @@ def _differences(scenario, selected, include_scores=True, include_water=True, de
         return "Baseline differences are unknown (none supplied for the selected results)."
     answers = []
     for item in records:
+        if trace is not None:
+            trace.add(item)
         line = f"Candidate {_text(item.get('candidate_id'))}: "
         if include_scores:
             line += ("supplied score difference (scenario minus baseline): "
                      f"{_number(item.get('score_delta'))}. ")
+            for key, label in (("rank_baseline", "baseline rank"), ("rank_scenario", "scenario rank")):
+                if key in item:
+                    line += f"Supplied {label}: {_number(item[key])}. "
         if include_water:
             line += _water(item.get("water_budget"), delta=True, deficit_only=deficit_only, trace=trace)
+        if any(item.get(key) for key in ("source_refs", "assumptions", "limitations")):
+            line += " " + _metadata(item)
         answers.append(line)
     return "\n".join(answers)
 

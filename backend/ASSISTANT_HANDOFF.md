@@ -192,5 +192,58 @@ python scripts/validate_data.py
 ```
 
 Remaining blockers: HTTP integration, persistence/authorization, source registry
-decisions, stable ID allocation, reviewed scoring/crop dates, UI range/unranked
-support, and Sinhala/Tamil implementation and review.
+decisions, stable ID allocation, reviewed catalog/crop dates, verification of the
+live UI integration, and Sinhala/Tamil implementation and review.
+
+## Merged backend integration report
+
+The assistant adapters now accept the merged scoring and frontend payloads:
+
+- Separate `requested_weight` and `effective_weight`, retaining legacy `weight`.
+- Per-season `water_budget_range` lists or single records, including demand
+  ranges, signed balances, units, sources, assumptions and limitations.
+- Descriptive budget period labels with unknown dates, without interpreting a
+  number of seasons as calendar dates.
+- Candidate-keyed `baseline_differences` with supplied `score_change` values,
+  exposed through the existing difference formatter without recalculation.
+
+Selected budget and difference sources are collected from validated records.
+The four required response fields remain `role`, `content`, `source_ids` and
+`limitations`. Original `explain()` callers remain supported; raw teammate
+payloads should use `respond()`/`respond_to_request()` or first pass through
+`normalize_context()`. The normalization guide above documents aliases and
+conflict handling. All new regression examples contain synthetic inputs.
+
+The remaining work belongs at the backend integration boundary:
+
+1. Implement the proposed assistant, rotation and scenario HTTP routes and
+   immutable analysis/scenario persistence. Currently the registered API covers
+   health, farms and observations; there is no assistant HTTP endpoint.
+2. Resolve and authorize farm, analysis, scenario and candidate IDs together.
+   Join generated constraints, scored results and crop-season budgets using
+   stable IDs. Never assign IDs/ranks from an array position in the assistant.
+3. Supply the original farm/observation snapshot and input version. Retain actual
+   crop-cycle dates and explicit irrigation basis; descriptive labels do not
+   establish aligned rainfall/demand periods or justify aggregation.
+4. Agree on source registry conventions. The assistant returns supplied source
+   references and URLs; persisted resource IDs are not automatically citations.
+5. Apply the error/status handling documented above, including HTTP 422
+   `UNSUPPORTED_LANGUAGE` for `si`/`ta`, context conflicts and unavailable results.
+6. Confirm reviewed catalog eligibility and water/scoring metadata before real
+   analyses. The shared crop catalog remains research-pending. No effective
+   rainfall formula or balance-to-deficit conversion is introduced here.
+7. Run an actual frontend-to-API-to-storage-to-assistant check after wiring the
+   routes. Unit tests and synthetic persistence probes do not verify that flow.
+
+Regression checks from the repository root (no provider access is required):
+
+```powershell
+python -m unittest discover -s backend/tests -p 'test_assistant*.py' -v
+python scripts/validate_data.py
+```
+
+For the complete FastAPI suite, use the isolated database and network guard in
+[CI.md](CI.md). On Windows, allow only loopback connections with
+`--allow-hosts=127.0.0.1,::1` instead of the Linux-only socket allowance so asyncio
+can create its local socket pair. Keep provider access mocked and
+`NASA_POWER_ENABLED=false` during offline verification.

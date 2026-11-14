@@ -89,6 +89,12 @@ a measured quantity. The adapter preserves explicit components and may convert
 a list of named components to the formatter's name-keyed mapping; it never
 computes a score or infers a ranking from list order.
 
+The merged `rotation-score-0.1` components retain and explain
+`requested_weight` and `effective_weight` separately. Null and zero remain
+distinct. The legacy `weight` field is still supported; it is not relabeled as
+either new field. The assistant validates supplied weights but never normalizes
+them, derives an effective weight, or recalculates the total score.
+
 ## Water quantities and explicit crop/season binding
 
 `normalize_water_budget(value, period=..., metadata=...)` accepts Bhagya's
@@ -104,9 +110,13 @@ computes a score or infers a ranking from list order.
 - No balance-to-deficit conversion, midpoint calculation, range aggregation,
   effective-rainfall calculation or default 80% factor is applied. An absent
   deficit or effective-rainfall value is unknown.
-- Periods must be `{start, end}` ISO dates. Missing dates stay unknown. Strings
-  such as "3-season cycle" are not converted to invented dates. Water depths
-  must already be mm; conversions are not performed.
+- Budget periods accept `{start, end}` ISO dates or a nonblank descriptive
+  string, such as `"3-season aggregate"`. A string becomes
+  `{"label": "3-season aggregate", "start": null, "end": null}`. A period object
+  may also retain a supplied `label`. Explanations show the label and supplied
+  dates separately; missing dates stay unknown. Observation and rainfall-only
+  scenario periods still require date objects. Water depths must already be mm;
+  conversions are not performed.
 
 Engine budget dataclasses omit dates and some source metadata. The coordinator
 must retain those from the corresponding climate/demand inputs:
@@ -133,6 +143,43 @@ IDs are checked against that candidate's sequence. Multiple crop-cycle budgets
 are rendered separately as `water_budgets`; they are never silently treated as
 one whole-rotation total. Budget source URLs can be retained as supplied URLs;
 the wrapper does not create citation registry IDs for them.
+
+The merged API/frontend field `candidate.water_budget_range` accepts either a
+list of per-season records or the older single record. It is also exposed as
+the formatter's `water_budgets` list, preserving order, crop/season identities,
+units, dates/labels, signed balances, assumptions and sources. Missing season
+indices are not filled from array order. Null means unavailable; an empty list
+means no supplied season budgets. If both aliases are supplied, their normalized
+values must agree. A separately supplied optional aggregate remains in context
+but never replaces the per-season explanation or contributes unrendered sources.
+
+## Rotation scenario differences
+
+The merged frontend's scenario shape is supported directly:
+
+```python
+scenario = {
+    # These IDs must come from resolved records.
+    "scenario_id": persisted_scenario_id,
+    "baseline_analysis_id": persisted_analysis_id,
+    "candidates": supplied_scenario_candidates,
+    "baseline_differences": supplied_differences_by_candidate_id,
+}
+```
+
+`baseline_differences[candidate_id].score_change` is exposed as
+`differences[*].score_delta`, retaining the original field and supplied candidate
+ID. Supplied `rank_baseline` and `rank_scenario` are explained separately; they
+do not assign a rank to a candidate missing its own rank. Other supplied fields
+and difference-record sources, assumptions and limitations are preserved.
+Signed, zero and null score differences stay unchanged; scores are never
+subtracted by the assistant. A missing difference remains unknown.
+
+Mapping keys must be nonblank candidate IDs and match an explicit row ID, when
+present. With available scenario candidates, mapping keys must identify those
+candidates. Legacy `differences` lists remain supported. If both representations
+are supplied, they must agree after alias normalization; conflicts and duplicate
+IDs are rejected. Normalization is safe to repeat and does not mutate inputs.
 
 ## Matheesha and Dulanjaya: observations and rainfall-only scenarios
 
@@ -193,11 +240,12 @@ Sinhala/Tamil. Dulanjaya should map it to 422 `UNSUPPORTED_LANGUAGE` using its
 - Stable candidate, analysis and scenario IDs, snapshot storage and ownership.
 - Exact crop-cycle dates, rainfall windows, irrigation entry basis and per-season
   bindings. Structural validation does not validate agronomic applicability.
-- Range/balance support in Shehani's UI, nullable scores/ranks, and how reported
-  constraint strings are displayed alongside explicit boolean checks.
+- Verify Shehani's range/balance UI and nullable scores/ranks against actual
+  backend records, including constraint reports with unknown pass status.
 - Source registry conventions and which source URLs belong to each calculation.
 - Any future effective-rainfall or deficit formula requires Bhagya's approval.
-- The final HTTP response/error schema and unsupported-language UI behavior.
+- HTTP implementation of the confirmed response/error contract and verification
+  of unsupported-language UI behavior against that endpoint.
 
 No HTTP routes, database code, LLMs, provider requests, or scientific formulas
 were added. `python -m unittest discover -s backend/tests -v` runs legacy and
