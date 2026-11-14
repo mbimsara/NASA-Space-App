@@ -2,9 +2,49 @@
 
 Review date: 2026-11-14
 
-Research commit: `486b081` by Tharuka
+Research commits: `486b081` and `b795585` by Tharuka
 
-Decision: **structure accepted; scientific values and rules remain pending**
+Decision: **structure and land-profile separation accepted; scientific values
+and numerical rules remain pending**
+
+## Review update for commit `b795585`
+
+The separation of the primary Anuradhapura lowland profile from the secondary
+Matale upland mockup resolves the earlier conceptual mixing. Use the coordinates
+in `farm.synthetic.json` only for the primary demonstration. Do not apply the
+Matale upland assumptions to that farm.
+
+The new evidence/assumption labels are also an improvement, but the crop records
+cannot yet be marked approved:
+
+- The five FAO crop-information URLs used for rice, grain legumes, maize,
+  groundnut, and pepper returned HTTP 404 during review on 2026-11-14. Replace
+  them with working document or archived official links and cite the applicable
+  page/table.
+- The working FAO 56 Chapter 6 URL is a general single-crop-coefficient chapter;
+  it does not by itself establish the stated finger-millet seasonal demand.
+- DOA variety pages may support names and maturity groups, but water demand,
+  waterlogging tolerance, soil prohibitions, and exact time limits need their
+  own directly supporting passages.
+- Catalog values currently mix crop evapotranspiration with gross field water
+  demand. Rice includes puddling, seepage, and percolation losses while other
+  crops are described mainly with ETc. Those quantities must not be compared as
+  if they were the same metric. Add a field/method contract or normalize every
+  crop to a consistent demand basis before water ranking.
+- The `700 mm` Yala cutoff is a model assumption derived from a nominal demand;
+  `K_y` relates relative yield response to relative evapotranspiration deficit
+  and does not independently prove total crop failure or a statutory 700 mm
+  threshold. Keep the cutoff disabled until direct local evidence and the water
+  accounting basis are supplied.
+- The legume bonus and diversity threshold are correctly labeled heuristics.
+  They remain disabled rather than being presented as calibrated agronomic
+  effects. A continuous diversity ratio is preferable to an arbitrary pass/fail
+  threshold for the first explainable model.
+
+The primary profile is accepted as a **demo configuration proposal**, not as a
+verified field classification. Adding landform/drainage behavior requires a
+coordinated farm-schema change with Dulanjaya; the engine must not infer those
+fields solely from coordinates.
 
 ## Catalog decision
 
