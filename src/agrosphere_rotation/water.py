@@ -3,6 +3,12 @@
 from .models import ClimateInput, WaterBudget, WaterBudgetRange, WaterDemandRange
 
 
+def _irrigation_for_budget(climate: ClimateInput) -> float:
+    if climate.irrigation_mm is None:
+        raise ValueError("irrigation is unknown; water budget is unavailable")
+    return climate.irrigation_mm
+
+
 def calculate_water_budget(crop_demand_mm: float, climate: ClimateInput) -> WaterBudget:
     """Compare crop demand with scenario-adjusted rainfall plus irrigation.
 
@@ -14,22 +20,23 @@ def calculate_water_budget(crop_demand_mm: float, climate: ClimateInput) -> Wate
     if crop_demand_mm <= 0:
         raise ValueError("crop_demand_mm must be greater than zero")
 
+    irrigation = _irrigation_for_budget(climate)
     multiplier = 1 + climate.rainfall_change_percent / 100
     scenario_rainfall = climate.rainfall_mm * multiplier
-    available = scenario_rainfall + climate.irrigation_mm
+    available = scenario_rainfall + irrigation
 
     return WaterBudget(
         crop_demand_mm=crop_demand_mm,
         baseline_rainfall_mm=climate.rainfall_mm,
         scenario_rainfall_mm=scenario_rainfall,
-        irrigation_mm=climate.irrigation_mm,
+        irrigation_mm=irrigation,
         available_water_mm=available,
         balance_mm=available - crop_demand_mm,
         coverage_percent=available / crop_demand_mm * 100,
         assumptions=(
             "All values cover the same crop season and use millimetres of water.",
             "Rainfall-change percentage defines a hypothetical scenario.",
-            "No effective-rainfall, runoff, storage, or irrigation-efficiency factor is applied.",
+            "Irrigation uses field-applied depth; no runoff, storage, or efficiency factor is applied.",
         ),
     )
 
@@ -43,17 +50,18 @@ def calculate_water_budget_range(
     upper-bound input until an effective-rainfall model is approved.
     """
 
+    irrigation = _irrigation_for_budget(climate)
     multiplier = 1 + climate.rainfall_change_percent / 100
     scenario_rainfall = climate.rainfall_mm * multiplier
-    available = scenario_rainfall + climate.irrigation_mm
-    baseline_available = climate.rainfall_mm + climate.irrigation_mm
+    available = scenario_rainfall + irrigation
+    baseline_available = climate.rainfall_mm + irrigation
     return WaterBudgetRange(
         crop_id=demand.crop_id,
         demand_low_mm=demand.low_mm,
         demand_high_mm=demand.high_mm,
         baseline_rainfall_mm=climate.rainfall_mm,
         scenario_rainfall_mm=scenario_rainfall,
-        irrigation_mm=climate.irrigation_mm,
+        irrigation_mm=irrigation,
         baseline_available_water_mm=baseline_available,
         available_water_mm=available,
         baseline_coverage_low_percent=baseline_available / demand.high_mm * 100,
@@ -68,7 +76,7 @@ def calculate_water_budget_range(
             "Demand is an indicative seasonal ETc range, not gross irrigation delivery.",
             "All values must cover the same crop period and use millimetres.",
             "Total rainfall is provisionally treated as available; effective rainfall is not modeled.",
-            "Irrigation efficiency, runoff, storage, seepage and percolation are not modeled.",
+            "Irrigation is field-applied depth; efficiency, runoff, storage, seepage and percolation are not modeled.",
             "The rainfall change is a hypothetical scenario, not a forecast.",
         ),
     )

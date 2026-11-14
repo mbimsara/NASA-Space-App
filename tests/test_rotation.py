@@ -155,17 +155,26 @@ def test_climate_input_accepts_complete_matheesha_season_handoff() -> None:
         "effective_rainfall_mm": None,
         "crop_water_demand_mm": None,
         "irrigation_deficit_mm": None,
+        "source_refs": ("NASA POWER API request 2025-01",),
+        "retrieved_at": "2026-11-14T08:00:00Z",
+        "data_kind": "modeled",
+        "limitations": ("Gridded estimate; not an on-farm gauge.",),
     }
 
     result = ClimateInput.from_season_inputs(
         season,
         irrigation_mm=50,
+        irrigation_basis="field_applied_depth",
         rainfall_change_percent=-20,
     )
 
     assert result.rainfall_mm == pytest.approx(221.69)
     assert result.irrigation_mm == 50
+    assert result.irrigation_basis == "field_applied_depth"
     assert result.rainfall_change_percent == -20
+    assert result.source_refs == ("NASA POWER API request 2025-01",)
+    assert result.retrieved_at == "2026-11-14T08:00:00Z"
+    assert result.limitations == ("Gridded estimate; not an on-farm gauge.",)
 
 
 @pytest.mark.parametrize(
@@ -206,9 +215,9 @@ def test_scoring_renormalizes_available_components_and_marks_climate_unknown() -
     ).candidates[0]
     _, requirements = load_water_requirements("data/catalogs/crop-water-requirements.json")
     climates = (
-        ClimateInput(600, "fixture", "2025-01-01", "2025-04-30"),
-        ClimateInput(400, "fixture", "2025-05-01", "2025-08-31"),
-        ClimateInput(600, "fixture", "2025-09-01", "2025-12-31"),
+        ClimateInput(600, "fixture", "2025-01-01", "2025-04-30", 0, "field_applied_depth"),
+        ClimateInput(400, "fixture", "2025-05-01", "2025-08-31", 0, "field_applied_depth"),
+        ClimateInput(600, "fixture", "2025-09-01", "2025-12-31", 0, "field_applied_depth"),
     )
     budgets = tuple(
         calculate_water_budget_range(requirements[crop_id], climate)
@@ -237,6 +246,8 @@ def test_scoring_adds_scenario_component_when_rainfall_changes() -> None:
         "fixture",
         "2025-01-01",
         "2025-04-30",
+        irrigation_mm=0,
+        irrigation_basis="field_applied_depth",
         rainfall_change_percent=-30,
     )
     budget = calculate_water_budget_range(requirements["maize"], climate)

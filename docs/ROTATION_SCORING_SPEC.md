@@ -84,9 +84,14 @@ No effective-rainfall method is approved yet. Dulanjaya should send and store:
 - historical `rainfall_total_mm` from Matheesha's complete season input;
 - `effective_rainfall_mm: null`;
 - farmer-entered `irrigation_supply_mm_per_season` when known;
+- `irrigation_basis: "field_applied_depth"` when irrigation is known;
 - the provisional assumption that total rainfall is used for screening.
 
 The engine's screening coverage therefore is not an irrigation prescription.
+Unknown irrigation remains `null` and makes the water-budget and water-based
+score components unavailable; it must never be converted to zero. A supplied
+zero explicitly means the farmer reports zero field-applied irrigation for that
+season.
 When an effective-rainfall method is reviewed, it requires a new water-model
 version and baseline/scenario regression tests.
 

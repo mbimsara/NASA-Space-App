@@ -49,12 +49,23 @@ class ClimateInput:
     source: str
     observation_start: str
     observation_end: str
-    irrigation_mm: float = 0
+    irrigation_mm: float | None = None
+    irrigation_basis: str | None = None
     rainfall_change_percent: float = 0
+    source_refs: tuple[str, ...] = ()
+    retrieved_at: str | None = None
+    data_kind: str = "modeled"
+    limitations: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
-        if self.rainfall_mm < 0 or self.irrigation_mm < 0:
-            raise ValueError("rainfall and irrigation cannot be negative")
+        if self.rainfall_mm < 0:
+            raise ValueError("rainfall cannot be negative")
+        if self.irrigation_mm is not None and self.irrigation_mm < 0:
+            raise ValueError("irrigation cannot be negative")
+        if self.irrigation_mm is None and self.irrigation_basis is not None:
+            raise ValueError("irrigation basis requires a known irrigation value")
+        if self.irrigation_mm is not None and self.irrigation_basis != "field_applied_depth":
+            raise ValueError("known irrigation requires basis 'field_applied_depth'")
         if self.rainfall_change_percent < -100:
             raise ValueError("rainfall change cannot be below -100 percent")
         if not self.source.strip():
@@ -65,7 +76,8 @@ class ClimateInput:
         cls,
         normalized: dict,
         *,
-        irrigation_mm: float = 0,
+        irrigation_mm: float | None = None,
+        irrigation_basis: str | None = None,
         rainfall_change_percent: float = 0,
     ) -> "ClimateInput":
         """Create an input from Matheesha's normalized NASA POWER result.
@@ -83,10 +95,15 @@ class ClimateInput:
         return cls(
             rainfall_mm=rainfall,
             irrigation_mm=irrigation_mm,
+            irrigation_basis=irrigation_basis,
             rainfall_change_percent=rainfall_change_percent,
             source="NASA POWER (modeled gridded estimate)",
             observation_start=summary["start"],
             observation_end=summary["end"],
+            source_refs=tuple(normalized.get("sources", ())),
+            retrieved_at=normalized.get("retrieved_at"),
+            data_kind=normalized.get("data_kind", "modeled"),
+            limitations=tuple(normalized.get("limitations", ())),
         )
 
     @classmethod
@@ -94,7 +111,8 @@ class ClimateInput:
         cls,
         season: dict,
         *,
-        irrigation_mm: float = 0,
+        irrigation_mm: float | None = None,
+        irrigation_basis: str | None = None,
         rainfall_change_percent: float = 0,
     ) -> "ClimateInput":
         """Consume Matheesha's PR #1 ``season_inputs`` handoff.
@@ -120,10 +138,15 @@ class ClimateInput:
         return cls(
             rainfall_mm=season["rainfall_total_mm"],
             irrigation_mm=irrigation_mm,
+            irrigation_basis=irrigation_basis,
             rainfall_change_percent=rainfall_change_percent,
             source="NASA POWER season_inputs (modeled gridded estimate)",
             observation_start=season["start"],
             observation_end=season["end"],
+            source_refs=tuple(season.get("source_refs", ())),
+            retrieved_at=season.get("retrieved_at"),
+            data_kind=season.get("data_kind", "modeled"),
+            limitations=tuple(season.get("limitations", ())),
         )
 
 

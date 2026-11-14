@@ -60,6 +60,12 @@ Until an effective-rainfall method is reviewed, preserve historical
 total rainfall is used only for provisional screening. Do not expose a
 placeholder effective-rainfall fraction as approved output.
 
+Irrigation is nullable. When known, send
+`irrigation_basis: "field_applied_depth"`; when unknown, send both irrigation
+value and basis as `null`. A literal zero is a known zero, not missing data.
+Unknown irrigation makes water-budget outputs and water-based score components
+null rather than silently creating a rainfed assumption.
+
 Score components are `water_sufficiency`, `crop_diversity`, and nullable
 `scenario_resilience`, as specified in
 [`ROTATION_SCORING_SPEC.md`](ROTATION_SCORING_SPEC.md). Return requested and
