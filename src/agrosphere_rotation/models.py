@@ -1,0 +1,79 @@
+"""Validated domain contracts owned by the rotation engine.
+
+These models intentionally preserve unknown agronomy values as ``None``. An
+unknown value must not silently become zero or an invented default.
+"""
+
+from dataclasses import dataclass
+from enum import StrEnum
+from urllib.parse import urlparse
+
+
+class Season(StrEnum):
+    MAHA = "maha"
+    YALA = "yala"
+    INTER_SEASON = "inter-season"
+
+
+@dataclass(frozen=True, slots=True)
+class Crop:
+    id: str
+    name: str
+    family: str
+    suitable_seasons: frozenset[Season]
+    source_urls: tuple[str, ...]
+    water_demand_mm: float | None = None
+    limitations: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not self.id or not all(c.islower() or c.isdigit() or c == "-" for c in self.id):
+            raise ValueError("crop id must contain lowercase letters, digits, or hyphens")
+        if not self.name.strip() or not self.family.strip():
+            raise ValueError("crop name and family are required")
+        if not self.suitable_seasons:
+            raise ValueError("at least one suitable season is required")
+        if self.water_demand_mm is not None and self.water_demand_mm <= 0:
+            raise ValueError("water_demand_mm must be positive when known")
+        if not self.source_urls or any(urlparse(url).scheme not in {"http", "https"} for url in self.source_urls):
+            raise ValueError("at least one HTTP(S) source URL is required")
+
+
+@dataclass(frozen=True, slots=True)
+class ClimateInput:
+    """Seasonal values normalized before entering the rotation engine."""
+
+    rainfall_mm: float
+    source: str
+    observation_start: str
+    observation_end: str
+    irrigation_mm: float = 0
+    rainfall_change_percent: float = 0
+
+    def __post_init__(self) -> None:
+        if self.rainfall_mm < 0 or self.irrigation_mm < 0:
+            raise ValueError("rainfall and irrigation cannot be negative")
+        if self.rainfall_change_percent < -100:
+            raise ValueError("rainfall change cannot be below -100 percent")
+        if not self.source.strip():
+            raise ValueError("climate source is required")
+
+
+@dataclass(frozen=True, slots=True)
+class WaterBudget:
+    crop_demand_mm: float
+    baseline_rainfall_mm: float
+    scenario_rainfall_mm: float
+    irrigation_mm: float
+    available_water_mm: float
+    balance_mm: float
+    coverage_percent: float
+    assumptions: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        if self.crop_demand_mm <= 0:
+            raise ValueError("crop demand must be positive")
+        if min(self.baseline_rainfall_mm, self.scenario_rainfall_mm, self.irrigation_mm, self.available_water_mm) < 0:
+            raise ValueError("water inputs cannot be negative")
+        expected = self.available_water_mm - self.crop_demand_mm
+        if abs(self.balance_mm - expected) > 1e-9:
+            raise ValueError("balance_mm must equal available water minus crop demand")
