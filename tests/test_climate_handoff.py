@@ -35,3 +35,34 @@ class HandoffTests(unittest.TestCase):
         self.assertEqual(obs["daily"][0]["temperature_c"], 25)
         with self.assertRaises(ValueError):
             observation_envelope(obs, "farm-new", "obs-new", True)
+
+    def test_season_provenance_is_preserved_without_mutating_source(self):
+        obs = example()["observation"]
+        obs["retrieved_at"] = "2026-11-14T08:00:00+00:00"
+        obs["source_url"] = "https://power.larc.nasa.gov/api/temporal/daily/point?example=synthetic"
+        result = season_inputs(obs, "2025-01-01", "2025-01-03")
+        self.assertEqual(result["retrieved_at"], obs["retrieved_at"])
+        self.assertEqual(result["data_kind"], "synthetic")
+        self.assertIn(obs["source_url"], result["source_refs"])
+        result["limitations"].append("consumer edit")
+        self.assertNotIn("consumer edit", obs["limitations"])
+        result["source_refs"].append("consumer source")
+        self.assertNotIn("consumer source", obs["source_refs"])
+
+    def test_unknown_timestamp_and_missing_rain_are_explicit(self):
+        obs = example()["observation"]
+        obs["daily"][0]["precipitation_mm_per_day"] = None
+        result = season_inputs(obs, "2025-01-01", "2025-01-03")
+        self.assertIsNone(result["retrieved_at"])
+        self.assertTrue(any("Incomplete seasonal rainfall" in note for note in result["limitations"]))
+        self.assertTrue(any("retrieval time is unknown" in note for note in result["limitations"]))
+
+    def test_invalid_provenance_is_not_silently_defaulted(self):
+        obs = example()["observation"]
+        obs["source_refs"] = []
+        with self.assertRaises(ValueError):
+            season_inputs(obs, "2025-01-01", "2025-01-03")
+        obs = example()["observation"]
+        obs["retrieved_at"] = "2026-11-14T08:00:00"
+        with self.assertRaises(ValueError):
+            season_inputs(obs, "2025-01-01", "2025-01-03")

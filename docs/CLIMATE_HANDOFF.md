@@ -44,6 +44,21 @@ season = season_inputs(observations, "2025-01-01", "2025-01-31")
 
 Dates are inclusive UTC calendar days; demand must use the same period. Rainfall depth is millimeters, not liters or cubic meters. The helper rejects dates outside the supplied history; missing rainfall produces a null total. `effective_rainfall_mm`, `crop_water_demand_mm` and `irrigation_deficit_mm` stay null. Define those formulas, soil/storage/runoff assumptions, irrigation basis, and seasonal boundaries before using them to score rotations. No arbitrary efficiency factor is applied here.
 
+### Confirmed seasonal provenance and irrigation agreement
+
+Each season result now includes `source_refs`, `source_url`, `retrieved_at`, `data_kind`, and `limitations`. Source references preserve provider IDs and include the original NASA POWER request URL when available. Retrieval timestamps retain their timezone; imported files with unknown original retrieval time remain null with an explicit limitation. Synthetic inputs remain synthetic. Missing rainfall and partial-temperature coverage are disclosed in the season's own limitations, not just the parent response. Source lists are copied so consumers cannot mutate the baseline.
+
+Verified against Bhagya's `zerokali20` commit `f686751`: `ClimateInput.from_season_inputs` preserves these fields with the real January 2025 total of 221.69 mm over 31 complete days. Unknown irrigation stays null; attempting a water budget raises a clear ValueError. Dulanjaya should translate this into the agreed unavailable-budget behavior rather than return an unhandled server error. Known irrigation must explicitly use `irrigation_basis="field_applied_depth"`; zero means confirmed zero, never unknown.
+
+```python
+climate = ClimateInput.from_season_inputs(season)  # unknown irrigation preserved
+confirmed_rainfed = ClimateInput.from_season_inputs(
+    season, irrigation_mm=0, irrigation_basis="field_applied_depth"
+)
+```
+
+Only pass a known irrigation value after farmer/input confirmation; the climate helper does not manufacture irrigation values or apply delivery-loss assumptions. Total rainfall remains provisional screening context; effective rainfall and crop demand remain with Bhagya. Crop approvals remain a separate evidence-review task. Verification: 43 local module tests and Bhagya's 19 independent tests pass, plus a cross-branch real-data smoke check for metadata and both irrigation cases.
+
 ## Assistant — Akash
 
 Resolve farm/observation/scenario context on the server. Explain the bundle's numbers, settings, coverage and limitations. Missing values mean unknown. Uniform rainfall scaling is a what-if exercise; historical comparisons and candidate distances do not predict weather, yield, or crop success. Preserve sources and units in each supported language.
