@@ -517,6 +517,21 @@ main.landing-main,
   font-size: 12px;
   font-weight: 800;
 }
+.feature-card > .feature-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.feature-card > .feature-action:hover { text-decoration: underline; }
+.feature-card > .feature-action svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
 .feature-viz {
   position: absolute;
   left: 20px;
