@@ -2,15 +2,6 @@
 import json
 from pathlib import Path
 
-import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-from app.main import app
-from app.database.connection import Base, get_db
-from app.models.farm import Farm
-
 
 FIXTURE_PATH = (
     Path(__file__).resolve().parents[2]
@@ -24,40 +15,6 @@ def sample_farm():
     return json.loads(
         FIXTURE_PATH.read_text(encoding="utf-8")
     )
-
-
-@pytest.fixture
-def client(tmp_path):
-    # Separate database for each test
-    database_path = tmp_path / "test.db"
-
-    test_engine = create_engine(
-        f"sqlite:///{database_path.as_posix()}",
-        connect_args={"check_same_thread": False}
-    )
-
-    Base.metadata.create_all(bind=test_engine)
-
-    TestingSession = sessionmaker(
-        bind=test_engine,
-        autoflush=False
-    )
-
-    def override_get_db():
-        db = TestingSession()
-        try:
-            yield db
-        finally:
-            db.close()
-
-    app.dependency_overrides[get_db] = override_get_db
-
-    try:
-        with TestClient(app) as test_client:
-            yield test_client
-    finally:
-        app.dependency_overrides.clear()
-        test_engine.dispose()
 
 
 def test_create_farm(client):

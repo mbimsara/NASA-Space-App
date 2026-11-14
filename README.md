@@ -6,7 +6,7 @@ AgroSphere combines Earth observations, farmer inputs, and local agronomy to hel
 
 ## Start here
 
-The repository currently contains development plans, shared data contracts, and synthetic fixtures. There is no runnable frontend/backend yet.
+The repository includes a runnable FastAPI backend with SQLite farm persistence, validation, version checks, and environment-based database/CORS configuration. See [backend setup and tests](backend/README.md). Farm observations integrate Matheesha's NASA POWER adapter; other analytical endpoints and the frontend remain planned.
 
 | Resource | Purpose |
 | --- | --- |
@@ -21,7 +21,7 @@ The repository currently contains development plans, shared data contracts, and 
 | [Demo guide](docs/DEMO.md) | Connected walkthrough and fallback rules |
 | [Shared data](data/README.md) | Synthetic farm, catalog and schemas |
 
-Validate shared inputs with `python scripts/validate_data.py` (Python 3.10+). GitHub Actions runs this check on pushes and pull requests. The crop catalog is intentionally empty pending research and approval. Application startup instructions will be added to [frontend](frontend/README.md) and [backend](backend/README.md) when scaffolding is implemented.
+Validate shared inputs with `python scripts/validate_data.py` (Python 3.10+). GitHub Actions runs this check on pushes and pull requests. The crop catalog is intentionally empty pending research and approval. Backend installation, startup, configuration, and test instructions are in [backend/README.md](backend/README.md). See [frontend](frontend/README.md) for its separate status.
 
 ## Product scope
 
@@ -82,6 +82,6 @@ Keep crop rotation central. SoilRevive and FarmRecovery are planning modes that 
 
 ## Current status
 
-Product scope documented. Application implementation has not started.
+The backend implements health and farm create/read/update APIs with SQLite persistence and automated tests. Farm observation requests now integrate Matheesha's NASA POWER adapter. Rotation, scenario, assistant, and saved-plan services remain planned.
 
 See the [six-member implementation plan](IMPLEMENTATION_PLAN.md) for responsibilities, Tharuka's UI/UX design assignment, integration contracts, milestones, and acceptance checks.

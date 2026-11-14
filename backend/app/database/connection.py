@@ -1,15 +1,25 @@
 
 from sqlalchemy import create_engine
+from sqlalchemy.engine import make_url
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-# SQLite database stored in the backend directory
-DATABASE_URL = "sqlite:///./agrosphere.db"
+from app.config import settings
 
-# Create database connection engine
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False}
-)
+
+DATABASE_URL = settings.database_url
+
+
+def create_database_engine(database_url: str):
+    # SQLite's thread option is not a valid argument for other DBAPI drivers.
+    connect_args = (
+        {"check_same_thread": False}
+        if make_url(database_url).get_backend_name() == "sqlite"
+        else {}
+    )
+    return create_engine(database_url, connect_args=connect_args)
+
+
+engine = create_database_engine(DATABASE_URL)
 
 # Create database session factory
 SessionLocal = sessionmaker(
