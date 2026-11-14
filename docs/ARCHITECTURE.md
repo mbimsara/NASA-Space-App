@@ -79,3 +79,14 @@ It preserves the baseline and observation without requiring the farm to remain
 at the old version. Unavailable seasonal climate and unapproved demand prevent
 numerical water changes; these limitations remain explicit. See
 [scenario behavior and persistence](../backend/SCENARIOS.md).
+
+## Implemented saved-plan boundary
+
+Plan creation validates the farm, saved analysis, optional scenario, original
+observation and selected candidate, including original catalog approval context.
+A conditional write rechecks the farm input version and holds SQLite's writer
+lock until the append to `saved_plans` commits. The new table contains reference
+IDs, original input version, complete immutable response snapshots and analytical
+provenance. GET reads only this row, preserving historical results after later
+farm, catalog or model changes. Existing tables and source snapshots are retained.
+See [saved-plan contracts and persistence](../backend/PLANS.md).

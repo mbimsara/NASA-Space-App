@@ -367,3 +367,9 @@ rainfall scenarios against immutable rotation baselines. See
 [scenario requests, differences, persistence and limitations](SCENARIOS.md).
 Supported diversity scores are recomputed; seasonal water effects remain unknown
 until the baseline contains approved aligned climate and demand inputs.
+
+Saved plans are implemented through `POST /api/v1/farms/{farm_id}/plans` (201:
+`{"plan_id": "..."}`) and `GET /api/v1/plans/{plan_id}` (200: immutable candidate,
+farm, analysis, scenario and observation snapshots). Saves check current farm
+versions and all selected-result relationships; reads preserve historical inputs
+after later edits. See [synthetic examples, errors and storage details](PLANS.md).

@@ -1,6 +1,6 @@
 # API contracts — proposed v0.1
 
-Owner: Dulanjaya. Reviewers: all module owners. Farm POST/GET/PATCH endpoints are implemented, along with GET `/api/v1/health`. The observations endpoint is also implemented through Matheesha's NASA POWER adapter. Rotation and climate scenario POST endpoints are implemented with the limitations below. Assistant and saved-plan endpoints remain proposed. Use `/api/v1` and JSON; freeze changes together before independent development.
+Owner: Dulanjaya. Reviewers: all module owners. Farm POST/GET/PATCH endpoints are implemented, along with GET `/api/v1/health`. The observations endpoint is also implemented through Matheesha's NASA POWER adapter. Rotation, climate scenario and saved-plan endpoints are implemented with the limitations below. Assistant endpoints remain proposed. Use `/api/v1` and JSON; freeze changes together before independent development.
 
 ## Conventions
 
@@ -111,4 +111,27 @@ and empty or unapproved catalogs yield explained empty results. Unknown analysis
 IDs return 404, stored ownership/version conflicts 409, invalid parameters 422,
 and unavailable or unsupported baseline data/computation/storage 503. See
 [full scenario contract and synthetic request example](../backend/SCENARIOS.md).
-Assistant and saved-plan endpoints remain proposed.
+Assistant endpoints remain proposed.
+
+## Implemented saved plans
+
+`POST /api/v1/farms/{farm_id}/plans` accepts `analysis_id`, optional nullable
+`scenario_id`, `candidate_id` and positive integer `expected_input_version`.
+It returns 201 with `{"plan_id": "server-generated-uuid"}`. The farm and
+analysis versions must match the expected version, rechecked atomically on save.
+The analysis must belong to the farm, the scenario to that analysis, and the
+candidate to the selected baseline/scenario. Empty analyses have no savable
+candidate. Only originally reviewed/approved catalog support is accepted.
+
+`GET /api/v1/plans/{plan_id}` returns 200 with `plan_id`, `farm_id`, `analysis_id`,
+nullable `scenario_id`, `candidate_id`, original `input_version`, `created_at`,
+`candidate_snapshot`, `input_snapshot`, and `analysis_snapshot` (catalog/model
+versions, source references, assumptions, limitations and data kind). Additive
+`observation_id`, complete `observation_snapshot`, and nullable complete
+`scenario_snapshot` retain historical provider metadata and hypothetical labels.
+These snapshots remain readable after farm, catalog or model changes.
+
+Unknown resources/candidates return 404, relationship/approval and version
+conflicts 409, invalid bodies 422, and unavailable persisted data/storage 503.
+No provider calls or analytical recomputation occur. See
+[complete saved-plan documentation and synthetic examples](../backend/PLANS.md).

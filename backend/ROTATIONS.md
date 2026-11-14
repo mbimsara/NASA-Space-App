@@ -74,7 +74,8 @@ analysis insert commits; a concurrent farm change returns 409 without saving.
 Analyses can be retrieved internally with `Session.get(RotationAnalysis, id)`;
 their original input versions remain intact after farm edits. The
 [Climate Scenario API](SCENARIOS.md) uses these immutable baselines. No public
-analysis GET, Saved Plan or AI Assistant APIs are implemented.
+analysis GET or AI Assistant APIs are implemented. The
+[Saved Plans APIs](PLANS.md) preserve selected baseline or scenario candidates.
 
 Tests use temporary SQLite databases and controlled synthetic observations/catalogs.
 Run the complete suite with `PYTHONPATH=backend python -m pytest backend/tests -q`

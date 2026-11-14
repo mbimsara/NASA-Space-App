@@ -79,8 +79,9 @@ Startup adds `climate_scenarios` using SQLAlchemy `create_all`, preserving all
 existing tables and rows. Each row stores a stable UUID, indexed baseline foreign
 key, parameters, baseline/input/observation snapshots and full response JSON.
 Repeated POSTs create separate scenario records. Internal retrieval is available
-through `Session.get(ClimateScenario, scenario_id)`; no new public GET endpoint,
-saved-plan API or frontend changes are included.
+through `Session.get(ClimateScenario, scenario_id)`; no public scenario GET endpoint
+or frontend changes are included. The [Saved Plans APIs](PLANS.md) can snapshot a
+selected scenario candidate with its hypothetical parameters and limitations.
 
 Run all backend tests from the repository root with
 `PYTHONPATH=backend python -m pytest backend/tests -q`, followed by
