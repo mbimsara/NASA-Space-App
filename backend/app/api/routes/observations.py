@@ -28,7 +28,7 @@ snapshot_router = APIRouter(prefix="/observations", tags=["Observations"])
 )
 def get_observations(
     farm_id: str,
-    period: Annotated[ObservationQuery, Depends()],
+    period: Annotated[ObservationQuery, Query()],
     response: Response,
     db: Session = Depends(get_db),
     adapter: ObservationAdapter | None = Depends(get_observation_adapter),
