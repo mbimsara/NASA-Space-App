@@ -229,6 +229,24 @@ export interface RotationAnalysis {
   assumptions: string[];
   source_refs: string[];
   limitations: string[];
+  /** Live API: one dated historical rainfall input per planned season (empty when not requested). */
+  season_inputs?: SeasonInput[];
+}
+
+export interface SeasonInput {
+  season_index: number;
+  season_label: string;
+  period_start: string;
+  period_end: string;
+  period_source: "season_calendar" | "request";
+  observation_id: string;
+  data_kind: DataKind;
+  expected_days: number;
+  rainfall_valid_days: number;
+  /** null when the period has missing rainfall days — never a partial sum. */
+  rainfall_total_mm: number | null;
+  source_refs: string[];
+  limitations: string[];
 }
 
 // ---------------------------------------------------------------------------

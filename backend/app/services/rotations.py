@@ -49,7 +49,13 @@ def _unavailable_components(weights: dict[str, float], crop_ids: tuple[str, ...]
 
 def build_analysis(
     *, farm: Farm, observation: ObservationResponse, request: RotationRequest,
+    season_inputs: list[dict] | None = None,
 ) -> dict:
+    """``season_inputs`` (one dated rainfall input per season) enables water screening."""
+    if season_inputs is not None:
+        return _build_seasonal_analysis(
+            farm=farm, observation=observation, request=request, season_inputs=season_inputs,
+        )
     catalog_version, crops = load_catalog(CATALOG_PATH)
     if request.catalog_version != catalog_version:
         raise CatalogVersionConflict(
@@ -147,6 +153,114 @@ def build_analysis(
             "Season-specific water screening requires dated rainfall inputs for each planned season.",
             *observation.limitations,
         ],
+    }
+
+
+def _build_seasonal_analysis(
+    *, farm: Farm, observation: ObservationResponse, request: RotationRequest,
+    season_inputs: list[dict],
+) -> dict:
+    """Same candidates and scoring as above, with one dated rainfall input per season."""
+    from app.services.season_inputs import load_demands, season_water_row
+
+    catalog_version, crops = load_catalog(CATALOG_PATH)
+    if request.catalog_version != catalog_version:
+        raise CatalogVersionConflict(
+            f"Requested catalog '{request.catalog_version}' does not match server catalog '{catalog_version}'."
+        )
+    if len(season_inputs) != len(request.season_labels):
+        raise ValueError("One season input is required per planned season.")
+    water_model_version, demands = load_demands()
+
+    history = sorted(farm.profile.get("crop_history", []), key=lambda item: item["planted_on"])
+    previous_crop = history[-1]["crop_id"] if history else None
+    generated = generate_candidates(
+        crops,
+        tuple(request.season_labels),
+        excluded_crop_ids=frozenset(farm.profile.get("excluded_crop_ids", [])),
+        previous_crop_id=previous_crop,
+    )
+    weights = request.priority_weights.model_dump()
+    irrigation = farm.profile.get("irrigation_supply_mm_per_season")
+    crop_by_id = {crop.id: crop for crop in crops}
+    candidates = []
+    for candidate in generated.candidates:
+        per_season, budgets = [], []
+        for season, crop_id in zip(season_inputs, candidate.crop_ids):
+            row, budget = season_water_row(season, crop_id, irrigation_mm=irrigation, demands=demands)
+            per_season.append(row)
+            budgets.append(budget)
+        try:
+            scored = rank_candidates(((candidate, tuple(budgets)),), weights)[0]
+            score = scored.score
+            components = [
+                {
+                    "name": component.name,
+                    "requested_weight": component.requested_weight,
+                    "effective_weight": component.effective_weight,
+                    "value": component.value,
+                    "direction": component.direction,
+                }
+                for component in scored.score_components
+            ]
+            score_reasons = list(scored.reasons)
+        except ValueError:
+            score = None
+            components = _unavailable_components(weights, candidate.crop_ids)
+            score_reasons = ["No positively weighted component is available from the supplied inputs."]
+
+        candidates.append({
+            "candidate_id": _candidate_id(candidate.crop_ids),
+            "sequence": [
+                {"season_index": index, "crop_id": crop_id, "crop_name": crop_by_id[crop_id].name}
+                for index, crop_id in enumerate(candidate.crop_ids, 1)
+            ],
+            "score": score,
+            "score_components": components,
+            "water_budget": {
+                "period": "season-specific periods; see water_budget_range", "demand_mm": None,
+                "rainfall_mm": None, "rainfall_total_mm": None, "effective_rainfall_mm": None,
+                "irrigation_supply_mm": irrigation,
+                "deficit_mm": None, "unit": "mm",
+                "assumptions": ["No effective-rainfall method is approved.",
+                                "Each season uses its own dated rainfall period; no plan-level total is formed."],
+            },
+            "water_budget_range": per_season,
+            "reasons": list(candidate.reasons) + score_reasons,
+            "constraint_checks": [asdict(check) for check in candidate.constraint_checks],
+        })
+    candidates.sort(key=lambda value: (value["score"] is None, -(value["score"] or 0), value["candidate_id"]))
+
+    kinds = {observation.data_kind, *(season["data_kind"] for season in season_inputs)}
+    source_refs = [observation.observation_id]
+    for season in season_inputs:
+        source_refs += [season["observation_id"], *season["source_refs"]]
+    source_refs += list(observation.source_refs)
+    limitations = [
+        "Heuristic comparison only; not a yield prediction or crop-success guarantee.",
+        "Season rainfall comes from historical reference periods, not forecasts of the planned seasons.",
+        "Total rainfall is provisionally treated as available; effective rainfall is not modeled.",
+    ]
+    if irrigation is None:
+        limitations.append("Irrigation is unknown, so water sufficiency and scenario resilience are unavailable.")
+    now = datetime.now(timezone.utc)
+    return {
+        "analysis_id": str(uuid4()), "farm_id": farm.id,
+        "input_version": farm.input_version, "observation_id": observation.observation_id,
+        "catalog_version": catalog_version, "model_version": MODEL_VERSION,
+        "data_kind": kinds.pop() if len(kinds) == 1 else "mixed",
+        "created_at": now.isoformat(),
+        "candidates": candidates, "reasons": list(generated.reasons),
+        "assumptions": [
+            "Only reviewed/approved catalog crops are eligible.",
+            "Crop diversity is a rotation-structure proxy, not measured soil improvement.",
+            "Each planned season uses rainfall from its own dated historical period; "
+            "one rainfall total is never reused for several seasons.",
+            f"Crop-water demand ranges use {water_model_version} (seasonal ETc basis).",
+        ],
+        "source_refs": list(dict.fromkeys(source_refs)),
+        "limitations": limitations + list(observation.limitations),
+        "season_inputs": season_inputs,
     }
 
 

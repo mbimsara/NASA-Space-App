@@ -23,6 +23,7 @@ import { CATALOG_VERSION, loadedCatalog } from "../catalog";
 import { SEASON_LABELS, type SeasonLabel } from "../api/client";
 import { normalizeWeights } from "../utils/validation";
 import type { PriorityWeights } from "../types/api";
+import { SeasonInputsCard } from "../components/rotations/SeasonInputsCard";
 
 export function RotationPage() {
   const { t } = useTranslation();
@@ -82,6 +83,8 @@ export function RotationPage() {
           season_labels: seasonLabels,
           catalog_version: CATALOG_VERSION,
           priority_weights: normalizeWeights(weights),
+          // Each planned season gets its own dated rainfall period (live API).
+          season_periods: "calendar",
         },
         ticket.signal,
       );
@@ -241,6 +244,8 @@ export function RotationPage() {
               </ul>
             </div>
           )}
+
+          {(analysis.season_inputs?.length ?? 0) > 0 && <SeasonInputsCard inputs={analysis.season_inputs!} />}
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
             {analysis.candidates.map((cand, i) => {
