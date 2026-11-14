@@ -24,15 +24,14 @@ export function LanguageSwitcher() {
   };
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <label htmlFor="lang-select" style={{ fontSize: 13 }}>
+    <div className="language-switcher">
+      <label htmlFor="lang-select">
         {t("nav.language")}
       </label>
       <select
         id="lang-select"
         value={i18n.language}
         onChange={(e) => handleChange(e.target.value as Language)}
-        style={{ padding: "2px 6px", fontSize: 13 }}
       >
         {LANGUAGES.map((l) => (
           <option key={l.code} value={l.code}>{l.label}</option>

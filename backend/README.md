@@ -10,9 +10,10 @@ FastAPI with synchronous SQLAlchemy and SQLite. Implemented endpoints:
 | PATCH | `/api/v1/farms/{farm_id}` | Replace the complete profile using `expected_input_version`; increment the version or return 409 |
 | GET | `/api/v1/farms/{farm_id}/observations?start=YYYY-MM-DD&end=YYYY-MM-DD` | Retrieve a fresh cached snapshot or fetch and persist NASA POWER observations |
 | GET | `/api/v1/observations/{observation_id}` | Read the original persisted observation snapshot |
+| POST | `/api/v1/observations/{observation_id}/rainfall-scenarios` | Uniformly scale stored daily rainfall for a labeled hypothetical sensitivity test |
 
 See [API contracts](../docs/API_CONTRACTS.md) for fields, units, and errors.
-Rotation, scenario, assistant, and plan endpoints remain planned. POWER observations, database-backed caching, and stable snapshot IDs are implemented. Live retrieval and cache reuse were verified on 2026-11-14.
+Rotation-analysis scenarios, assistant, and plan endpoints remain planned. POWER observations, database-backed caching, stable snapshot IDs, and observation-based rainfall scenarios are implemented. Live retrieval and cache reuse were verified on 2026-11-14.
 
 ## Installation
 
@@ -149,6 +150,18 @@ First create a farm and use its returned ID. Then request inclusive UTC calendar
 curl "http://127.0.0.1:8000/api/v1/farms/YOUR_FARM_ID/observations?start=2025-01-01&end=2025-01-31"
 ```
 
+Use the returned immutable observation ID to explore a hypothetical rainfall change:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/api/v1/observations/YOUR_OBSERVATION_ID/rainfall-scenarios" \
+  -H "Content-Type: application/json" \
+  -d '{"rainfall_change_pct":-30}'
+```
+
+This scales available daily rainfall uniformly, preserves missing values and dates, and never
+changes the historical snapshot. It is a sensitivity test, not a weather, yield, soil, or crop
+forecast. Rotation candidate recalculation remains a separate unimplemented endpoint.
+
 Swagger UI provides the same endpoint. Both dates are required, must use `YYYY-MM-DD`,
 and must satisfy `1981-01-01 <= start <= end < today (UTC)`, matching the existing POWER
 adapter's historical-date policy. Unknown query parameters are rejected. IDs are looked up
@@ -162,8 +175,8 @@ fresh persisted snapshot. On a cache miss it calls the
 Matheesha's existing `fetch` and `normalize` functions in `backend/services/nasa_power.py`.
 That module and its package initializer were imported unchanged from
 [`matheesha/nasa-power-integration`, commit `c580b4f`](https://github.com/mbimsara/NASA-Space-App/tree/c580b4fc620212f5450e388ed951e7cef5c014f6).
-Only POWER is included here; his other climate/SMAP functions remain on his branch.
-No crop calculations or provider normalization algorithms were reimplemented.
+The route also exposes his rainfall-scenario function against stored snapshots. SMAP remains a
+separate pipeline. No crop calculations or provider normalization algorithms were reimplemented.
 
 The integration response preserves Matheesha's normalized `daily`, `monthly`, summary,
 source, API, parameter, and resolution metadata. The original API contract's
