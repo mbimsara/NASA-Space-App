@@ -1,6 +1,6 @@
 # Data source register
 
-Owner: Matheesha. Documentation support: Tharuka. NASA POWER is integrated as a standalone Python adapter; other products remain research candidates.
+Owner: Matheesha. Documentation support: Tharuka. NASA POWER is integrated through the Python adapter and persisted backend observation cache. SMAP has a separate verified processing pipeline but is not yet exposed by the observations HTTP route.
 
 ## Source selection policy
 
@@ -8,7 +8,7 @@ Use resources listed on the [competition resources page](https://www.spaceappsch
 
 | Candidate | Intended investigation | Status |
 | --- | --- | --- |
-| NASA POWER | Daily T2M and PRECTOTCORR via AG community, UTC | Live 2025 demo retrieval verified; see adapter guide |
+| NASA POWER | Daily T2M and PRECTOTCORR via AG community, UTC | Connected to the farm observations API; live 2025 demo retrieval and cache reuse verified |
 | GPM | Precipitation observations | Product/version, access, coverage and resolution to verify |
 | SMAP SPL3SMP_E V006 | Regional soil-moisture context | January 2025 Sri Lankan subset automation verified: 31 files, 12 accepted AM / 11 accepted PM retrievals. See [SMAP guide](SMAP.md) |
 | Landsat / MODIS / VIIRS | Competition-listed vegetation/land-surface history | Specific products, access and quality processing to verify; HLS is not currently approved |
@@ -26,5 +26,14 @@ Before implementing an adapter, record its official documentation URL, product/v
 Demonstrate one successful retrieval for the agreed location and date range, record the request pattern without secrets, inspect missing/quality values, and compare a normalized result with the raw response. Agree with Bhagya how the values enter the water/climate model.
 
 ## Provenance rules
+
+The imported POWER module uses the fixed NASA daily point endpoint and no API key. Its
+results retain `data_kind: modeled`, source identifiers, API/parameter metadata and UTC
+retrieval time. It reports MERRA2 grid resolution only when the source metadata matches;
+otherwise resolution is null. Missing days and fill values stay null. The HTTP integration
+adds explicit units, aggregation descriptions and coverage; it does not invent dataset versions
+or substitute fixtures on provider failure. Immutable database snapshots preserve the original
+retrieval metadata and farm version. Fresh-cache lifetime defaults to 24 hours; failed expired
+refreshes return 503. Old snapshots remain explicitly readable by ID.
 
 Keep source references with analyses and reports. Satellite/regional values do not establish exact field nutrients, weed coverage, or guaranteed yields. Historical data does not by itself predict future weather. Synthetic fixtures under `data/fixtures/` are invented and must never appear as live NASA data.
