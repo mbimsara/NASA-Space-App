@@ -90,3 +90,14 @@ IDs, original input version, complete immutable response snapshots and analytica
 provenance. GET reads only this row, preserving historical results after later
 farm, catalog or model changes. Existing tables and source snapshots are retained.
 See [saved-plan contracts and persistence](../backend/PLANS.md).
+
+## Implemented assistant boundary
+
+The assistant POST resolves farm, analysis, original observation and optional
+scenario/candidate references from SQLite. A separate context adapter checks
+ownership and versions and converts persisted shapes to Akash's unchanged
+normalization/response functions. The service is deterministic and English-only.
+It reports supplied facts and citations, disclosing unknown, synthetic and
+hypothetical information without provider calls, translation, model inference
+or agronomic calculations. No records or schemas are mutated. See
+[assistant contracts and pinned upstream provenance](../backend/ASSISTANT.md).

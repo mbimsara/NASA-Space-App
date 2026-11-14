@@ -373,3 +373,9 @@ Saved plans are implemented through `POST /api/v1/farms/{farm_id}/plans` (201:
 farm, analysis, scenario and observation snapshots). Saves check current farm
 versions and all selected-result relationships; reads preserve historical inputs
 after later edits. See [synthetic examples, errors and storage details](PLANS.md).
+
+`POST /api/v1/assistant/messages` now resolves persisted farm/analysis context
+and reuses Akash's unchanged English-only explanation service. It returns
+`role`, `content`, `source_ids`, `limitations`, `status`, `language` and
+`assumptions` without external AI or NASA calls. See
+[requests, synthetic responses, supported questions and limitations](ASSISTANT.md).

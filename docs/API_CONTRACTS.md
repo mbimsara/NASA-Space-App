@@ -1,6 +1,6 @@
 # API contracts — proposed v0.1
 
-Owner: Dulanjaya. Reviewers: all module owners. Farm POST/GET/PATCH endpoints are implemented, along with GET `/api/v1/health`. The observations endpoint is also implemented through Matheesha's NASA POWER adapter. Rotation, climate scenario and saved-plan endpoints are implemented with the limitations below. Assistant endpoints remain proposed. Use `/api/v1` and JSON; freeze changes together before independent development.
+Owner: Dulanjaya. Reviewers: all module owners. Farm POST/GET/PATCH endpoints are implemented, along with GET `/api/v1/health`. The observations endpoint is also implemented through Matheesha's NASA POWER adapter. Rotation, climate scenario and saved-plan endpoints are implemented with the limitations below. The English-only assistant endpoint is also implemented. Use `/api/v1` and JSON; freeze changes together before independent development.
 
 ## Conventions
 
@@ -17,7 +17,7 @@ Farm mutation input follows [the farm schema](../data/schemas/farm.schema.json).
 | GET `/observations/{observation_id}` | Persistent observation ID | 200: original immutable observation envelope; 404 if absent |
 | POST `/farms/{id}/rotations` | `input_version`, `observation_id`, `seasons`, `catalog_version`, `priority_weights` | Immutable rotation analysis |
 | POST `/analyses/{id}/scenarios` | `rainfall_change_pct` from -100 to 100 for the prototype | New hypothetical scenario linked to baseline, recalculated candidates and deltas |
-| POST `/assistant/messages` | `farm_id`, `analysis_id`, optional `scenario_id`/`candidate_id`, `language` (`en`, `si`, `ta`), `message` | Explanation, source IDs, limitations; server verifies context IDs belong together |
+| POST `/assistant/messages` | `farm_id`, `analysis_id`, optional `scenario_id`/`candidate_id`, `language` (`en` implemented; `si`/`ta` unsupported), `message` | Explanation, source IDs, limitations; server verifies context IDs belong together |
 | POST `/farms/{id}/plans` | `analysis_id`, optional `scenario_id`, `candidate_id`, `expected_input_version` | 201: saved plan ID and snapshot references |
 | GET `/plans/{id}` | Plan ID | Saved candidate, input snapshot, sources, assumptions, model versions |
 
@@ -111,7 +111,7 @@ and empty or unapproved catalogs yield explained empty results. Unknown analysis
 IDs return 404, stored ownership/version conflicts 409, invalid parameters 422,
 and unavailable or unsupported baseline data/computation/storage 503. See
 [full scenario contract and synthetic request example](../backend/SCENARIOS.md).
-Assistant endpoints remain proposed.
+The assistant integration is described below.
 
 ## Implemented saved plans
 
@@ -135,3 +135,22 @@ Unknown resources/candidates return 404, relationship/approval and version
 conflicts 409, invalid bodies 422, and unavailable persisted data/storage 503.
 No provider calls or analytical recomputation occur. See
 [complete saved-plan documentation and synthetic examples](../backend/PLANS.md).
+
+## Implemented assistant messages
+
+`POST /api/v1/assistant/messages` accepts `farm_id`, `analysis_id`, optional
+nullable `scenario_id` and `candidate_id`, `language` and a nonblank `message`.
+Only `language: "en"` is implemented; `si` and `ta` return 422. IDs are resolved
+from persisted records, ownership is checked and outdated analyses return 409.
+
+HTTP 200 returns `role: "assistant"`, `content`, `source_ids`, `limitations`,
+`status` (`answered`, `insufficient_context`, `unsupported_question`),
+`language: "en"` and `assumptions`. Akash's unchanged deterministic service
+explains only supplied facts. Unsupported questions return a limitation response,
+not new recommendations. Sources come from rendered evidence; synthetic and
+hypothetical labels remain explicit. No translations, external LLM requests,
+NASA retrievals, message storage or new scientific calculations occur.
+
+Unknown references return 404, relationship/version conflicts 409, invalid
+bodies/languages 422, and missing required persisted data or normalization/storage
+failures 503. See [examples and detailed assistant behavior](../backend/ASSISTANT.md).
