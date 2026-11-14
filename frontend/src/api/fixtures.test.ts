@@ -212,3 +212,40 @@ describe("assistant", () => {
     expect(ok.source_ids).toContain(a.analysis_id);
   });
 });
+
+describe("season labels and scenario plans (Dulanjaya's FRONTEND_INTEGRATION items)", () => {
+  it("uses explicit season labels for each season's rainfall and records them", async () => {
+    const f = await fx.createDemoFarmFixture();
+    const { schema_version: _v, ...profile } = f.profile;
+    const f2 = await fx.updateFarmFixture(f.id, 1, { ...profile, irrigation_supply_mm_per_season: 0 });
+    const a = await fx.createRotationFixture(f.id, { ...rotationBody(f2.input_version), season_labels: ["yala", "yala", "inter-season"] });
+    const r = asSeasonRanges(a.candidates[0].water_budget_range);
+    expect(r.map((x) => x.season_label)).toEqual(["yala", "yala", "inter-season"]);
+    expect(r.map((x) => x.baseline_rainfall_mm)).toEqual([300, 300, 150]);
+    await expect(
+      fx.createRotationFixture(f.id, { ...rotationBody(f2.input_version), season_labels: ["maha"] }),
+    ).rejects.toMatchObject({ status: 422 });
+  });
+
+  it("saves a scenario plan with the scenario's candidate and scenario_id", async () => {
+    const f = await fx.createDemoFarmFixture();
+    const { schema_version: _v, ...profile } = f.profile;
+    await fx.updateFarmFixture(f.id, 1, { ...profile, irrigation_supply_mm_per_season: 0 });
+    const a = await fx.createRotationFixture(f.id, rotationBody(2));
+    const s = await fx.createScenarioFixture(a.analysis_id, -30);
+    const { plan_id } = await fx.savePlanFixture(f.id, {
+      analysis_id: a.analysis_id,
+      scenario_id: s.scenario_id,
+      candidate_id: s.candidates[0].candidate_id,
+      expected_input_version: 2,
+    });
+    const plan = await fx.getPlanFixture(plan_id);
+    expect(plan.scenario_id).toBe(s.scenario_id);
+    const sr = plan.candidate_snapshot.score_components.find((c) => c.name === "scenario_resilience");
+    expect(sr?.value).not.toBeNull();
+    await expect(
+      fx.savePlanFixture(f.id, { analysis_id: a.analysis_id, scenario_id: "nope", candidate_id: "cand-1", expected_input_version: 2 }),
+    ).rejects.toMatchObject({ status: 404 });
+  });
+});
+

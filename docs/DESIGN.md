@@ -1,10 +1,22 @@
 # Design handoff
 
-Owner: Tharuka. Implementation: Shehani. Figma project/file link: **pending — Tharuka to add the shareable design-file URL**.
+Owner: Tharuka. Implementation: Shehani.
+
+Tharuka's approved landing page, navigation, visual tokens, cards, responsive
+layout, and workflow patterns are now integrated directly into Shehani's
+functional application under `frontend/`. The standalone sample prototypes were
+removed after integration so there is one maintained user interface.
+
+To run locally:
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
 Core journey: farm setup → observations → three rotation alternatives where feasible → climate scenario → grounded explanation → saved plan.
 
-## Required handoff
+## Integrated handoff and review criteria
 
 - Components: navigation, buttons, fields, cards, crop timeline, comparison table, source/assumption labels, status and uncertainty states.
 - Screens: farm setup, farm overview, rotation workspace, scenario comparison, assistant, saved plan.

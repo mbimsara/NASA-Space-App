@@ -74,7 +74,12 @@ export const farmFormSchema = z.object({
   location: locationSchema,
   area_ha: finiteNumber("Area").pipe(z.number().positive("Area must be greater than zero")),
   // null means irrigation supply is unknown — do NOT default to 0
-  irrigation_supply_mm_per_season: z.number().min(0, "Must be ≥ 0").nullable(),
+  // null = unknown; 0 = confirmed rainfed; NaN = "amount" chosen but not entered.
+  irrigation_supply_mm_per_season: z
+    .number({ error: "Enter the irrigation amount, or choose Rainfed or Unknown" })
+    .refine(Number.isFinite, { message: "Enter the irrigation amount, or choose Rainfed or Unknown" })
+    .pipe(z.number().min(0, "Must be ≥ 0"))
+    .nullable(),
   crop_history: z.array(cropHistoryEntrySchema),
   soil_tests: z.array(soilTestEntrySchema),
   priority_weights: priorityWeightsSchema,
@@ -89,6 +94,19 @@ export function fieldErrors(error: z.ZodError): Record<string, string> {
   for (const issue of error.issues) {
     const key = issue.path.map(String).join(".");
     if (!(key in out)) out[key] = issue.message;
+  }
+  return out;
+}
+
+/**
+ * Map the backend's 422 `fields` (Dulanjaya: dotted Pydantic locations without "body",
+ * e.g. "area_ha", "location.latitude", or "profile.area_ha" for PATCH) onto form paths.
+ */
+export function serverFieldErrors(fields: Record<string, string>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [key, msg] of Object.entries(fields)) {
+    const path = key.replace(/^(body\.)?(profile\.)?/, "");
+    if (path && !(path in out)) out[path] = msg;
   }
   return out;
 }

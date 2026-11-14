@@ -12,6 +12,7 @@
  */
 import demoFarmProfile from "../../../data/fixtures/farm.synthetic.json";
 import { ApiClientError } from "./client";
+import { asSeasonRanges } from "../utils/format";
 import type { PlanRequest, RotationRequest } from "./client";
 import type {
   AssistantMessage,
@@ -38,6 +39,7 @@ interface FixtureDb {
   farms: Record<string, FarmEnvelope>;
   analyses: Record<string, RotationAnalysis>;
   plans: Record<string, SavedPlan>;
+  scenarios?: Record<string, ScenarioResult>;
   seq: number;
 }
 
@@ -273,7 +275,7 @@ const FIXTURE_CROPS: Record<string, FixtureCrop> = {
 };
 
 /** Synthetic seasonal rainfall totals (mm) for the demo; not observations. */
-const FIXTURE_SEASON_RAINFALL: Record<string, number> = { maha: 650, yala: 300 };
+const FIXTURE_SEASON_RAINFALL: Record<string, number> = { maha: 650, yala: 300, "inter-season": 150 };
 
 const TEMPLATES: string[][] = [
   ["rice", "cowpea", "maize"],
@@ -289,11 +291,13 @@ interface ScoreInputs {
   irrigationPerSeason: number | null;
   /** null = baseline only (no scenario); otherwise 1 + pct/100. */
   scenarioFactor: number | null;
+  /** Explicit season identity per season (defaults to alternating maha/yala). */
+  labels?: string[];
 }
 
 /** Score one sequence per rotation-score-0.1. Unknown inputs stay null; nothing becomes 0. */
 export function scoreSequence(cropIds: string[], candidateId: string, inp: ScoreInputs): RotationCandidate & { _tie: number[] } {
-  const labels = seasonLabels(cropIds.length);
+  const labels = inp.labels && inp.labels.length === cropIds.length ? inp.labels : seasonLabels(cropIds.length);
   const crops = cropIds.map((id) => FIXTURE_CROPS[id]);
   const factor = inp.scenarioFactor ?? 1;
   const irr = inp.irrigationPerSeason;
@@ -305,12 +309,16 @@ export function scoreSequence(cropIds: string[], candidateId: string, inp: Score
     const available = irr === null ? null : scen + irr;
     return {
       season_index: i + 1,
+      season_label: labels[i],
       crop_id: c.id,
       demand_low_mm: c.demand_low,
       demand_high_mm: c.demand_high,
       baseline_rainfall_mm: base,
       scenario_rainfall_mm: scen,
       irrigation_mm: irr,
+      baseline_available_water_mm: irr === null ? null : base + irr,
+      baseline_coverage_low_percent: irr === null ? null : ((base + irr) / c.demand_high) * 100,
+      baseline_coverage_high_percent: irr === null ? null : ((base + irr) / c.demand_low) * 100,
       available_water_mm: available,
       balance_low_mm: available === null ? null : available - c.demand_high,
       balance_high_mm: available === null ? null : available - c.demand_low,
@@ -419,6 +427,9 @@ export async function createRotationFixture(
     fail(409, "VERSION_CONFLICT", "The farm changed since this request was prepared. Reload and try again.");
   }
 
+  if (body.season_labels && body.season_labels.length !== body.seasons) {
+    fail(422, "VALIDATION_ERROR", "season_labels must have one label per season.", { season_labels: "One label per season" });
+  }
   const excluded = new Set(farm.profile.excluded_crop_ids.map((c) => c.toLowerCase()));
   const reasons: string[] = [];
   const scored: (RotationCandidate & { _tie: number[] })[] = [];
@@ -434,6 +445,7 @@ export async function createRotationFixture(
         weights: w,
         irrigationPerSeason: farm.profile.irrigation_supply_mm_per_season,
         scenarioFactor: null,
+        labels: body.season_labels,
       }),
     );
   });
@@ -492,6 +504,7 @@ export async function createScenarioFixture(
           weights: { water: req(b, "water_sufficiency"), soil: req(b, "crop_diversity"), climate: req(b, "scenario_resilience") },
           irrigationPerSeason: farm?.profile.irrigation_supply_mm_per_season ?? null,
           scenarioFactor: 1 + rainfallChangePct / 100,
+          labels: asSeasonRanges(b.water_budget_range).map((r) => r.season_label ?? ""),
         },
       ),
     ),
@@ -513,7 +526,7 @@ export async function createScenarioFixture(
     }),
   );
 
-  return {
+  const scenario: ScenarioResult = {
     scenario_id: nextId(db, "scenario"),
     baseline_analysis_id: analysisId,
     parameters: { rainfall_change_pct: rainfallChangePct },
@@ -526,6 +539,10 @@ export async function createScenarioFixture(
     data_kind: "synthetic",
     created_at: new Date().toISOString(),
   };
+  db.scenarios = { ...(db.scenarios ?? {}), [scenario.scenario_id]: scenario };
+  save(db);
+  return scenario;
+
 }
 
 // ---------------------------------------------------------------------------
@@ -555,6 +572,10 @@ export async function sendAssistantMessageFixture(body: AssistantRequest, signal
   return {
     role: "assistant",
     content,
+    // Mirrors Akash's respond(): coarse status plus assumptions alongside the four required fields.
+    status: !cand ? "insufficient_context" : water === null || water === undefined ? "insufficient_context" : "answered",
+    language: "en",
+    assumptions: analysis.assumptions.slice(0, 2),
     source_ids: [analysis.analysis_id, ...(body.scenario_id ? [body.scenario_id] : []), ...(analysis.observation_id ? [analysis.observation_id] : []), SOURCE],
     limitations: [
       "Synthetic fixture response, not a model-generated answer.",
@@ -579,7 +600,14 @@ export async function savePlanFixture(farmId: string, body: PlanRequest, signal?
   if (body.expected_input_version !== farm.input_version || analysis.input_version !== farm.input_version) {
     fail(409, "VERSION_CONFLICT", "The farm changed after this analysis. Re-run the rotation before saving.");
   }
-  const candidate = analysis.candidates.find((c) => c.candidate_id === body.candidate_id);
+  let source: RotationCandidate[] = analysis.candidates;
+  if (body.scenario_id) {
+    const sc = db.scenarios?.[body.scenario_id];
+    if (!sc) fail(404, "NOT_FOUND", "Scenario not found.");
+    if (sc.baseline_analysis_id !== analysis.analysis_id) fail(409, "CONTEXT_MISMATCH", "Scenario is not based on this analysis.");
+    source = sc.candidates;
+  }
+  const candidate = source.find((c) => c.candidate_id === body.candidate_id);
   if (!candidate) fail(422, "VALIDATION_ERROR", "Candidate not found in analysis.");
 
   const planId = nextId(db, "plan");

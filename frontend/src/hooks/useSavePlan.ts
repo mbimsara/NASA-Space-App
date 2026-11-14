@@ -29,7 +29,7 @@ export function useSavePlan() {
       });
       const cand = analysis.candidates.find((c) => c.candidate_id === candidateId);
       const crops = cand?.sequence.map((s) => s.crop_name ?? s.crop_id).join(" → ") ?? candidateId;
-      rememberPlan({ id: plan_id, name: `${farm.profile.name}: ${crops}`, farmId: farm.id });
+      rememberPlan({ id: plan_id, name: `${farm.profile.name}: ${crops}${scenarioId ? " (scenario)" : ""}`, farmId: farm.id });
       navigate(`/plans/${plan_id}`);
     } catch (err) {
       setError(err);

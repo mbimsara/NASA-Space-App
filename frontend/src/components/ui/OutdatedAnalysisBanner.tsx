@@ -18,12 +18,12 @@ export function OutdatedAnalysisBanner({ isOutdated, onRerun }: Props) {
     <div
       role="alert"
       style={{
-        background: "#fff3cd",
-        border: "2px solid #ffc107",
+        background: "var(--warn-bg)",
+        border: "2px solid var(--warn-border)",
         borderRadius: 6,
         padding: "10px 16px",
         marginBottom: 12,
-        color: "#856404",
+        color: "var(--warn-text)",
         fontSize: 14,
         display: "flex",
         alignItems: "center",
@@ -35,7 +35,7 @@ export function OutdatedAnalysisBanner({ isOutdated, onRerun }: Props) {
       {onRerun && (
         <button
           onClick={onRerun}
-          style={{ padding: "4px 12px", cursor: "pointer", background: "#ffc107", border: "none", borderRadius: 4, fontWeight: 600 }}
+          style={{ padding: "4px 12px", cursor: "pointer", background: "var(--amber)", color: "#2b1d00", border: "none", borderRadius: 4, fontWeight: 600 }}
         >
           {t("rotation.rerun")}
         </button>

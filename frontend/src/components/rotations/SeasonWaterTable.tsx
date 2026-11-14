@@ -21,6 +21,12 @@ export function SeasonWaterTable({ ranges, sequence }: Props) {
     return <p className="muted" style={{ fontSize: 12 }}>{t("rotation.noSeasonWater")}</p>;
   }
 
+  // Show "baseline → scenario" only when a scenario actually changed the value.
+  const hasScenario = ranges.some(
+    (r) => isKnown(r.baseline_rainfall_mm) && isKnown(r.scenario_rainfall_mm) && r.baseline_rainfall_mm !== r.scenario_rainfall_mm,
+  );
+  const pair = (b: string, s: string) => (hasScenario && b !== s ? `${b} → ${s}` : s);
+
   const cropName = (r: WaterBudgetRange, i: number) => {
     const step = sequence.find((s) => s.season_index === r.season_index) ?? sequence[i];
     return step?.crop_name ?? r.crop_id ?? step?.crop_id ?? u;
@@ -43,11 +49,11 @@ export function SeasonWaterTable({ ranges, sequence }: Props) {
             <tr>
               <th scope="col">{t("rotation.season")}</th>
               <th scope="col">{t("rotation.demandRange")}</th>
-              <th scope="col">{t("rotation.baselineRainfall")}</th>
-              <th scope="col">{t("rotation.scenarioRainfall")}</th>
+              <th scope="col">{hasScenario ? t("rotation.rainfallBaselineScenario") : t("rotation.rainfallTotal")}</th>
               <th scope="col">{t("rotation.irrigation")}</th>
-              <th scope="col">{t("rotation.coverageRange")}</th>
-              <th scope="col">{t("rotation.balanceRange")}</th>
+              <th scope="col">{hasScenario ? t("rotation.availableBaselineScenario") : t("rotation.availableWater")}</th>
+              <th scope="col">{hasScenario ? t("rotation.coverageBaselineScenario") : t("rotation.coverageRange")}</th>
+              <th scope="col">{hasScenario ? t("rotation.balanceScenario") : t("rotation.balanceRange")}</th>
             </tr>
           </thead>
           <tbody>
@@ -56,13 +62,30 @@ export function SeasonWaterTable({ ranges, sequence }: Props) {
               return (
                 <tr key={`${r.season_index ?? i}-${r.crop_id ?? ""}`}>
                   <th scope="row" style={{ fontWeight: 400, background: "transparent" }}>
-                    {r.season_index ?? i + 1}. <strong>{cropName(r, i)}</strong>
+                    {r.season_index ?? i + 1}.{" "}
+                    {r.season_label && <span className="muted">{t(`rotation.seasonLabel.${r.season_label}`, { defaultValue: r.season_label })} · </span>}
+                    <strong>{cropName(r, i)}</strong>
                   </th>
                   <td>{fmtRange(r.demand_low_mm, r.demand_high_mm, u, "mm")}</td>
-                  <td>{fmtMm(r.baseline_rainfall_mm, u)}</td>
-                  <td>{fmtMm(r.scenario_rainfall_mm, u)}</td>
+                  <td>{pair(fmtMm(r.baseline_rainfall_mm, u), fmtMm(r.scenario_rainfall_mm, u))}</td>
                   <td>{fmtMm(r.irrigation_mm, u)}</td>
-                  <td>{fmtRange(r.coverage_low_percent, r.coverage_high_percent, u, "%")}</td>
+                  <td>
+                    {pair(
+                      fmtMm(r.baseline_available_water_mm ?? (hasScenario ? null : r.available_water_mm), u),
+                      fmtMm(r.available_water_mm, u),
+                    )}
+                  </td>
+                  <td>
+                    {pair(
+                      fmtRange(
+                        r.baseline_coverage_low_percent ?? (hasScenario ? null : r.coverage_low_percent),
+                        r.baseline_coverage_high_percent ?? (hasScenario ? null : r.coverage_high_percent),
+                        u,
+                        "%",
+                      ),
+                      fmtRange(r.coverage_low_percent, r.coverage_high_percent, u, "%"),
+                    )}
+                  </td>
                   <td style={{ color: short ? "var(--red-700)" : undefined, fontWeight: short ? 600 : undefined }}>
                     {fmtRange(r.balance_low_mm, r.balance_high_mm, u, "mm", true)}
                   </td>

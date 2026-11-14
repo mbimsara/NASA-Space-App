@@ -22,7 +22,7 @@ The repository includes a runnable React frontend and FastAPI backend with SQLit
 | [SMAP automation](docs/SMAP_AUTOMATION.md) | Private local sign-in, resumable subset jobs, retries and coverage checks |
 | [Attribution](docs/ATTRIBUTION.md) | NASA POWER credit and metadata requirements |
 | [Agronomy rules](docs/AGRONOMY_RULES.md) | Evidence and model review process |
-| [Design handoff](docs/DESIGN.md) | Tharuka's UI/UX handoff to Shehani |
+| [Design handoff](docs/DESIGN.md) | Tharuka's design system as integrated into Shehani's functional frontend |
 | [Demo guide](docs/DEMO.md) | Connected walkthrough and fallback rules |
 | [Shared data](data/README.md) | Synthetic farm, catalog and schemas |
 
@@ -34,7 +34,6 @@ The repository includes a runnable React frontend and FastAPI backend with SQLit
 | `backend/services/` | Matheesha's provider-facing NASA POWER and climate modules used by the backend |
 | `backend/tests/` | Backend API, configuration, cache, persistence, and provider-boundary tests |
 | `frontend/src/` | Shehani's React/TypeScript application, pages, API client, fixture API, state, catalog validation, and finance calculator |
-| `frontend/design-prototype/` | Tharuka's visual design prototype; reference implementation rather than the production app |
 | `src/agrosphere_rotation/` | Bhagya's crop-rotation domain package: catalog loading, candidates, constraints, scoring, and water budgets |
 | `data/catalogs/` | Versioned crop and crop-water catalogs; all eight crops currently remain `draft` |
 | `data/fixtures/` | Explicitly synthetic farm, climate, environment, and interface-development examples |
@@ -189,6 +188,19 @@ Use one Sri Lankan demonstration farm and a researched local crop catalog:
 **Select farm → enter history, soil results, and priorities → review NASA observations → compare three rotations → simulate reduced rainfall → compare water and soil tradeoffs → ask the assistant to explain → save or share the plan.**
 
 Keep crop rotation central. SoilRevive and FarmRecovery are planning modes that influence the same rotation comparison rather than separate disconnected tools.
+
+## Unified frontend
+
+Tharuka's approved visual system and landing experience are integrated into
+Shehani's functional application in `frontend/`. The former standalone sample
+prototypes were removed to prevent the team from running or extending the wrong
+application. Use the single frontend command in the quick start above.
+
+The unified app retains the working farm setup, Earth-observation display,
+rotation comparison, climate scenario, finance, assistant, saved-plan, offline
+viewing, action-calendar, and reporting flows. Features without validated data
+or backend/model support remain explicitly identified on the roadmap instead of
+showing fabricated results.
 
 ## Data and model requirements
 

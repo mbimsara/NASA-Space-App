@@ -45,7 +45,7 @@ export function MapPicker({ latitude, longitude, onChange, label }: Props) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {valid && <CircleMarker center={[lat, lng]} radius={9} pathOptions={{ color: "#1b5e20", fillOpacity: 0.7 }} />}
+        {valid && <CircleMarker center={[lat, lng]} radius={9} pathOptions={{ color: "#176b4d", weight: 3, fillColor: "#10b981", fillOpacity: 0.75 }} />}
         <ClickHandler onChange={onChange} />
         <Recenter lat={lat} lng={lng} />
       </MapContainer>

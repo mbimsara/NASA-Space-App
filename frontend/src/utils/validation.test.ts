@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import demoFarm from "../../../data/fixtures/farm.synthetic.json";
-import { farmFormSchema, fieldErrors, isIsoDate, normalizeWeights, type FarmFormValues } from "./validation";
+import { farmFormSchema, fieldErrors, isIsoDate, normalizeWeights, serverFieldErrors, type FarmFormValues } from "./validation";
 
 const valid = (): FarmFormValues => {
   const { schema_version: _v, data_kind: _k, ...rest } = demoFarm as typeof demoFarm & { schema_version: string };
@@ -42,6 +42,13 @@ describe("farmFormSchema", () => {
     expect(e["crop_history.1.planted_on"]).toMatch(/future/);
   });
 
+  it("distinguishes unknown (null), rainfed (0) and an amount chosen but not entered (NaN)", () => {
+    expect(farmFormSchema.parse({ ...valid(), irrigation_supply_mm_per_season: 0 }).irrigation_supply_mm_per_season).toBe(0);
+    expect(errorsOf({ ...valid(), irrigation_supply_mm_per_season: Number.NaN }).irrigation_supply_mm_per_season).toMatch(
+      /Rainfed or Unknown/,
+    );
+  });
+
   it("keeps unknown irrigation as null and rejects negatives", () => {
     expect(farmFormSchema.parse({ ...valid(), irrigation_supply_mm_per_season: null }).irrigation_supply_mm_per_season).toBeNull();
     expect(errorsOf({ ...valid(), irrigation_supply_mm_per_season: -5 }).irrigation_supply_mm_per_season).toBeDefined();
@@ -70,3 +77,12 @@ describe("helpers", () => {
     expect(w).toEqual({ water: 0.5, soil: 0.25, climate: 0.25 });
   });
 });
+
+describe("serverFieldErrors (backend 422 → form fields)", () => {
+  it("maps Dulanjaya's dotted locations, with or without the PATCH profile prefix", () => {
+    expect(
+      serverFieldErrors({ area_ha: "Must be > 0", "profile.location.latitude": "Out of range", "body.name": "Required" }),
+    ).toEqual({ area_ha: "Must be > 0", "location.latitude": "Out of range", name: "Required" });
+  });
+});
+

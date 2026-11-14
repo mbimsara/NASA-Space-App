@@ -17,12 +17,12 @@ export function MissingDataPlaceholder({ reason, variable }: Props) {
       role="status"
       aria-label={`${variable ? variable + ": " : ""}${t("observations.missingData")}`}
       style={{
-        background: "#f8d7da",
-        border: "1px solid #f5c2c7",
+        background: "var(--error-bg)",
+        border: "1px solid var(--error-border)",
         borderRadius: 6,
         padding: "10px 14px",
         fontSize: 13,
-        color: "#842029",
+        color: "var(--error-text)",
       }}
     >
       {variable && <strong>{variable}: </strong>}

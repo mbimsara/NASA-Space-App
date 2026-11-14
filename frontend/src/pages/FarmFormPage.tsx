@@ -14,8 +14,11 @@ import { farmFormSchema, fieldErrors, todayIso, type FarmFormValues } from "../u
 import { clearDraft, loadDraft, saveDraft } from "../utils/draft";
 import { api } from "../api";
 import { isAbortError } from "../api/requestGuard";
+import { ApiClientError } from "../api/client";
+import { serverFieldErrors } from "../utils/validation";
 import { useAppStore } from "../hooks/useAppStore";
 import { useLatestRequest } from "../hooks/useLatestRequest";
+import { useCanWrite } from "../hooks/useCanWrite";
 import { ErrorMessage } from "../components/ui/ErrorMessage";
 import { MapPicker } from "../components/map/MapPicker";
 import { HECTARES_PER, type AreaUnit } from "../finance/calculator";
@@ -41,6 +44,8 @@ function FieldError({ id, message }: { id: string; message?: string }) {
   );
 }
 
+type IrrigationMode = "amount" | "rainfed" | "unknown";
+
 const num = (s: string) => (s.trim() === "" ? Number.NaN : Number(s));
 const errId = (k: string) => `${k.replace(/\./g, "-")}-error`;
 
@@ -50,6 +55,7 @@ export function FarmFormPage({ mode }: { mode: "new" | "edit" }) {
   const farm = useAppStore((s) => s.farm);
   const setFarm = useAppStore((s) => s.setFarm);
   const guard = useLatestRequest();
+  const canWrite = useCanWrite();
 
   const editingFarm = mode === "edit" ? farm : null;
   const draftKey = editingFarm?.id ?? "new";
@@ -64,6 +70,15 @@ export function FarmFormPage({ mode }: { mode: "new" | "edit" }) {
   const [areaUnit, setAreaUnit] = useState<AreaUnit>("ha");
   const [areaInput, setAreaInput] = useState(String(initial.area_ha));
   const [exclusionsInput, setExclusionsInput] = useState(initial.excluded_crop_ids.join(", "));
+  const modeOf = (v: number | null): IrrigationMode => (v === null ? "unknown" : v === 0 ? "rainfed" : "amount");
+  const [irrigationMode, setIrrigationMode] = useState<IrrigationMode>(() => modeOf(initial.irrigation_supply_mm_per_season));
+  const setIrrigation = (m: IrrigationMode) => {
+    setIrrigationMode(m);
+    update((v) => ({
+      ...v,
+      irrigation_supply_mm_per_season: m === "unknown" ? null : m === "rainfed" ? 0 : Number.NaN,
+    }));
+  };
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<unknown>(null);
   const [saving, setSaving] = useState(false);
@@ -120,6 +135,8 @@ export function FarmFormPage({ mode }: { mode: "new" | "edit" }) {
       navigate(`/farms/${env.id}`);
     } catch (err) {
       if (!isAbortError(err)) {
+        // Show the server's field-level validation (422) beside the matching inputs.
+        if (err instanceof ApiClientError && err.fields) setErrors(serverFieldErrors(err.fields));
         setSubmitError(err);
         requestAnimationFrame(() => errorSummaryRef.current?.focus());
       }
@@ -136,6 +153,7 @@ export function FarmFormPage({ mode }: { mode: "new" | "edit" }) {
       setAreaUnit("ha");
       setAreaInput(String(v.area_ha));
       setExclusionsInput(v.excluded_crop_ids.join(", "));
+      setIrrigationMode(modeOf(v.irrigation_supply_mm_per_season));
     }
     setDraft(null);
   };
@@ -266,43 +284,54 @@ export function FarmFormPage({ mode }: { mode: "new" | "edit" }) {
             <FieldError id={errId("area_ha")} message={err("area_ha")} />
           </div>
 
-          <div className="field">
-            <label htmlFor="irrigation">
-              {t("farm.irrigation")} <span className="muted">({t("common.optional")})</span>
-            </label>
-            <input
-              id="irrigation"
-              type="number"
-              min="0"
-              step="any"
-              disabled={values.irrigation_supply_mm_per_season === null}
-              value={values.irrigation_supply_mm_per_season ?? ""}
-              placeholder={t("common.unknown")}
-              onChange={(e) =>
-                update((v) => ({
-                  ...v,
-                  irrigation_supply_mm_per_season: e.target.value === "" ? null : num(e.target.value),
-                }))
-              }
-              aria-invalid={!!err("irrigation_supply_mm_per_season")}
-              aria-describedby={describedBy("irrigation_supply_mm_per_season")}
-            />
-            <label style={{ fontWeight: 400, fontSize: "0.875rem" }}>
-              <input
-                type="checkbox"
-                checked={values.irrigation_supply_mm_per_season === null}
-                onChange={(e) =>
-                  update((v) => ({ ...v, irrigation_supply_mm_per_season: e.target.checked ? null : 0 }))
-                }
-                style={{ width: "auto", marginRight: 6 }}
-              />
-              {t("farm.irrigationUnknown")}
-            </label>
+          {/* Unknown (null) and rainfed (confirmed 0) are different: unknown irrigation
+              makes water screening unavailable (API_CONTRACTS.md, ROTATION_SCORING_SPEC.md). */}
+          <fieldset className="field" style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
+            <legend style={{ fontWeight: 600, fontSize: "0.9rem" }}>{t("farm.irrigation")}</legend>
+            {(["amount", "rainfed", "unknown"] as const).map((m) => (
+              <label key={m} style={{ fontWeight: 400, fontSize: "0.9rem", display: "flex", gap: 6, alignItems: "center" }}>
+                <input
+                  type="radio"
+                  name="irrigation-mode"
+                  value={m}
+                  checked={irrigationMode === m}
+                  onChange={() => setIrrigation(m)}
+                  style={{ width: "auto" }}
+                />
+                {t(`farm.irrigationMode.${m}`)}
+              </label>
+            ))}
+            {irrigationMode === "amount" && (
+              <>
+                <label htmlFor="irrigation" className="muted" style={{ fontWeight: 400 }}>
+                  {t("farm.irrigationAmount")}
+                </label>
+                <input
+                  id="irrigation"
+                  type="number"
+                  min="0"
+                  step="any"
+                  value={
+                    values.irrigation_supply_mm_per_season === null || !Number.isFinite(values.irrigation_supply_mm_per_season)
+                      ? ""
+                      : values.irrigation_supply_mm_per_season
+                  }
+                  onChange={(e) =>
+                    update((v) => ({ ...v, irrigation_supply_mm_per_season: num(e.target.value) }))
+                  }
+                  aria-invalid={!!err("irrigation_supply_mm_per_season")}
+                  aria-describedby={describedBy("irrigation_supply_mm_per_season") ?? "irrigation-hint"}
+                />
+              </>
+            )}
+            <span id="irrigation-hint" className="muted" style={{ fontSize: "0.8rem" }}>
+              {t(`farm.irrigationHint.${irrigationMode}`)}
+            </span>
             <FieldError
               id={errId("irrigation_supply_mm_per_season")}
               message={err("irrigation_supply_mm_per_season")}
             />
-          </div>
+          </fieldset>
         </div>
 
         <fieldset className="card" style={{ margin: "0 0 16px" }}>
@@ -343,7 +372,7 @@ export function FarmFormPage({ mode }: { mode: "new" | "edit" }) {
             type="text"
             value={exclusionsInput}
             onChange={(e) => setExclusions(e.target.value)}
-            placeholder="e.g. maize, groundnut"
+            placeholder={t("farm.excludedCropsPlaceholder")}
             aria-describedby="exclusions-hint"
             list="catalog-crops"
           />
@@ -512,7 +541,8 @@ export function FarmFormPage({ mode }: { mode: "new" | "edit" }) {
 
         {editingFarm && <p className="muted">{t("farm.editWarning")}</p>}
 
-        <button type="submit" className="btn btn-primary" disabled={saving} style={{ width: "100%", padding: 12 }}>
+        {!canWrite && <p className="muted" role="note">{t("offline.formBlocked")}</p>}
+        <button type="submit" className="btn btn-primary" disabled={saving || !canWrite} style={{ width: "100%", padding: 12 }}>
           {saving ? t("common.loading") : mode === "new" ? t("farm.save") : t("farm.update")}
         </button>
       </form>
