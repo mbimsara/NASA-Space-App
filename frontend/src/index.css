@@ -1,27 +1,29 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap");
+
 /*
- * Base styles for AgroSphere AI. Placeholder tokens until Tharuka's Figma
- * component styles are handed off — replace values here, not in components.
- * Owner: Shehani.
+ * Official AgroSphere visual system. Tharuka's forest/emerald design language
+ * is applied to Shehani's functional routed application here.
  */
 :root {
-  --green-700: #1b5e20;
-  --green-600: #2e7d32;
-  --green-50: #f1f8f1;
-  --blue-700: #1565c0;
-  --blue-50: #e8f4fd;
+  --green-700: #12372a;
+  --green-600: #176b4d;
+  --green-50: #e8f3eb;
+  --blue-700: #176b4d;
+  --blue-50: #edf7f1;
   --amber-50: #fff3cd;
   --amber-500: #ffc107;
   --amber-900: #856404;
   --red-700: #c62828;
   --red-50: #f8d7da;
-  --text: #1f2933;
-  --text-muted: #55606b;
-  --border: #d5dbe1;
+  --text: #18332a;
+  --text-muted: #6c7f76;
+  --border: #dfe9e1;
   --surface: #ffffff;
-  --surface-alt: #f6f8f9;
-  --focus: #1565c0;
-  --radius: 8px;
-  --sans: system-ui, "Segoe UI", Roboto, "Noto Sans Sinhala", "Noto Sans Tamil", sans-serif;
+  --surface-alt: #f5f8f4;
+  --focus: #10b981;
+  --radius: 16px;
+  --sans: "DM Sans", "Segoe UI", Roboto, "Noto Sans Sinhala", "Noto Sans Tamil", sans-serif;
+  --display: "Manrope", var(--sans);
 
   /* Components still use light inline colours; keep one scheme until design tokens land. */
   color-scheme: light;
@@ -48,6 +50,8 @@ h2,
 h3 {
   line-height: 1.25;
   color: var(--text);
+  font-family: var(--display);
+  letter-spacing: -0.035em;
 }
 
 h1 {
@@ -95,41 +99,94 @@ svg {
 
 /* ---------- App shell ---------- */
 .app-header {
-  background: var(--green-700);
-  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--green-700);
+  border-bottom: 1px solid rgba(223, 233, 225, 0.9);
+  backdrop-filter: blur(14px);
 }
 .app-header__bar {
-  max-width: 1100px;
+  max-width: 1180px;
   margin: 0 auto;
-  padding: 10px 16px;
+  min-height: 72px;
+  padding: 10px 24px;
   display: flex;
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
 }
 .app-header__brand {
-  color: #fff;
-  font-weight: 700;
-  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--green-700);
+  font: 700 1.12rem var(--display);
+  letter-spacing: -0.04em;
   text-decoration: none;
   margin-right: auto;
 }
+.app-header__brand b {
+  color: #10b981;
+}
+.app-header__mark {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #fff;
+  background: var(--green-600);
+}
+.app-header__mark svg {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+.app-header__nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 .app-header label,
 .app-header select {
-  color: #fff;
+  color: var(--green-700);
 }
 .app-header select {
-  background: var(--green-600);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 4px;
+  background: #f8faf7;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 6px 8px;
 }
 .app-header select option {
   color: var(--text);
   background: #fff;
 }
 .app-header__link {
-  color: #fff;
-  font-size: 0.9rem;
+  color: #536c61;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 8px 10px;
+  border-radius: 9px;
+  text-decoration: none;
+}
+.app-header__link:hover {
+  color: var(--green-600);
+  background: var(--green-50);
+}
+.language-switcher {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.language-switcher label {
+  font-size: 0.76rem;
+  font-weight: 700;
 }
 
 .fixture-ribbon {
@@ -178,23 +235,24 @@ svg {
 }
 
 main {
-  max-width: 1100px;
+  max-width: none;
   margin: 0 auto;
   padding: 0 0 48px;
 }
 
 /* ---------- Generic building blocks ---------- */
 .page {
-  max-width: 900px;
+  max-width: 1040px;
   margin: 0 auto;
-  padding: 24px 16px;
+  padding: 38px 24px;
 }
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 16px;
+  padding: 20px;
   margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(26, 61, 45, 0.045);
 }
 .muted {
   color: var(--text-muted);
@@ -224,10 +282,10 @@ main {
 .field input,
 .field select,
 .field textarea {
-  padding: 8px 10px;
+  padding: 10px 12px;
   border: 1px solid var(--border);
-  border-radius: 4px;
-  background: #fff;
+  border-radius: 9px;
+  background: #fbfcfb;
   width: 100%;
 }
 .field input[aria-invalid="true"] {
@@ -243,8 +301,8 @@ main {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 9px 17px;
+  border-radius: 11px;
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
@@ -252,6 +310,10 @@ main {
   text-decoration: none;
   font-weight: 600;
   min-height: 40px;
+  transition: transform 0.2s, background 0.2s, border-color 0.2s;
+}
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
 }
 .btn:disabled {
   opacity: 0.6;
@@ -261,6 +323,7 @@ main {
   background: var(--green-600);
   border-color: var(--green-600);
   color: #fff;
+  box-shadow: 0 8px 22px rgba(23, 107, 77, 0.2);
 }
 .btn-secondary {
   background: var(--blue-700);
@@ -289,6 +352,224 @@ main {
 .notice-ok {
   background: var(--green-50);
   border: 1px solid #a5d6a7;
+}
+
+/* ---------- Official landing experience (Tharuka design + Shehani flow) ---------- */
+.home-page {
+  min-height: calc(100vh - 72px);
+}
+.home-hero {
+  min-height: 610px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: #12372a;
+}
+.home-hero__image,
+.home-hero__shade {
+  position: absolute;
+  inset: 0;
+}
+.home-hero__image {
+  background: url("/images/agrosphere-hero-aerial.webp") center 48% / cover no-repeat;
+  transform: scale(1.015);
+}
+.home-hero__shade {
+  background:
+    linear-gradient(90deg, rgba(10, 39, 29, 0.94) 0%, rgba(14, 55, 40, 0.83) 42%, rgba(14, 55, 40, 0.2) 78%),
+    linear-gradient(0deg, rgba(9, 31, 24, 0.34), transparent 55%);
+}
+.home-hero__content {
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  color: #fff;
+}
+.eyebrow {
+  display: inline-block;
+  color: var(--green-600);
+  font-size: 0.73rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.home-hero .eyebrow {
+  color: #68e1ac;
+}
+.home-hero h1 {
+  max-width: 720px;
+  margin: 16px 0 18px;
+  color: #fff;
+  font-size: clamp(2.8rem, 6vw, 5.25rem);
+  line-height: 0.99;
+  letter-spacing: -0.065em;
+}
+.home-hero__content > p:not(.home-hero__journey) {
+  max-width: 640px;
+  margin: 0;
+  color: rgba(238, 249, 242, 0.84);
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  line-height: 1.7;
+}
+.home-hero__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+.btn-large {
+  min-height: 50px;
+  padding-inline: 22px;
+}
+.btn-glass {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.34);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+.btn-glass:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.18);
+}
+.home-hero__journey {
+  max-width: 760px;
+  margin: 25px 0 0;
+  color: rgba(229, 244, 235, 0.68);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+.home-content {
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 54px 0 72px;
+}
+.home-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+.home-feature {
+  position: relative;
+  min-height: 210px;
+  padding: 28px;
+}
+.home-feature__number {
+  color: #10b981;
+  font: 800 0.72rem var(--display);
+  letter-spacing: 0.14em;
+}
+.home-feature h2 {
+  margin: 34px 0 10px;
+  font-size: 1.2rem;
+}
+.home-feature p,
+.home-workspace__intro p {
+  color: var(--text-muted);
+  line-height: 1.65;
+  font-size: 0.9rem;
+}
+.home-workspace {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.7fr) 1.5fr;
+  gap: 34px;
+  align-items: start;
+  padding-top: 56px;
+}
+.home-workspace__intro h2 {
+  margin: 10px 0 12px;
+  font-size: 1.8rem;
+}
+.home-recents {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.home-recent-card {
+  min-height: 180px;
+}
+.home-recent-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.home-recent-card__head h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.home-recent-card__head a {
+  color: var(--green-600);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.home-recent-list {
+  list-style: none;
+  padding: 8px 0 0;
+  margin: 0;
+}
+.home-recent-list li {
+  padding: 9px 0;
+  border-bottom: 1px solid #edf2ee;
+}
+.home-recent-list li:last-child {
+  border-bottom: 0;
+}
+.home-recent-list a,
+.home-recent-list span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.home-recent-list a {
+  color: var(--green-700);
+  font-weight: 700;
+}
+.home-recent-list span {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+@media (max-width: 780px) {
+  .app-header__bar {
+    padding-inline: 16px;
+  }
+  .app-header__nav {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+  }
+  .language-switcher label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .home-hero {
+    min-height: 570px;
+  }
+  .home-hero__content,
+  .home-content {
+    width: min(100% - 32px, 1180px);
+  }
+  .home-hero__shade {
+    background: linear-gradient(90deg, rgba(10, 39, 29, 0.94), rgba(14, 55, 40, 0.65));
+  }
+  .home-feature-grid,
+  .home-workspace,
+  .home-recents {
+    grid-template-columns: 1fr;
+  }
+  .home-feature {
+    min-height: 0;
+  }
+  .home-feature h2 {
+    margin-top: 20px;
+  }
 }
 
 table.data {
