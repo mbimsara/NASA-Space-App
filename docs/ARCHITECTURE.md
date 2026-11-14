@@ -1,6 +1,6 @@
 # Architecture — proposed v0.1
 
-Status: FastAPI, SQLAlchemy/SQLite farm persistence, validation, version checks, and environment-based database/CORS configuration are implemented. The farm observations route integrates Matheesha's standalone NASA POWER fetch/normalization module. Other analytical services and the frontend below remain proposed. See [backend setup](../backend/README.md).
+Status: FastAPI farm/observation persistence, rotation analyses, climate scenarios, the deterministic assistant and saved plans are implemented on canonical SQLite snapshot tables. Provider/scientific modules remain owned by their leads. See [backend setup](../backend/README.md) and [canonical integration details](ASSISTANT_SAVED_PLANS_INTEGRATION.md).
 
 ```mermaid
 flowchart TD
@@ -59,4 +59,20 @@ Old snapshots remain readable at `/api/v1/observations/{observation_id}`. Failed
 503 rather than silently using expired or synthetic values. Cache expiry and farm-version
 staleness are separate: the future-analysis reference helper permits historical IDs for matching
 current inputs but rejects ownership/version conflicts. Future analysis saves must recheck
-input versions when committing. No crop calculations are added. See [backend details](../backend/README.md#climate-observations).
+input versions when committing. No crop calculations are added in the observation boundary. See [backend details](../backend/README.md#climate-observations).
+
+## Canonical analysis and selection boundaries
+
+`rotation_analysis_snapshots`, `rotation_scenario_snapshots` and
+`saved_plan_snapshots` remain the sole analytical/plan tables. Rotation insertion
+and plan saving atomically guard the farm version through a conditional no-op
+UPDATE and commit. Calculation code, scenario comparison fields and producer
+snapshots are retained unchanged; no legacy tables or duplicate engine package
+are introduced.
+
+The assistant/plan resolver checks canonical snapshot identities and relationships.
+Plan reads validate only their embedded historical snapshots. The original full
+analysis request/catalog bundle was not persisted by main and is not fabricated
+from current inputs. The assistant HTTP bridge adds selected-context warnings
+without altering explanation or evidence-selection functions. See
+[selective old-branch review and compatibility evidence](DULANJAYA_BACKEND_REVIEW.md).

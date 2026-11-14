@@ -1,5 +1,11 @@
 # AgroSphere AI backend
 
+See the [selective backend review](../docs/DULANJAYA_BACKEND_REVIEW.md) for the
+old-branch inclusion/exclusion inventory, canonical regression additions and
+Task 4 compatibility results. Rotation saves now atomically recheck farm versions;
+rotation version/count inputs require JSON integers. Existing snapshot tables
+and analytical response contracts are preserved.
+
 FastAPI with synchronous SQLAlchemy and SQLite. Implemented endpoints:
 
 | Method | Route | Behavior |

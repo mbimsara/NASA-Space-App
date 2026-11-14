@@ -18,7 +18,7 @@ Farm mutation input follows [the farm schema](../data/schemas/farm.schema.json).
 | GET `/farms/{id}/observations?start=YYYY-MM-DD&end=YYYY-MM-DD` | Inclusive dates; start <= end | Observation summary below |
 | GET `/observations/{observation_id}` | Persistent observation ID | 200: original immutable observation envelope; 404 if absent |
 | POST `/observations/{observation_id}/rainfall-scenarios` | `rainfall_change_pct` from -100 to 100 | Hypothetical uniform scaling of the stored daily rainfall baseline; missing values are preserved and the snapshot is unchanged |
-| POST `/farms/{id}/rotations` | `input_version`, `observation_id`, `seasons`, `catalog_version`, `priority_weights` | Immutable rotation analysis |
+| POST `/farms/{id}/rotations` | `input_version`, `observation_id`, `seasons`, ordered `season_labels`, `catalog_version`, `priority_weights` | 201: immutable rotation analysis |
 | POST `/analyses/{id}/scenarios` | `rainfall_change_pct` from -100 to 100 for the prototype | New hypothetical scenario linked to baseline, recalculated candidates and deltas |
 | POST `/assistant/messages` | `farm_id`, `analysis_id`, optional `scenario_id`/`candidate_id`, `language` (`en`; `si`/`ta` return 422 `UNSUPPORTED_LANGUAGE`), `message` (1 to 2000 characters) | Explanation, source IDs, limitations; server verifies context IDs belong together |
 | POST `/farms/{id}/plans` | `analysis_id`, optional `scenario_id`, `candidate_id`, `expected_input_version` | 201: saved plan ID and snapshot references |
@@ -139,3 +139,16 @@ and saves. Canonical rotation/scenario POST success is 201. Assistant si/ta
 requests retain 422 `UNSUPPORTED_LANGUAGE` and support explicit English retry.
 See [Task 4 verification](LIVE_MODE_TASK4.md) for real-browser evidence, isolated
 synthetic workflows, actual NASA retrieval and repeatable test commands.
+
+## Selective backend safeguards
+
+Rotation `input_version` and `seasons` require JSON integers; booleans, numeric
+strings and floats return 422. Valid frontend integer requests are unchanged.
+Saving a rotation atomically rechecks the farm version while holding the SQLite
+writer lock; an edit before insertion returns 409 `VERSION_CONFLICT` without
+saving an outdated analysis. Existing result schemas and scenario behavior remain.
+
+Assistant responses additionally retain selected-context synthetic/hypothetical
+warnings in `limitations` even for farm-only questions. The explanation and
+rendered-evidence source selection remain unchanged. See
+[review decisions and verification](DULANJAYA_BACKEND_REVIEW.md).
