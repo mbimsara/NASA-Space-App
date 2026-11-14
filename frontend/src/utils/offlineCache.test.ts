@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { MAX_CACHED_PLANS, cachePlan, getCachedPlan, listCachedPlanIds } from "./offlineCache";
 import type { SavedPlan } from "../types/api";
+import { PLAN_CACHE_KEY } from "../api/config";
 
 const plan = (id: string) => ({ plan_id: id, farm_id: "farm-1" }) as unknown as SavedPlan;
 
@@ -26,7 +27,7 @@ describe("offline plan cache (read-only)", () => {
   });
 
   it("survives corrupt storage", () => {
-    localStorage.setItem("agrosphere_offline_plans", "{not json");
+    localStorage.setItem(PLAN_CACHE_KEY, "{not json");
     expect(getCachedPlan("p1")).toBeNull();
     expect(() => cachePlan(plan("p1"), null)).not.toThrow();
   });

@@ -124,3 +124,18 @@ POST `/plans` additionally accepts `farm_id` in the body; GET `/plans` requires 
 `analysis_result_snapshot`, `scenario_snapshot` and `observation_snapshot` fields,
 while retaining the frontend's `input_snapshot`, `candidate_snapshot` and
 `analysis_snapshot` metadata. No scientific calculations or calendar dates are inferred.
+
+## Task 4 live frontend mode
+
+The frontend defaults to real HTTP (`VITE_USE_FIXTURES=false`,
+`VITE_API_BASE_URL=http://localhost:8000/api/v1`). Explicit `true` enables a
+separately labeled synthetic demonstration. Errors never switch modes. Browser
+state/drafts/plan caches are isolated by mode and API URL; plan-cache fallback is
+read-only, labeled, and limited to connection failures, not authoritative errors.
+
+The live frontend supplies required `season_labels` and a current observation ID,
+handles zero candidates without inventing a plan, and blocks stale computations
+and saves. Canonical rotation/scenario POST success is 201. Assistant si/ta
+requests retain 422 `UNSUPPORTED_LANGUAGE` and support explicit English retry.
+See [Task 4 verification](LIVE_MODE_TASK4.md) for real-browser evidence, isolated
+synthetic workflows, actual NASA retrieval and repeatable test commands.

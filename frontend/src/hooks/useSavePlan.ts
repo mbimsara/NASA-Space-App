@@ -8,16 +8,18 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { isAnalysisOutdated, useAppStore } from "./useAppStore";
 import type { RotationAnalysis } from "../types/api";
+import { useCanWrite } from "./useCanWrite";
 
 export function useSavePlan() {
   const navigate = useNavigate();
+  const canWrite = useCanWrite();
   const farm = useAppStore((s) => s.farm);
   const rememberPlan = useAppStore((s) => s.rememberPlan);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
   const save = async (analysis: RotationAnalysis, candidateId: string, scenarioId?: string) => {
-    if (!farm || analysis.farm_id !== farm.id || isAnalysisOutdated(analysis, farm.input_version)) return;
+    if (!canWrite || !farm || analysis.farm_id !== farm.id || isAnalysisOutdated(analysis, farm.input_version)) return;
     setSaving(true);
     setError(null);
     try {

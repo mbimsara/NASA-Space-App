@@ -56,6 +56,7 @@ export function ScenarioPage() {
   }
 
   const runScenario = async () => {
+    if (!canWrite || isAnalysisOutdated(baseline, farm.input_version)) return;
     const ticket = guard.next();
     setLoading(true);
     setError(null);
@@ -106,7 +107,7 @@ export function ScenarioPage() {
           {t("scenario.hypotheticalLabel")}
         </div>
         <div className="row">
-          <button type="button" className="btn btn-secondary" onClick={runScenario} disabled={loading || !canWrite}>
+          <button type="button" className="btn btn-secondary" onClick={runScenario} disabled={loading || !canWrite || isAnalysisOutdated(baseline, farm.input_version)}>
             {loading ? t("common.loading") : t("scenario.run")}
           </button>
           {scenario && (

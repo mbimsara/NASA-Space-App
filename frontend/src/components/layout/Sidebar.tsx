@@ -38,7 +38,7 @@ export function Sidebar({ open, onNavigate, id }: Props) {
     : [];
 
   const link = (to: string, icon: string, label: string, end = false) => (
-    <NavLink key={to} to={to} end={end} onClick={onNavigate}>
+    <NavLink key={`${to}|${icon}|${label}`} to={to} end={end} onClick={onNavigate}>
       <Icon name={icon} />
       <span>{label}</span>
     </NavLink>

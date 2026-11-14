@@ -2,13 +2,13 @@
  * API facade: switches between the live client and synthetic fixtures.
  * Owner: Shehani.
  *
- * Fixtures are the default until the backend is deployed. Set
- * VITE_USE_FIXTURES=false in frontend/.env.local to call VITE_API_BASE_URL.
+ * Live is the default. Only VITE_USE_FIXTURES=true enables synthetic demos.
  */
 import * as live from "./client";
 import * as fix from "./fixtures";
+import { configuration } from "./config";
 
-export const USE_FIXTURES = import.meta.env.VITE_USE_FIXTURES !== "false";
+export const USE_FIXTURES = configuration.useFixtures;
 
 export const api = {
   createFarm: USE_FIXTURES ? fix.createFarmFixture : live.createFarm,

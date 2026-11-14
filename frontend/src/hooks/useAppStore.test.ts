@@ -49,6 +49,16 @@ beforeEach(() => {
 });
 
 describe("useAppStore invariants", () => {
+  it("drops old observations when the same farm is edited and rejects late results", () => {
+    const s = useAppStore.getState();
+    s.setFarm(farm("farm-A", 1));
+    s.setLatestObservation({ farmId: "farm-A", observationId: "obs-old", inputVersion: 1 });
+    s.setFarm(farm("farm-A", 2));
+    expect(useAppStore.getState().latestObservation).toBeNull();
+    expect(s.setLatestObservation({ farmId: "farm-A", observationId: "late", inputVersion: 1 })).toBe(false);
+    expect(s.putAnalysis(analysis("late", "farm-A", 1))).toBe(false);
+    expect(s.setLatestObservation({ farmId: "farm-A", observationId: "current", inputVersion: 2 })).toBe(true);
+  });
   it("switching farm clears results so another farm's analysis is never shown", () => {
     const s = useAppStore.getState();
     s.setFarm(farm("farm-A"));
