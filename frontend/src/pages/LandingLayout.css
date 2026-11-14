@@ -1,0 +1,78 @@
+/* Keep landing layout independent of the shared workspace component styles. */
+.landing { --landing-gutter: clamp(20px, 6.5vw, 112px); }
+.landing .land-nav { position: sticky; top: 0; height: 76px; padding-inline: var(--landing-gutter); gap: 24px; }
+.landing .brand { flex-shrink: 0; padding: 0; white-space: nowrap; }
+.landing .brand-mark { flex: none; }
+.landing .brand-mark svg { width: 28px; height: 28px; }
+.landing .land-nav nav { gap: clamp(18px, 2.4vw, 36px); }
+.landing .land-nav a, .landing .btn, .landing .video-btn { text-decoration: none; }
+.landing .land-nav nav a:hover, .landing .video-btn:hover { text-decoration: underline; text-underline-offset: 5px; }
+.landing section[id] { scroll-margin-top: 96px; }
+.landing .hero { min-height: min(800px, calc(100svh - 76px)); padding: 56px var(--landing-gutter); gap: 48px; }
+.landing .hero-content { left: auto; right: auto; margin: 0; width: min(100%, 690px); max-width: 690px; flex: 1; min-width: 0; }
+.landing .hero h1 { font-size: clamp(44px, 4.6vw, 74px); line-height: 1.08; margin-block: 24px; text-wrap: initial; }
+.landing .hero-content > p { font-size: clamp(16px, 1.2vw, 18px); max-width: 580px; }
+.landing .hero-buttons { flex-wrap: wrap; margin-bottom: 24px; }
+.landing .hero-spaceapps-badge { display: inline-flex; align-items: center; justify-content: flex-start; width: fit-content; max-width: 100%; margin-top: 0; padding: 14px 18px; gap: 16px; text-align: left; }
+.landing .hero-spaceapps-logo { width: 84px; height: 42px; flex: none; }
+.landing .hero-spaceapps-label { min-width: 0; color: #fff; font-size: 13px; font-weight: 700; line-height: 1.5; }
+.landing .hero-float { position: relative; inset: auto; flex: 0 0 310px; align-self: flex-end; margin: 0 0 8px auto; }
+.landing .float-top { font-size: 12px; }
+.landing .float-score span, .landing .hero-float > p { font-size: 12px; }
+.landing .feature-card { min-height: 0; padding: 28px; }
+.landing .feature-icon svg { width: 24px; height: 24px; }
+.landing .feature-card > .feature-action { margin-top: 24px; }
+.landing #workspace .feature-card > a { display: flex; margin-top: 16px; }
+/* Decorative observation orbits stay behind the globe and inside its column. */
+.landing .earth-card { width: 100%; height: auto; aspect-ratio: 1; min-width: 0; }
+.landing .earth-card::before { width: 80%; height: 80%; }
+.landing .earth-card::after { width: 98%; height: 98%; }
+.landing .earth-image { position: relative; inset: auto; width: 94%; max-width: 480px; transform: none; }
+.landing .earth-effects { position: absolute; inset: 0; pointer-events: none; }
+.landing .earth-halo { position: absolute; inset: 9%; border-radius: 50%; background: radial-gradient(circle, transparent 48%, #34d39918 63%, #34d39908 72%, transparent 74%); filter: blur(10px); }
+.landing .earth-orbit { position: absolute; inset: 2%; border: 1px solid #79e6bb38; border-radius: 50%; animation: earth-orbit-turn 32s linear infinite; }
+.landing .earth-orbit::after { content: ""; position: absolute; inset: -1px; border: 1px solid transparent; border-top-color: #8cf5cf99; border-radius: 50%; transform: rotate(32deg); }
+.landing .earth-orbit i { position: absolute; top: 50%; left: -4px; width: 7px; height: 7px; border-radius: 50%; background: #a7f3d0; box-shadow: 0 0 8px #6ee7b7, 0 0 20px #34d39988; }
+.landing .earth-orbit--inner { inset: 10%; border-style: dashed; border-color: #79e6bb26; animation-duration: 45s; animation-direction: reverse; }
+.landing .earth-orbit--inner i { width: 5px; height: 5px; left: -3px; }
+.landing .earth-orbit--tilted { inset: 18% -1%; transform: rotate(-28deg) scaleY(.48); animation: earth-orbit-shimmer 6s ease-in-out infinite; }
+.landing .earth-pulse { position: absolute; inset: 15%; border: 1px solid #6ee7b755; border-radius: 50%; animation: earth-signal-pulse 5s ease-out infinite; }
+@keyframes earth-orbit-turn { to { transform: rotate(360deg); } }
+@keyframes earth-orbit-shimmer { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
+@keyframes earth-signal-pulse { 0% { transform: scale(1); opacity: 0; } 20% { opacity: .55; } 100% { transform: scale(1.42); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .landing .earth-orbit, .landing .earth-pulse { animation: none; }
+  .landing .earth-pulse { opacity: .25; }
+}
+@media (max-width: 1100px) {
+  .landing .land-nav { gap: 16px; padding-inline: 24px; }
+  .landing .land-nav nav { gap: 18px; }
+  .landing .hero-float { display: none; }
+  .landing .hero-content { max-width: 720px; }
+}
+@media (max-width: 850px) {
+  .landing .land-nav nav { display: none; position: absolute; inset: 75px 0 auto; padding: 24px; background: var(--surface); flex-direction: column; border-bottom: 1px solid var(--line); }
+  .landing .land-nav nav.open { display: flex; }
+  .landing .mobile-menu { display: grid; }
+  .landing .land-actions > .btn-secondary { display: none; }
+}
+@media (max-width: 760px) {
+  .landing .land-nav { height: 66px; padding-inline: 16px; gap: 10px; }
+  .landing .land-nav nav { top: 65px; }
+  .landing .land-actions { gap: 6px; }
+  .landing .hero { min-height: calc(100svh - 66px); padding: 48px var(--landing-gutter); }
+  .landing .hero-content { margin: 0; }
+  .landing .hero h1 { font-size: clamp(38px, 7.8vw, 58px); }
+  .landing .hero-buttons { flex-direction: row; align-items: center; gap: 18px; }
+  .landing .hero-spaceapps-badge { gap: 12px; padding: 12px; }
+  .landing .hero-spaceapps-logo { width: 64px; height: 36px; }
+  .landing .hero-spaceapps-label { font-size: 12px; }
+  .landing .eyebrow { font-size: 10px; letter-spacing: .05em; }
+}
+@media (max-width: 390px) {
+  .landing .land-actions > .btn-primary { font-size: 11px; min-height: 40px; padding-inline: 9px; }
+  .landing .land-actions > .btn-primary svg { display: none; }
+  .landing .land-actions .icon-btn { width: 34px; height: 38px; }
+  .landing .brand { font-size: 14px; gap: 6px; }
+  .landing .brand-mark { width: 32px; height: 32px; }
+}

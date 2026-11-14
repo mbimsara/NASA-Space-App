@@ -7,6 +7,7 @@ import { useTheme } from "../hooks/useTheme";
 import { Icon } from "../components/ui/Icon";
 import { ErrorMessage } from "../components/ui/ErrorMessage";
 import { listCachedPlanIds } from "../utils/offlineCache";
+import "./LandingLayout.css";
 
 const slides = ["agrosphere-hero.webp", "agrosphere-hero-aerial.webp", "agrosphere-hero-precision.webp", "agrosphere-hero-water.webp", "agrosphere-hero-global.webp"];
 
@@ -46,10 +47,10 @@ export function HomePage() {
     <div className="landing" data-theme={theme}>
       <header className="land-nav">
         <button className="brand" type="button" onClick={() => window.scrollTo(0, 0)}><span className="brand-mark"><Icon name="leaf" /></span><span>AgroSphere <b>AI</b></span></button>
-        <nav className={menu ? "open" : ""} aria-label="Landing navigation"><a href="#platform">Platform</a><a href="#data">NASA data</a><a href="#impact">Impact</a><a href="#workspace">Workspace</a></nav>
+        <nav id="landing-navigation" className={menu ? "open" : ""} aria-label="Landing navigation" onClick={() => setMenu(false)}><a href="#platform">Platform</a><a href="#data">NASA data</a><a href="#impact">Impact</a><a href="#workspace">Workspace</a></nav>
         <div className="land-actions">
           <button className="icon-btn theme-toggle" type="button" onClick={toggleTheme} aria-label="Toggle theme"><Icon name={theme === "dark" ? "sun" : "moon"} /></button>
-          <button className="icon-btn mobile-menu" type="button" onClick={() => setMenu(!menu)} aria-label="Open menu"><Icon name={menu ? "close" : "menu"} /></button>
+          <button className="icon-btn mobile-menu" type="button" onClick={() => setMenu(!menu)} aria-label={menu ? "Close menu" : "Open menu"} aria-expanded={menu} aria-controls="landing-navigation"><Icon name={menu ? "close" : "menu"} /></button>
           <button className="btn btn-secondary" type="button" onClick={loadDemo} disabled={busy}>{busy ? "Loading…" : "View demo"}</button>
           <Link className="btn btn-primary" to="/farms/new">Open platform <Icon name="arrow" /></Link>
         </div>
@@ -59,14 +60,13 @@ export function HomePage() {
           <div className="hero-images">{slides.map((name, index) => <img key={name} className={slide === index ? "active" : ""} src={`/images/${name}`} alt="" aria-hidden={slide !== index} />)}</div>
           <div className="hero-shade" />
           <div className="hero-content">
-            <div className="eyebrow"><span /> Earth intelligence for every field</div>
+            <div className="eyebrow"><span className="eyebrow-dot" /> Earth intelligence for every field</div>
             <h1>Grow with the planet,<br /><em>not against it.</em></h1>
             <p>AgroSphere turns Earth observation signals and farm knowledge into clear, climate-resilient decisions for growers everywhere.</p>
             <div className="hero-buttons"><Link className="btn btn-primary" to="/farms/new">Explore your farm <Icon name="arrow" /></Link><a className="video-btn" href="#platform"><span>▶</span> See how it works</a></div>
-            <a href="https://www.spaceappschallenge.org/" target="_blank" rel="noopener noreferrer" className="hero-spaceapps-badge" title="Built for NASA Space Apps 2026 - Official Challenge Site">
+            <a href="https://www.spaceappschallenge.org/" target="_blank" rel="noopener noreferrer" className="hero-spaceapps-badge">
               <img src="/images/nasa-space-apps-logo-transparent.png" alt="NASA Space Apps Challenge" className="hero-spaceapps-logo" />
-              <span className="hero-spaceapps-divider" />
-              <div className="hero-spaceapps-text"><strong>Built for NASA Space Apps 2026</strong><small>Official Global Challenge ? spaceappschallenge.org <Icon name="external" /></small></div>
+              <span className="hero-spaceapps-label">Built for NASA Space Apps</span>
             </a>
           </div>
           <div className="hero-float card"><div className="float-top"><span className="status-dot" /> Decision workspace <span>Ready</span></div><div className="float-score"><strong>3–5</strong><span>seasons<br /><b>compared</b></span></div><p>Compare crop, water, climate, soil, and financial trade-offs in one farm context.</p></div>
@@ -82,7 +82,16 @@ export function HomePage() {
         </section>
         <section id="data" className="data-section">
           <div className="data-copy"><div className="section-kicker light">EARTH OBSERVATION, MADE USEFUL</div><h2>Global perspective.<br />Visible limitations.</h2><p>NASA POWER climate observations and regional SMAP surface-moisture context are kept separate from measured field soil properties.</p><ul><li><Icon name="check" /> Source, dates, units, and coverage</li><li><Icon name="check" /> Missing days remain visible</li><li><Icon name="check" /> Historical baselines stay distinct from scenarios</li></ul><div className="prototype-note"><Icon name="book" /><span><b>Transparency by design</b>Fixture results are labelled synthetic. Modeled NASA values are not presented as on-farm measurements.</span></div></div>
-          <div className="earth-card"><img className="earth-image" src="/images/earth-observation.webp" alt="Earth observation view centred on South Asia" /></div>
+          <div className="earth-card">
+            <div className="earth-effects" aria-hidden="true">
+              <span className="earth-halo" />
+              <span className="earth-orbit earth-orbit--outer"><i /></span>
+              <span className="earth-orbit earth-orbit--inner"><i /></span>
+              <span className="earth-orbit earth-orbit--tilted"><i /></span>
+              <span className="earth-pulse" />
+            </div>
+            <img className="earth-image" src="/images/earth-observation.webp" alt="Earth observation view centred on South Asia" />
+          </div>
         </section>
         <section id="impact" className="land-section impact"><div className="section-kicker">DESIGNED FOR REAL-WORLD RESILIENCE</div><h2>Every tool supports the rotation decision.</h2><div className="impact-grid"><div><Icon name="climate" /><h3>Water security</h3><p>Compare rainfall, known field-applied irrigation, and crop demand.</p></div><div><Icon name="farm" /><h3>Soil and recovery</h3><p>Keep measured soil inputs distinct from modeled screening indicators.</p></div><div><Icon name="coin" /><h3>Financial scenarios</h3><p>Inspect ranges, sources, dates, and omitted cost categories.</p></div><div><Icon name="overview" /><h3>Climate context</h3><p>Explore observations, scenarios, and future climate-twin methods.</p></div></div></section>
         <section id="workspace" className="land-section intro"><div className="section-kicker">YOUR WORKSPACE</div><h2>Pick up where you left off.</h2><ErrorMessage error={error} onRetry={loadDemo} /><div className="feature-grid"><article className="feature-card"><h3>Recent farms</h3>{recentFarms.length ? recentFarms.map((farm) => <Link key={farm.id} to={`/farms/${farm.id}`}>{farm.name}</Link>) : <p>No farms yet on this device.</p>}</article><article className="feature-card"><h3>Saved plans</h3>{recentPlans.length ? recentPlans.map((plan) => <Link key={plan.id} to={`/plans/${plan.id}`}>{plan.name}{offlineIds.has(plan.id) ? " · Offline" : ""}</Link>) : <p>No saved plans yet on this device.</p>}</article><article className="feature-card"><h3>Start planning</h3><p>Create a farm or load the clearly labelled synthetic demonstration.</p><Link to="/farms/new">Create farm →</Link></article></div></section>
