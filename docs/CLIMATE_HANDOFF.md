@@ -64,4 +64,6 @@ Bundles now also include `temperature_exposure`. Fetch with `--include-extremes`
 
 ## Readiness and remaining decisions
 
-Independent code, source metadata, tests, examples, run instructions and attribution guidance are ready. Integration still needs backend persistence/cache policy, UI agreement, agronomic model review and twin-distance scale review. Only NASA POWER is implemented; other competition-listed products are not claimed as complete. Follow [source restrictions](DATA_SOURCES.md) for any future additions.
+SMAP is now a separate implemented sample pipeline: metadata discovery → authenticated spatial subset via Earthdata → local nearest-pixel/quality extraction → combined AM/PM series. See [SMAP output and integration instructions](SMAP.md). Do not pass it into NASA POWER-specific functions or merge passes by date without preserving their acquisition context.
+
+Independent code, source metadata, tests, examples, run instructions and attribution guidance are ready. Integration still needs backend persistence/cache policy, UI agreement, agronomic model review and twin-distance scale review. NASA POWER and the small SMAP subset pipeline are implemented; other competition-listed products are not claimed as complete. Follow [source restrictions](DATA_SOURCES.md) for any future additions.

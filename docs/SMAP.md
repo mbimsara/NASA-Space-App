@@ -1,6 +1,6 @@
 # SMAP integration — access and preparation
 
-Status: public discovery, quality filtering, local file inspection, and nearest-pixel extraction are implemented. A spatially trimmed January 1, 2025 Harmony file has been downloaded and verified. The three-day order remains partly processed; the January 3 download timed out, and January 2 was not yet available at the last check.
+Status: public discovery, quality filtering, local file inspection, nearest-pixel extraction and combined time-series output are implemented. All three January 1–3, 2025 Harmony subset files have now downloaded and been extracted successfully. Missing passes remain unknown.
 
 ## Selected product
 
@@ -51,4 +51,31 @@ Extraction reads global AM/PM groups separately, selects the nearest geolocated 
 
 Live January 1 result: AM unavailable; PM accepted with retrieval flag 8 and surface flag 128, soil moisture 0.4747059 m3/m3 at (8.3252602, 80.4304962), 4.3759 km from the demo point. Raw PM acquisition time is 2025-01-01T12:37:21.592Z. This single retrieval does not establish a drought threshold, field irrigation requirement, or root-zone condition. Product V006 selection is verified through the Earthdata collection, not guessed from the granule release string.
 
-Remaining: obtain/verify the other subset files, retain download/provenance information, and agree how to present passes and quality limitations in the application. Never treat absent passes as zero moisture.
+## Completed three-day series
+
+All three spatially trimmed files were downloaded after Harmony completed. January 3's earlier download timeout was resolved by retrying the available subset link; no new global-data request was needed.
+
+| Composite date | AM filtered moisture (m3/m3) | PM filtered moisture (m3/m3) |
+| --- | --- | --- |
+| 2025-01-01 | Unknown: no valid pass geolocation | 0.4747059 |
+| 2025-01-02 | 0.4464757 | Unknown: no valid pass geolocation |
+| 2025-01-03 | Unknown: no valid pass geolocation | Unknown: no valid pass geolocation |
+
+Both accepted samples use quality flag 8, surface flag 128 and the same nearest grid point about 4.3759 km away. January 2 AM acquisition time is 2025-01-02T00:51:07.654Z. This is not a continuous two-day change measurement at a fixed time of day; AM and PM must remain separate.
+
+After extracting each file with `scripts.extract_smap_point`, combine the explicit inputs:
+
+```powershell
+.venv/Scripts/python.exe -m scripts.build_smap_series --input .cache/smap/point-2025-01-01.json --input .cache/smap/point-2025-01-02.json --input .cache/smap/point-2025-01-03.json --start 2025-01-01 --end 2025-01-03 --output .cache/smap/series-2025-01-01-03.json
+```
+
+This file already exists locally. `build_series(records, start, end)` is also importable from `backend.services.smap_series` without optional HDF5 dependencies. It checks common product/version, requested point and distance policy, rejects duplicate granule dates and pass identifiers, and fills unsupplied dates/passes with explicit null reasons. It does not interpolate or average. Sources remain traceable through file hashes and version-selection notes.
+
+### Frontend/backend handoff
+
+- **Dulanjaya:** persist extracted records and the series with farm/input version and observation IDs. Verify ownership and coordinates before serving; add recorded download/source metadata. Do not infer V006 from the release code in a filename.
+- **Shehani:** plot separate AM/PM series from `daily[].AM.soil_moisture_m3_m3` and `daily[].PM.soil_moisture_m3_m3`; preserve gaps. Use `granule_supplied`, `accepted`, `rejection_reason`, actual acquisition time and distance in tooltips/source details.
+- **Coverage:** this example has 3 supplied granule days, 1 accepted AM and 1 accepted PM retrieval, out of 3 requested dates. Display these separately rather than saying 3 complete moisture days.
+- **Bhagya/Akash:** no drought, saturation or crop-risk class is assigned. Review agronomic interpretation before recommendations; explain quality and missing values without inventing them.
+
+The full optional-dependency suite now has 30 passing tests. New cases cover duplicates, mixed versions/locations, rejected-value consistency, missing dates/passes, and out-of-period records. Remaining work is application integration and scientific review, not downloading this sample again.
