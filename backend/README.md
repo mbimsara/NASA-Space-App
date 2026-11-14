@@ -361,3 +361,9 @@ Bhagya's pinned rotation package. See [request/response examples, persistence,
 errors and approval limitations](ROTATIONS.md). The current research-pending
 catalog returns an explained empty candidates list; numerical water budgets
 await a compatible seasonal observation contract.
+
+`POST /api/v1/analyses/{analysis_id}/scenarios` now saves explicitly hypothetical
+rainfall scenarios against immutable rotation baselines. See
+[scenario requests, differences, persistence and limitations](SCENARIOS.md).
+Supported diversity scores are recomputed; seasonal water effects remain unknown
+until the baseline contains approved aligned climate and demand inputs.

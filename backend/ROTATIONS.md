@@ -72,8 +72,9 @@ no-op farm update rechecks the version and holds the SQLite writer lock until th
 analysis insert commits; a concurrent farm change returns 409 without saving.
 
 Analyses can be retrieved internally with `Session.get(RotationAnalysis, id)`;
-their original input versions remain intact after farm edits. No public analysis
-GET, Climate Scenario, Saved Plan or AI Assistant APIs are introduced here.
+their original input versions remain intact after farm edits. The
+[Climate Scenario API](SCENARIOS.md) uses these immutable baselines. No public
+analysis GET, Saved Plan or AI Assistant APIs are implemented.
 
 Tests use temporary SQLite databases and controlled synthetic observations/catalogs.
 Run the complete suite with `PYTHONPATH=backend python -m pytest backend/tests -q`

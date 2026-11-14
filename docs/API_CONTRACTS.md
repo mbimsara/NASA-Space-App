@@ -1,6 +1,6 @@
 # API contracts — proposed v0.1
 
-Owner: Dulanjaya. Reviewers: all module owners. Farm POST/GET/PATCH endpoints are implemented, along with GET `/api/v1/health`. The observations endpoint is also implemented through Matheesha's NASA POWER adapter. Rotation/scenario, assistant, and saved-plan endpoints below remain proposed. Use `/api/v1` and JSON; freeze changes together before independent development.
+Owner: Dulanjaya. Reviewers: all module owners. Farm POST/GET/PATCH endpoints are implemented, along with GET `/api/v1/health`. The observations endpoint is also implemented through Matheesha's NASA POWER adapter. Rotation and climate scenario POST endpoints are implemented with the limitations below. Assistant and saved-plan endpoints remain proposed. Use `/api/v1` and JSON; freeze changes together before independent development.
 
 ## Conventions
 
@@ -93,5 +93,22 @@ Use 400 for malformed requests, 404 for unknown resources, 409 for version/conte
 count-only request remains accepted; optional `season_labels` supplies explicit
 season identity. Missing labels or no approved crops produce an explained empty
 analysis. Unknown water metrics and unavailable scores remain null. Analyses are
-stored with original inputs, catalog contents and engine provenance. Scenario,
-assistant and saved-plan endpoints remain proposed.
+stored with original inputs, catalog contents and engine provenance.
+
+## Implemented climate scenarios
+
+`POST /api/v1/analyses/{analysis_id}/scenarios` accepts a finite numeric
+`rainfall_change_pct` from -100 to 100. It returns a persisted scenario with
+`hypothetical: true`, stable `scenario_id`, baseline reference, parameters,
+candidate results, differences and limitations. Candidate identifiers reference
+the baseline. Differences are keyed by candidate ID with nullable `score_delta`,
+`water_budget_delta` and `water_budget_range_delta`.
+
+The original saved farm/catalog/observation inputs are used, including after
+farm edits. Current baselines lack seasonal water alignment; rainfall-driven
+metrics and water differences stay null. Diversity scores can be recomputed,
+and empty or unapproved catalogs yield explained empty results. Unknown analysis
+IDs return 404, stored ownership/version conflicts 409, invalid parameters 422,
+and unavailable or unsupported baseline data/computation/storage 503. See
+[full scenario contract and synthetic request example](../backend/SCENARIOS.md).
+Assistant and saved-plan endpoints remain proposed.

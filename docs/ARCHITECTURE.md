@@ -69,3 +69,13 @@ atomically rechecks the farm version. Water calculations await matching seasonal
 climate periods and approved crops; no missing inputs are synthesized. See
 [integration details](../backend/ROTATIONS.md) and
 [engine provenance](../backend/agrosphere_rotation/VENDORED.md).
+
+## Implemented climate scenario boundary
+
+The scenario POST validates the saved baseline and original observation context,
+replays supported rotation calculations against saved inputs, and appends a
+`climate_scenarios` row containing parameters, provenance snapshots and results.
+It preserves the baseline and observation without requiring the farm to remain
+at the old version. Unavailable seasonal climate and unapproved demand prevent
+numerical water changes; these limitations remain explicit. See
+[scenario behavior and persistence](../backend/SCENARIOS.md).
