@@ -1,7 +1,168 @@
 {
   "schema_version": "0.1",
-  "catalog_version": "0.1-draft",
+  "catalog_version": "0.1-draft-referenced",
   "status": "research_pending",
-  "region": "Sri Lanka — demonstration region to confirm",
-  "crops": []
+  "region": "Sri Lanka — Primary: Anuradhapura Lowland DL1b; Secondary: Matale Upland IL1a",
+  "crops": [
+    {
+      "id": "rice",
+      "name": "Paddy Rice (Oryza sativa)",
+      "family": "Poaceae",
+      "season_labels": ["maha", "yala"],
+      "water_demand_mm_per_cycle": 1050.0,
+      "sources": [
+        {
+          "url": "https://www.fao.org/land-water/databases-and-software/crop-information/rice/en/",
+          "accessed_on": "2026-11-14",
+          "notes": "FAO Irrigation and Drainage Paper 33 (Doorenbos & Kassam) and FAO 56 (Allen et al.): Seasonal evapotranspiration (ETc) of wetland puddle rice ranges between 450-700 mm; with puddle water management, percolation, and seepage losses under typical tropical lowland conditions, total gross water demand is 900-1250 mm (nominal 1050 mm). Evidence: Measured in tropical Asia paddy soils. Limitation: Percolation rates vary from 1-3 mm/day in heavy Low Humic Gley (LHG) soils to >10 mm/day in sandy loams."
+        },
+        {
+          "url": "https://doa.gov.lk/rrdi-varieties/",
+          "accessed_on": "2026-11-14",
+          "notes": "DOA Sri Lanka Rice Research & Development Institute (RRDI Bathalagoda): Standard BG varieties for Dry/Intermediate lowlands (e.g., Bg 300, Bg 352, Bg 358) require 105-115 days (3-3.5 months). Lowland LHG soils. Assumption: Puddle irrigation requires standing water; cannot be grown rainfed in Yala in Dry Zone DL1b without continuous major tank delivery."
+        }
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "mung-bean",
+      "name": "Mung Bean / Green Gram (Vigna radiata)",
+      "family": "Fabaceae",
+      "season_labels": ["yala", "maha"],
+      "water_demand_mm_per_cycle": 350.0,
+      "sources": [
+        {
+          "url": "https://www.fao.org/land-water/databases-and-software/crop-information/grain-legumes/en/",
+          "accessed_on": "2026-11-14",
+          "notes": "FAO Irrigation Paper 33 & 56 (Grain Legumes): Water requirement (ETc) for short-duration pulses is 300-400 mm for 60-70 day cultivars. Highly sensitive to waterlogging (aeration stress kills roots within 48h). Drought tolerant due to rapid root elongation."
+        },
+        {
+          "url": "https://doa.gov.lk/fcrdi-crop-varieties/",
+          "accessed_on": "2026-11-14",
+          "notes": "DOA Sri Lanka FCRDI Mahailluppallama Technical Guide: Recommended varieties MI-5, MI-6, and Ari mature in 60-65 days. Ideal for Yala cultivation in Anuradhapura paddy fallows utilizing residual soil moisture and 2-3 supplementary irrigations. Limitation: Extreme sensitivity to high water table and pre-harvest rainfall."
+        }
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "maize",
+      "name": "Maize (Zea mays)",
+      "family": "Poaceae",
+      "season_labels": ["maha", "yala"],
+      "water_demand_mm_per_cycle": 550.0,
+      "sources": [
+        {
+          "url": "https://www.fao.org/land-water/databases-and-software/crop-information/maize/en/",
+          "accessed_on": "2026-11-14",
+          "notes": "FAO Irrigation and Drainage Paper 33 (Maize): Seasonal crop water requirements (ETc) for medium-maturity tropical maize range from 500-800 mm (nominal 550 mm). High yield response factor (Ky = 1.25) indicating extreme vulnerability to moisture deficit during flowering and tasseling."
+        },
+        {
+          "url": "https://doa.gov.lk/fcrdi-crop-varieties/",
+          "accessed_on": "2026-11-14",
+          "notes": "DOA Sri Lanka FCRDI Mahailluppallama: Commercial cultivars (Bhadra, Ruwan, Pacific hybrids) require 105-115 days. Well-adapted to upland Reddish Brown Earths (RBE) in Maha. Critical limitation: Cannot tolerate poor drainage or waterlogged lowland soils; prohibited on unridged LHG lowland soils."
+        }
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "groundnut",
+      "name": "Groundnut / Peanut (Arachis hypogaea)",
+      "family": "Fabaceae",
+      "season_labels": ["maha", "yala"],
+      "water_demand_mm_per_cycle": 500.0,
+      "sources": [
+        {
+          "url": "https://www.fao.org/land-water/databases-and-software/crop-information/groundnut/en/",
+          "accessed_on": "2026-11-14",
+          "notes": "FAO Irrigation Paper 33 (Groundnut): Crop water requirements for 90-120 day cultivars range from 500-700 mm (500 mm in light soils). Tolerates dry conditions once established; sensitive during pegging and pod development (Ky = 0.70)."
+        },
+        {
+          "url": "https://doa.gov.lk/fcrdi-crop-varieties/",
+          "accessed_on": "2026-11-14",
+          "notes": "DOA Sri Lanka FCRDI Mahailluppallama: Recommended cultivars (Tikiri, Tissa, Walawa) require 90-105 days. Best in light-textured RBEs and well-drained sandy loams in Anuradhapura/Matale uplands. Limitation: Pod rot and harvest difficulty occur on compacting heavy clays or waterlogged soils."
+        }
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "cowpea",
+      "name": "Cowpea (Vigna unguiculata)",
+      "family": "Fabaceae",
+      "season_labels": ["yala", "maha"],
+      "water_demand_mm_per_cycle": 350.0,
+      "sources": [
+        {
+          "url": "https://www.fao.org/land-water/databases-and-software/crop-information/grain-legumes/en/",
+          "accessed_on": "2026-11-14",
+          "notes": "FAO Irrigation Paper 33 & 56 (Cowpea): Water requirement 300-450 mm. Outstanding drought tolerance and deep taproot system capable of extracting moisture from subsoil horizons in semi-arid tropics."
+        },
+        {
+          "url": "https://doa.gov.lk/fcrdi-crop-varieties/",
+          "accessed_on": "2026-11-14",
+          "notes": "DOA Sri Lanka FCRDI Mahailluppallama: Cultivars Waruni, Dhawala, and Bombay require 70-75 days. Cultivated in upland RBE during late Maha or in Yala paddy fallows. High nodulation rate and biomass for soil conservation."
+        }
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "finger-millet",
+      "name": "Finger Millet / Kurakkan (Eleusine coracana)",
+      "family": "Poaceae",
+      "season_labels": ["maha", "yala"],
+      "water_demand_mm_per_cycle": 350.0,
+      "sources": [
+        {
+          "url": "https://www.fao.org/3/x0490e/x0490e0b.htm",
+          "accessed_on": "2026-11-14",
+          "notes": "FAO 56 (Small Millets): Seasonal crop evapotranspiration (ETc) is 300-450 mm for 75-90 day cycles. High water-use efficiency (C4 photosynthetic pathway); resilient to prolonged mid-season dry spells."
+        },
+        {
+          "url": "https://doa.gov.lk/fcrdi-crop-varieties/",
+          "accessed_on": "2026-11-14",
+          "notes": "DOA Sri Lanka FCRDI Mahailluppallama: Recommended cultivars (Oshada, Ravi) mature in 80-90 days. Ideal for rainfed upland chena/RBE soils across Dry Zone Anuradhapura. Tolerates shallow soils with minimal fertilizer."
+        }
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "black-gram",
+      "name": "Black Gram / Undu (Vigna mungo)",
+      "family": "Fabaceae",
+      "season_labels": ["yala", "maha"],
+      "water_demand_mm_per_cycle": 350.0,
+      "sources": [
+        {
+          "url": "https://www.fao.org/land-water/databases-and-software/crop-information/grain-legumes/en/",
+          "accessed_on": "2026-11-14",
+          "notes": "FAO Irrigation Paper 33: Water requirement 300-400 mm for 70-80 day cycles. Moderate salinity and drought tolerance; fixes atmospheric nitrogen effectively with native Rhizobium strains."
+        },
+        {
+          "url": "https://doa.gov.lk/fcrdi-crop-varieties/",
+          "accessed_on": "2026-11-14",
+          "notes": "DOA Sri Lanka FCRDI Mahailluppallama: Recommended cultivars MI-1 and Anuradha mature in 70-80 days. Widely grown in Yala paddy fields on residual soil moisture in the Dry Zone. Sensitive to prolonged soil saturation."
+        }
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "chilli",
+      "name": "Chilli / Hot Pepper (Capsicum annuum)",
+      "family": "Solanaceae",
+      "season_labels": ["maha", "yala"],
+      "water_demand_mm_per_cycle": 600.0,
+      "sources": [
+        {
+          "url": "https://www.fao.org/land-water/databases-and-software/crop-information/pepper/en/",
+          "accessed_on": "2026-11-14",
+          "notes": "FAO Irrigation Paper 33 & 56 (Pepper/Chilli): Water requirement 600-900 mm (nominal 600 mm under drip/well-managed furrow). Highly sensitive to water deficit at flowering/fruit set (Ky = 1.1) and highly sensitive to waterlogging (wilt sets in after 24h standing water)."
+        },
+        {
+          "url": "https://doa.gov.lk/fcrdi-crop-varieties/",
+          "accessed_on": "2026-11-14",
+          "notes": "DOA Sri Lanka FCRDI Mahailluppallama: Commercial varieties (MICH-3, MICH-HY1, KA-2) require 135-150 days with multi-harvest picking. High cash-value crop suited for well-drained upland RBEs in Anuradhapura/Matale. Strict rotation away from other Solanaceae required due to anthracnose and leaf curl complex."
+        }
+      ],
+      "review_status": "draft"
+    }
+  ]
 }
