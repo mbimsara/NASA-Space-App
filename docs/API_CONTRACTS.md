@@ -1,6 +1,6 @@
 # API contracts — proposed v0.1
 
-Owner: Dulanjaya. Reviewers: all module owners. Farm POST/GET/PATCH, health, observations, and rotation-analysis endpoints are implemented. Observations use Matheesha's NASA POWER adapter; rotations call Bhagya's shared domain package and persist immutable snapshots. Scenario, assistant, and saved-plan endpoints below remain proposed. Use `/api/v1` and JSON; freeze changes together before independent development.
+Owner: Dulanjaya. Reviewers: all module owners. Farm POST/GET/PATCH, health, observations, and rotation-analysis endpoints are implemented. Observations use Matheesha's NASA POWER adapter; rotations call Bhagya's shared domain package and persist immutable snapshots. Analysis scenarios, the deterministic assistant and immutable saved plans are implemented; see the canonical integration details below. Use `/api/v1` and JSON; freeze changes together before independent development.
 
 The implemented climate functions and proposed serializer are documented in [the climate handoff](CLIMATE_HANDOFF.md). Its committed synthetic bundle is the current integration example. The observation serializer exposes separate temperature/rain coverage and the adapter's explicit `rainfall_total_mm` field; the simplified example below predates that implementation. Dulanjaya should adopt/review that payload when implementing the route rather than assume the abbreviated example is a complete schema.
 
@@ -20,7 +20,7 @@ Farm mutation input follows [the farm schema](../data/schemas/farm.schema.json).
 | POST `/observations/{observation_id}/rainfall-scenarios` | `rainfall_change_pct` from -100 to 100 | Hypothetical uniform scaling of the stored daily rainfall baseline; missing values are preserved and the snapshot is unchanged |
 | POST `/farms/{id}/rotations` | `input_version`, `observation_id`, `seasons`, `catalog_version`, `priority_weights` | Immutable rotation analysis |
 | POST `/analyses/{id}/scenarios` | `rainfall_change_pct` from -100 to 100 for the prototype | New hypothetical scenario linked to baseline, recalculated candidates and deltas |
-| POST `/assistant/messages` | `farm_id`, `analysis_id`, optional `scenario_id`/`candidate_id`, `language` (`en`, `si`, `ta`), `message` | Explanation, source IDs, limitations; server verifies context IDs belong together |
+| POST `/assistant/messages` | `farm_id`, `analysis_id`, optional `scenario_id`/`candidate_id`, `language` (`en`; `si`/`ta` return 422 `UNSUPPORTED_LANGUAGE`), `message` (1 to 2000 characters) | Explanation, source IDs, limitations; server verifies context IDs belong together |
 | POST `/farms/{id}/plans` | `analysis_id`, optional `scenario_id`, `candidate_id`, `expected_input_version` | 201: saved plan ID and snapshot references |
 | GET `/plans/{id}` | Plan ID | Saved candidate, input snapshot, sources, assumptions, model versions |
 
@@ -113,3 +113,14 @@ Scenario responses include `scenario_id`, `baseline_analysis_id`, parameters, re
 ```
 
 Use 400 for malformed requests, 404 for unknown resources, 409 for version/context conflicts, 422 for field/domain validation, and 503 for unavailable dependencies. Avoid exposing credentials/provider internals. Validate coordinate ranges, chronological dates, compatible units, catalog IDs, supported languages, three-to-five seasons, nonnegative weights with positive total, and relationships among farm/analysis/scenario/candidate IDs. Normalize priority weights on the server and return the effective weights.
+
+## Canonical assistant and saved-plan integration
+
+See [the integration handoff](ASSISTANT_SAVED_PLANS_INTEGRATION.md) for the implemented
+request/response fields, canonical snapshot tables, controlled errors and offline tests.
+The existing farm-scoped plan POST and plan GET remain compatible with the frontend.
+POST `/plans` additionally accepts `farm_id` in the body; GET `/plans` requires a
+`farm_id` query and supports `limit`/`offset`. Saved plans include full immutable
+`analysis_result_snapshot`, `scenario_snapshot` and `observation_snapshot` fields,
+while retaining the frontend's `input_snapshot`, `candidate_snapshot` and
+`analysis_snapshot` metadata. No scientific calculations or calendar dates are inferred.
