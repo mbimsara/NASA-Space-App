@@ -20,7 +20,7 @@ Owner: Shehani. Run before each integration merge and at feature freeze. Record 
 7. [ ] **Stale analysis:** edit the farm (any field) → Rotations shows the outdated banner and **Save** is disabled; Scenario shows the banner; the saved plan shows "inputs changed".
 8. [ ] **Scenario:** −30% → table compares baseline vs scenario per plan (rank, score, effective rainfall, deficit), labelled hypothetical and referencing the same baseline ID.
 9. [ ] **Assistant:** context box shows the analysis, selected plan, and scenario; numbers in the answer match the selected plan; source IDs link back to rotations/scenario. Changing the scenario or plan clears the conversation.
-10. [ ] **Finance:** enter the worked example (2 ha; seed 10,000–12,000; labour 20,000–30,000; yield 3,000–4,000 kg/ha; price 100–120/kg) → cost 60,000–84,000; revenue 600,000–960,000; net 516,000–900,000. Clear the yield fields → revenue/net show "Unknown", not 0. The pending-approval banner is visible.
+10. [ ] **Finance (spec v0.1):** add a source record marked *Synthetic*, link it to every input, and enter the synthetic worked example (2 ha; seed 10,000–12,000; labour 20,000–30,000; remove the other categories; yield scenario 3,000–4,000 kg/ha; price 100–120/kg) → cost 60,000–84,000; revenue 600,000–960,000; net 516,000–900,000. Removed categories are listed as "not assumed zero"; the synthetic-inputs warning shows. Unlink the price source → an error asks for a source. Clear the yield fields → revenue/net show "Unknown", not 0. The banner shows spec v0.1, the spec reference, and "input data pending".
 
 ## Farm form
 

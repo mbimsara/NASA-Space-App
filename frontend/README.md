@@ -38,7 +38,7 @@ React Router 6 (routing), Zustand (selected farm/analysis state, persisted), Zod
 | `src/api/requestGuard.ts` | Stale-response guard (abort + "is this still the latest request") |
 | `src/hooks/useAppStore.ts` | Selected farm/analysis/scenario/candidate; results are cached per farm and cleared on farm switch |
 | `src/catalog/` | Validated loading path for `data/catalogs/crops.json` |
-| `src/finance/calculator.ts` | Deterministic cost/revenue/net ranges (spec v0.1-draft, pending Bhagya's review) |
+| `src/finance/calculator.ts` | Deterministic cost/revenue/net ranges: financial specification v0.1 (`docs/FINANCIAL_SPECIFICATION.md`, approved by Bhagya with conditions), with per-input source provenance |
 | `src/components/layout/` | App shell; `FarmLayout` loads the farm in the URL |
 | `src/pages/` | One page per journey step, plus catalog and finance |
 

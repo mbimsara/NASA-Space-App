@@ -27,7 +27,7 @@ Scope reminder: frontend implementation, client integration, workflow QA, **plus
 | # | Task | Deliverable / completion check | Partner | Status |
 | --- | --- | --- | --- | --- |
 | 10 | Crop catalog loading + validation | `validateCatalog()` mirrors `data/schemas/crop-catalog.schema.json` and `scripts/validate_data.py` cross-rules (unique IDs, approved entries need sources/seasons/family, reviewed catalog needs approved crops, URL/date formats, positive water demand). Catalog page lists issues before the engine consumes data. Unit tests. | Bhagya owns meaning | [x] |
-| 11 | Financial calculator | Pure deterministic functions: area conversion (ha/acre/perch), cost categories, revenue and net **ranges**, explicit currency/period, dated sources required. Labelled *pending Bhagya's review*. Unit tests with worked examples. | Bhagya approves formulas | [~] |
+| 11 | Financial calculator | Implements financial specification v0.1 (`docs/FINANCIAL_SPECIFICATION.md`; formulas approved by Bhagya with conditions on 2026-11-14, `zerokali20` commit 9a6425a): area conversion (ha/acre/perch), standard cost-category prompts with omitted categories disclosed, yield scenario range, farm-gate price range, conservative net, break-even price; per-input source records (URL/document, quoted/access dates, area, crop/grade, unit/period, value type). Synthetic worked tests. **Input data still pending sourced local values** (Tharuka/Bhagya). | Bhagya | [x] formulas · [ ] sourced inputs |
 | 12 | Language switching | All UI strings in `i18n/locales`; English fallback for missing keys; selection persisted; farm/analysis state preserved | Akash, fluent reviewers | [~] |
 
 ## Phase 3 — Verification
