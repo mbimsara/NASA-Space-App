@@ -106,6 +106,11 @@ export function AppShell() {
             />
           </div>
           <div className="top-actions">
+            <a href="https://www.spaceappschallenge.org/" target="_blank" rel="noopener noreferrer" className="spaceapps-topbar-badge" title="Built for NASA Space Apps Challenge 2026">
+              <img src="/images/nasa-space-apps-logo.png" alt="NASA Space Apps Challenge" className="spaceapps-topbar-logo" />
+              <span className="spaceapps-topbar-text">Built for <strong>NASA Space Apps 2026</strong></span>
+              <Icon name="external" />
+            </a>
             <span className="data-state"><i /> {USE_FIXTURES ? t("nav.modeFixtures") : t("nav.modeLive")}</span>
             {farmName && <span className="topbar-title" title={farmName}>{farmName}</span>}
             <button

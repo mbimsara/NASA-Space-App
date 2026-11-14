@@ -109,6 +109,10 @@ export function Sidebar({ open, onNavigate, id }: Props) {
       </nav>
 
       <div className="side-bottom">
+        <a href="https://www.spaceappschallenge.org/" target="_blank" rel="noopener noreferrer" className="spaceapps-side-card" title="Built for NASA Space Apps 2026 - Visit official challenge site">
+          <div className="spaceapps-side-logo-wrap"><img src="/images/nasa-space-apps-logo.png" alt="NASA Space Apps Challenge" className="spaceapps-side-logo" /></div>
+          <div className="spaceapps-side-info"><span className="spaceapps-side-tag">HACKATHON 2026</span><strong className="spaceapps-side-title">NASA Space Apps</strong><span className="spaceapps-side-link">spaceappschallenge.org <Icon name="external" /></span></div>
+        </a>
         <b>{USE_FIXTURES ? t("nav.modeFixtures") : t("nav.modeLive")}</b>
         {USE_FIXTURES ? t("nav.modeFixturesHelp") : t("nav.modeLiveHelp")}
       </div>

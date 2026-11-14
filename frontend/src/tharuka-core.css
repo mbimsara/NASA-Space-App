@@ -486,13 +486,70 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
+.source-provenance-footer {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px dashed #d7e3dc;
+  padding-top: 14px;
+}
+.provenance-spaceapps-badge {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, #162660 0%, #0d1a45 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(13, 26, 69, 0.2);
+}
+.provenance-spaceapps-badge:hover {
+  background: linear-gradient(135deg, #1e3585 0%, #112258 100%);
+  border-color: rgba(114, 226, 177, 0.6);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(13, 26, 69, 0.35);
+}
+.provenance-spaceapps-img {
+  height: 28px;
+  width: auto;
+  border-radius: 4px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.provenance-spaceapps-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.provenance-spaceapps-text strong {
+  font-size: 11px;
+  color: #ffffff;
+  font-weight: 700;
+}
+.provenance-spaceapps-text span {
+  font-size: 8.5px;
+  color: #b7cecb;
+  margin-top: 2px;
+}
+.provenance-spaceapps-badge svg {
+  color: #72e2b1;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.provenance-spaceapps-badge:hover svg {
+  transform: translate(2px, -2px);
+}
 .source-note {
   display: flex;
   align-items: center;
   gap: 7px;
   color: #73887d;
   font-size: 7px;
-  padding-top: 10px;
+  padding-top: 4px;
 }
 
 .saved-summary {
@@ -960,4 +1017,15 @@
 [data-theme="dark"] .form-alert.success {
   background: #17382b;
   border-color: #285a46;
+}
+[data-theme="dark"] .source-provenance-footer {
+  border-top-color: #294138;
+}
+[data-theme="dark"] .provenance-spaceapps-badge {
+  background: linear-gradient(135deg, #132050 0%, #0a1335 100%);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+[data-theme="dark"] .provenance-spaceapps-badge:hover {
+  background: linear-gradient(135deg, #1a2d70 0%, #0f1c48 100%);
+  border-color: rgba(114, 226, 177, 0.5);
 }

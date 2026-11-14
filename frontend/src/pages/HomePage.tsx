@@ -63,7 +63,11 @@ export function HomePage() {
             <h1>Grow with the planet,<br /><em>not against it.</em></h1>
             <p>AgroSphere turns Earth observation signals and farm knowledge into clear, climate-resilient decisions for growers everywhere.</p>
             <div className="hero-buttons"><Link className="btn btn-primary" to="/farms/new">Explore your farm <Icon name="arrow" /></Link><a className="video-btn" href="#platform"><span>▶</span> See how it works</a></div>
-            <div className="trust-row"><div className="avatar-stack"><span>N</span><span>A</span><span>S</span></div><div><strong>Built for NASA Space Apps 2026</strong><small>Working app with clearly labelled synthetic and NASA-derived data</small></div></div>
+            <a href="https://www.spaceappschallenge.org/" target="_blank" rel="noopener noreferrer" className="hero-spaceapps-badge" title="Built for NASA Space Apps 2026 - Official Challenge Site">
+              <img src="/images/nasa-space-apps-logo-transparent.png" alt="NASA Space Apps Challenge" className="hero-spaceapps-logo" />
+              <span className="hero-spaceapps-divider" />
+              <div className="hero-spaceapps-text"><strong>Built for NASA Space Apps 2026</strong><small>Official Global Challenge ? spaceappschallenge.org <Icon name="external" /></small></div>
+            </a>
           </div>
           <div className="hero-float card"><div className="float-top"><span className="status-dot" /> Decision workspace <span>Ready</span></div><div className="float-score"><strong>3–5</strong><span>seasons<br /><b>compared</b></span></div><p>Compare crop, water, climate, soil, and financial trade-offs in one farm context.</p></div>
         </section>

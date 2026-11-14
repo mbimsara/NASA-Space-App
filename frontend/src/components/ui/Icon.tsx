@@ -20,6 +20,7 @@ const PATHS: Record<string, string> = {
   moon: "M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z",
   leaf: "M5 19c0-8 5-14 15-15-1 10-7 15-15 15zM5 19l7-7",
   arrow: "M5 12h14M13 6l6 6-6 6",
+  external: "M18 13v6H5V6h6M15 3h6v6M10 14 21 3",
   check: "M5 12.5 10 17l9-10",
 };
 
