@@ -13,7 +13,25 @@
     "catalog": "Crop catalog",
     "finance": "Finance",
     "editFarm": "Edit farm",
-    "farmSections": "Farm sections"
+    "farmSections": "Farm sections",
+    "roadmap": "Roadmap",
+    "main": "Main navigation",
+    "switchFarm": "Switch farm",
+    "noFarm": "No farm selected",
+    "chooseFarm": "Create or open a farm",
+    "coreJourney": "Core journey",
+    "needsFarm": "Open a farm to continue",
+    "tools": "Tools",
+    "planned": "Planned",
+    "soon": "Soon",
+    "modeFixtures": "Fixture mode",
+    "modeFixturesHelp": "Synthetic data stored in this browser.",
+    "modeLive": "Live API",
+    "modeLiveHelp": "Connected to the AgroSphere backend.",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "lightTheme": "Switch to light theme",
+    "darkTheme": "Switch to dark theme"
   },
   "farm": {
     "title": "Farm Setup",
@@ -25,8 +43,7 @@
     "longitude": "Longitude",
     "area": "Farm area",
     "areaUnit": "hectares",
-    "irrigation": "Irrigation Supply (mm/season)",
-    "irrigationUnknown": "Unknown / not irrigated",
+    "irrigation": "Irrigation (field-applied depth)",
     "cropHistory": "Crop History",
     "addCrop": "Add crop",
     "cropId": "Crop",
@@ -58,7 +75,19 @@
     "prioritiesHelp": "Relative importance used to rank rotation plans. They are normalised to 100%.",
     "excludedCropsHelp": "Comma-separated crop IDs that must never be recommended.",
     "noHistory": "No crop history entered (treated as unknown).",
-    "editWarning": "Saving changes marks existing analyses as outdated."
+    "editWarning": "Saving changes marks existing analyses as outdated.",
+    "irrigationMode": {
+      "amount": "Irrigated — I know the amount",
+      "rainfed": "Rainfed — no irrigation (0 mm)",
+      "unknown": "Unknown"
+    },
+    "irrigationAmount": "Field-applied irrigation, mm per season",
+    "irrigationHint": {
+      "amount": "Water applied to the field each season, in millimetres of depth.",
+      "rainfed": "Saved as 0 mm. Water screening uses rainfall only.",
+      "unknown": "Water screening will show Unknown until irrigation is entered. Unknown is not treated as zero."
+    },
+    "excludedCropsPlaceholder": "e.g. maize, groundnut"
   },
   "observations": {
     "title": "Farm Observations",
@@ -95,7 +124,9 @@
     "resolutionUnknown": "not reported",
     "sourceLink": "Source",
     "docsLink": "Documentation",
-    "idNote": "Observation ID {{id}} is sent with rotation requests."
+    "idNote": "Observation ID {{id}} is sent with rotation requests.",
+    "chartLegend": "{{rain}} (bars, left axis) · {{temp}} (line, right axis)",
+    "dataKindLabel": "Data kind: {{kind}}"
   },
   "rotation": {
     "title": "Rotation Plans",
@@ -173,7 +204,29 @@
     "planAggregate": "Plan aggregate (optional, does not replace per-season values)",
     "rainfallTotal": "Total rainfall",
     "notModeled": "Not modeled (no approved method)",
-    "rangeAssumptions": "Assumptions and limitations"
+    "rangeAssumptions": "Assumptions and limitations",
+    "rainfallBaselineScenario": "Rainfall (baseline → scenario)",
+    "availableBaselineScenario": "Available water (baseline → scenario)",
+    "coverageBaselineScenario": "Coverage (baseline → scenario, uncapped)",
+    "balanceScenario": "Water balance range (scenario)",
+    "timelineLabel": "Crop rotation: {{crops}}",
+    "seasonN": "Season {{n}}",
+    "needsObservation": "Load this farm's observations first: the analysis needs an observation snapshot for the current farm version.",
+    "loadObservations": "Load observations",
+    "seasonLabels": "Seasons in this rotation",
+    "seasonLabelsHelp": "Choose the season for each step. The engine does not infer a calendar from the number of seasons.",
+    "seasonLabel": {
+      "maha": "Maha",
+      "yala": "Yala",
+      "inter-season": "Inter-season"
+    },
+    "mode": "Planning mode",
+    "modes": {
+      "standard": "Standard rotation",
+      "soilRevive": "SoilRevive (soil recovery)",
+      "farmRecovery": "FarmRecovery (after drought/flood)"
+    },
+    "modeHelp": "Soil and recovery modes are waiting for approved soil/recovery rules."
   },
   "scenario": {
     "title": "Scenario Comparison",
@@ -194,7 +247,12 @@
     "sliderChanged": "The slider changed since the last run. Run the scenario again to update results.",
     "askAssistant": "Ask the assistant about this scenario",
     "hypothetical": "hypothetical",
-    "worstBalance": "Lowest season balance (conservative)"
+    "worstBalance": "Lowest season balance (conservative)",
+    "seasonDetail": "Per-season water for {{plan}} ({{crops}})",
+    "choosePlan": "Plan to inspect",
+    "saveScenarioPlan": "Save this plan with the scenario",
+    "saveScenarioHelp": "Saves the selected plan together with this hypothetical scenario's results.",
+    "impactUnknown": "For some plans the climate effect is unknown (for example, irrigation is unknown). A score change of 0 does not mean the scenario has no impact."
   },
   "assistant": {
     "title": "AI Assistant",
@@ -216,7 +274,16 @@
     "q2": "What does the water deficit mean for my farm?",
     "q3": "How would reduced rainfall affect my top plan?",
     "askInEnglish": "Ask in English instead",
-    "languagePending": "Sinhala and Tamil answers are not available yet."
+    "languagePending": "Sinhala and Tamil answers are not available yet.",
+    "status": {
+      "insufficient_context": "The selected results don't contain enough information to fully answer this.",
+      "unsupported_question": "This question is outside what the assistant can answer from your results."
+    },
+    "outdated": "The farm changed after this analysis, so the assistant can't answer from it. Re-run the rotation first.",
+    "chooseContext": "What should the assistant explain?",
+    "scenarioOption": "Scenario: rainfall {{pct}}% (hypothetical)",
+    "noScenarios": "No scenarios yet for this analysis.",
+    "contextResets": "Changing the plan or scenario starts a new conversation, so answers never mix contexts."
   },
   "plan": {
     "title": "Saved Plan",
@@ -233,7 +300,8 @@
     "reanalyze": "Re-analyze with current inputs",
     "openFarm": "Open farm",
     "scenarioRef": "Scenario",
-    "evidence": "Evidence and versions"
+    "evidence": "Evidence and versions",
+    "savedSelection": "Saved selection ({{id}})"
   },
   "financial": {
     "title": "Financial Scenario",
@@ -332,7 +400,6 @@
     "valid": "Catalog passes validation.",
     "invalid": "Catalog has {{count}} problem(s) and cannot be used.",
     "invalidBlocking": "The crop catalog failed validation, so results cannot use it.",
-    "emptyNote": "The crop catalog has no approved crops yet; results shown are fixtures, not recommendations.",
     "summary": "Version {{version}} · status {{status}} · region {{region}} · {{count}} crop(s), {{approved}} approved",
     "path": "Location",
     "problem": "Problem",
@@ -340,6 +407,102 @@
     "family": "Family",
     "seasons": "Seasons",
     "water": "Water demand / cycle",
-    "review": "Review"
+    "review": "Review",
+    "emptyNoteFixture": "The crop catalog has no approved crops yet; plans shown here are synthetic fixtures, not recommendations.",
+    "emptyNoteLive": "The crop catalog has no approved crops yet, so the live engine returns no plans until crops are approved."
+  },
+  "irrigationNotice": {
+    "title": "Water screening unavailable:",
+    "body": "this farm's irrigation is unknown, so water sufficiency, balances and coverage show Unknown. Unknown is not treated as zero.",
+    "action": "Enter irrigation (choose Rainfed if none)"
+  },
+  "offline": {
+    "title": "You are offline.",
+    "body": "Saved plans you opened before are available to view. Changes can't be sent until you reconnect.",
+    "writeBlocked": "Offline: this needs the server. Try again when you are back online.",
+    "formBlocked": "Offline: your changes are kept as a draft on this device. Save again when you are back online.",
+    "planCopy": "Showing the copy saved on this device on {{date}}. It may be out of date.",
+    "planCached": "Saved on this device for offline viewing ({{date}}).",
+    "availableBadge": "Available offline"
+  },
+  "calendar": {
+    "title": "Action calendar",
+    "help": "Add the dates you plan for each season. Only the dates you enter are used; the app does not suggest timings.",
+    "seasonLegend": "Season {{n}}: {{crop}}",
+    "action": "Action",
+    "date": "Date",
+    "note": "Note",
+    "addAction": "Add action",
+    "timeline": "Planned actions by date",
+    "empty": "No dates entered yet.",
+    "export": "Download calendar (.ics)",
+    "localOnly": "Saved on this device only. Reminders are not sent yet.",
+    "disclaimer": "Planned in AgroSphere AI from farmer-entered dates; not an agronomic recommendation.",
+    "kind": {
+      "planting": "Planting",
+      "monitoring": "Field check",
+      "soil_test": "Soil test",
+      "harvest": "Harvest",
+      "other": "Other"
+    }
+  },
+  "roadmap": {
+    "title": "Planned features",
+    "intro": "These capabilities are part of AgroSphere AI's scope but are not implemented yet. Each is waiting for the dependency shown.",
+    "waitingFor": "Waiting for",
+    "owners": "Owners",
+    "items": {
+      "feedback": {
+        "title": "Season feedback",
+        "what": "Record what actually happened each season and compare it with the saved plan.",
+        "why": "Outcome fields and season-record storage (backend)"
+      },
+      "export": {
+        "title": "Shareable report export",
+        "what": "Download or share the saved plan as a report. Printing works today.",
+        "why": "Report/export endpoint (backend) and report design"
+      },
+      "offlineEdit": {
+        "title": "Offline editing",
+        "what": "Edit farms offline and sync later. Offline viewing of saved plans works today.",
+        "why": "Agreed sync and conflict policy"
+      },
+      "reminders": {
+        "title": "Calendar reminders",
+        "what": "Send reminders for planned actions. The calendar and .ics download work today.",
+        "why": "Reminder delivery method and calendar records (backend)"
+      },
+      "soilModes": {
+        "title": "SoilRevive and FarmRecovery modes",
+        "what": "Soil-recovery and post-drought/flood planning options.",
+        "why": "Approved soil/recovery rules"
+      },
+      "twins": {
+        "title": "Global climate twins",
+        "what": "Compare your climate with similar historical regions.",
+        "why": "Reviewed climate-twin method and interpretation"
+      },
+      "weed": {
+        "title": "WeedShield image check",
+        "what": "Upload a field photo for weed analysis.",
+        "why": "A validated model and test data"
+      },
+      "voice": {
+        "title": "Voice input and read-aloud",
+        "what": "Ask questions by voice and hear answers.",
+        "why": "Working multilingual text flow and voice service"
+      }
+    }
+  },
+  "journey": {
+    "label": "Core journey",
+    "setup": "Farm setup",
+    "overview": "Overview",
+    "plan": "Crop plan",
+    "climate": "Climate test",
+    "ai": "AI review",
+    "save": "Save & export",
+    "next": "Next: {{step}}",
+    "done": "done"
   }
 }

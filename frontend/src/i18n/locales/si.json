@@ -20,8 +20,6 @@
     "longitude": "දේශාංශය",
     "area": "ගොවිතැන් භූමි ප්‍රමාණය",
     "areaUnit": "හෙක්ටෙයාර්",
-    "irrigation": "වාරිමාර්ග සැපයුම (mm/සෘතුව)",
-    "irrigationUnknown": "නොදනී / වාරිමාර්ග නැත",
     "cropHistory": "බෝග ඉතිහාසය",
     "addCrop": "බෝගය එකතු කරන්න",
     "cropId": "බෝගය",

@@ -39,8 +39,10 @@ React Router 6 (routing), Zustand (selected farm/analysis state, persisted), Zod
 | `src/hooks/useAppStore.ts` | Selected farm/analysis/scenario/candidate; results are cached per farm and cleared on farm switch |
 | `src/catalog/` | Validated loading path for `data/catalogs/crops.json` |
 | `src/finance/calculator.ts` | Deterministic cost/revenue/net ranges: financial specification v0.1 (`docs/FINANCIAL_SPECIFICATION.md`, approved by Bhagya with conditions), with per-input source provenance |
-| `src/components/layout/` | App shell; `FarmLayout` loads the farm in the URL |
-| `src/pages/` | One page per journey step, plus catalog and finance |
+| `src/components/layout/` | App shell (sidebar, top bar, theme toggle), step tracker (`JourneyStepper`), and `FarmLayout`, which loads the farm in the URL |
+| `src/pages/` | One page per journey step, plus catalog, finance and roadmap |
+| `src/components/plan/ActionCalendar.tsx`, `src/utils/calendar.ts` | Farmer-entered action calendar with `.ics` export (stored on device) |
+| `src/utils/offlineCache.ts`, `public/sw.js` | Read-only offline viewing of saved plans; production-only app-shell service worker |
 
 ## Integration notes
 
@@ -48,3 +50,7 @@ React Router 6 (routing), Zustand (selected farm/analysis state, persisted), Zod
 - `PATCH /farms/{id}` sends `expected_input_version`. A changed profile marks analyses outdated, and saving an outdated analysis is blocked in the UI.
 - The observation chart expects `time_series: [{date, rainfall_mm, mean_temperature_c}]`. Confirm field names with Matheesha.
 - The backend should store `input_snapshot` and `analysis_snapshot` with saved plans (see `SavedPlan` in `src/types/api.ts`).
+
+## Design
+
+Visual design follows Tharuka's prototype in [`design-prototype/`](design-prototype/README.md) (run it with `npm run dev -- --host 127.0.0.1` inside that folder; it uses sample data only). Colours, fonts, radii and shadows are tokens in `src/index.css`, with light and dark themes that follow the device setting until the user toggles them (key `agrosphere-theme`). Differences from the prototype, for accessibility: text is at least 12 px; muted text is darkened to meet WCAG AA; dark-theme primary buttons use dark text; sample values are not copied.

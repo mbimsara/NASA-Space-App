@@ -90,6 +90,11 @@ export function BaselineVsScenario({ baseline, scenario }: Props) {
         </div>
       )}
 
+      {scenario.candidates.some((c) => !isKnown(comp(c, "scenario_resilience"))) && (
+        <div className="notice notice-warn" role="note">
+          {t("scenario.impactUnknown")}
+        </div>
+      )}
       <p className="muted">{t("scenario.sameBaseline", { id: scenario.baseline_analysis_id })}</p>
       <p className="muted" style={{ fontSize: 12 }}>
         {t("rotation.smallDifferences")}

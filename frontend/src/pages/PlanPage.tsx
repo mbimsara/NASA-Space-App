@@ -14,6 +14,8 @@ import { ErrorMessage } from "../components/ui/ErrorMessage";
 import { SyntheticDataBanner } from "../components/ui/SyntheticDataBanner";
 import { SourceBadge } from "../components/ui/SourceBadge";
 import { CandidateCard } from "../components/rotations/CandidateCard";
+import { ActionCalendar } from "../components/plan/ActionCalendar";
+import { cachePlan, getCachedPlan } from "../utils/offlineCache";
 import type { FarmEnvelope, SavedPlan } from "../types/api";
 
 export function PlanPage() {
@@ -23,20 +25,36 @@ export function PlanPage() {
   const [plan, setPlan] = useState<SavedPlan | null>(null);
   const [farm, setFarm] = useState<FarmEnvelope | null>(null);
   const [error, setError] = useState<unknown>(null);
+  /** Set when showing this device's saved copy because the plan could not be fetched. */
+  const [offlineCopyAt, setOfflineCopyAt] = useState<string | null>(null);
+  const [cachedAt, setCachedAt] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!planId) return;
     const ticket = guard.next();
     setError(null);
     setPlan(null);
+    setOfflineCopyAt(null);
     try {
       const p = await api.getPlan(planId, ticket.signal);
       if (!ticket.isCurrent()) return;
       setPlan(p);
       const f = await api.getFarm(p.farm_id, ticket.signal).catch(() => null);
-      if (ticket.isCurrent()) setFarm(f);
+      if (!ticket.isCurrent()) return;
+      setFarm(f);
+      setCachedAt(cachePlan(p, f).cachedAt);
     } catch (err) {
-      if (ticket.isCurrent() && !isAbortError(err)) setError(err);
+      if (!ticket.isCurrent() || isAbortError(err)) return;
+      // Read-only offline viewing: fall back to this device's last saved copy.
+      const cached = getCachedPlan(planId);
+      if (cached) {
+        setPlan(cached.plan);
+        setFarm(cached.farm);
+        setOfflineCopyAt(cached.cachedAt);
+        setCachedAt(cached.cachedAt);
+      } else {
+        setError(err);
+      }
     }
   }, [planId, guard]);
 
@@ -67,6 +85,20 @@ export function PlanPage() {
         {t("plan.savedAt", { date: new Date(plan.created_at).toLocaleString() })} · {plan.plan_id}
       </p>
 
+      {offlineCopyAt && (
+        <div className="notice notice-warn" role="status">
+          {t("offline.planCopy", { date: new Date(offlineCopyAt).toLocaleString() })}{" "}
+          <button type="button" className="btn" onClick={load} style={{ minHeight: 0, padding: "2px 10px" }}>
+            {t("common.retry")}
+          </button>
+        </div>
+      )}
+      {!offlineCopyAt && cachedAt && (
+        <p className="muted no-print" style={{ fontSize: 12 }}>
+          {t("offline.planCached", { date: new Date(cachedAt).toLocaleString() })}
+        </p>
+      )}
+
       {outdated && (
         <div className="notice notice-warn no-print" role="alert">
           {t("plan.outdatedBanner")}{" "}
@@ -86,7 +118,7 @@ export function PlanPage() {
 
       <h2>{t("plan.chosenRotation")}</h2>
       {plan.candidate_snapshot?.sequence ? (
-        <CandidateCard candidate={plan.candidate_snapshot} rank={1} />
+        <CandidateCard candidate={plan.candidate_snapshot} />
       ) : (
         <p className="muted">{plan.candidate_id}</p>
       )}
@@ -162,6 +194,22 @@ export function PlanPage() {
           </div>
         </>
       )}
+
+      {plan.candidate_snapshot?.sequence && (
+        <ActionCalendar
+          planId={plan.plan_id}
+          seasons={plan.candidate_snapshot.sequence.map((s) => ({ season_index: s.season_index, crop_name: s.crop_name ?? s.crop_id }))}
+        />
+      )}
+
+      <section className="card no-print" aria-labelledby="feedback-title">
+        <h2 id="feedback-title" style={{ marginTop: 0 }}>
+          {t("roadmap.items.feedback.title")} <span className="badge-planned">{t("common.roadmapFeature")}</span>
+        </h2>
+        <p className="muted" style={{ margin: 0 }}>
+          {t("roadmap.items.feedback.why")}
+        </p>
+      </section>
 
       <h2>{t("plan.evidence")}</h2>
       <div className="card">

@@ -138,10 +138,16 @@ export async function getObservations(
 // Rotation endpoints
 // ---------------------------------------------------------------------------
 
+export type SeasonLabel = "maha" | "yala" | "inter-season";
+export const SEASON_LABELS: SeasonLabel[] = ["maha", "yala", "inter-season"];
+
 export interface RotationRequest {
   input_version: number;
+  /** Required by the live API (422 when null); the UI blocks generation without it. */
   observation_id: string | null;
   seasons: number; // 3–5
+  /** Ordered season identity, one per season; the API does not infer a calendar from a count. */
+  season_labels?: SeasonLabel[];
   catalog_version: string;
   priority_weights: { water: number; soil: number; climate: number };
 }

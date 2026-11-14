@@ -1,58 +1,41 @@
 /**
- * CropTimeline — visual seasonal timeline for a rotation candidate.
- * Shows each season's crop as a colored segment.
+ * CropTimeline — seasonal timeline for a rotation candidate.
+ * Text colour is chosen from the background luminance so every block meets
+ * WCAG AA contrast; unknown crop IDs get a stable colour from a small palette.
  * Owner: Shehani.
  */
+import { useTranslation } from "react-i18next";
 import type { SequenceStep } from "../../types/api";
+import { colorFor, textColorFor } from "../../utils/cropColors";
 
-// Deterministic color per crop family/id
-const CROP_COLORS: Record<string, string> = {
-  rice: "#4CAF50",
-  cowpea: "#8BC34A",
-  maize: "#FFC107",
-  groundnut: "#FF9800",
-  soybean: "#9C27B0",
-  vegetables: "#00BCD4",
-  default: "#607D8B",
-};
-
-function colorFor(cropId: string): string {
-  return CROP_COLORS[cropId] ?? CROP_COLORS.default;
-}
-
-interface Props {
-  sequence: SequenceStep[];
-}
-
-export function CropTimeline({ sequence }: Props) {
+export function CropTimeline({ sequence }: { sequence: SequenceStep[] }) {
+  const { t } = useTranslation();
   if (sequence.length === 0) return null;
+  const names = sequence.map((s) => s.crop_name ?? s.crop_id).join(" → ");
 
   return (
-    <div
-      role="img"
-      aria-label={`Crop rotation: ${sequence.map((s) => s.crop_name ?? s.crop_id).join(" → ")}`}
-      style={{ display: "flex", gap: 4, margin: "10px 0" }}
-    >
-      {sequence.map((step) => (
-        <div
-          key={step.season_index}
-          style={{
-            flex: 1,
-            background: colorFor(step.crop_id),
-            borderRadius: 6,
-            padding: "10px 6px",
-            textAlign: "center",
-            color: "#fff",
-            fontWeight: 600,
-            fontSize: 13,
-            minWidth: 70,
-          }}
-        >
-          <div style={{ fontSize: 11, opacity: 0.85 }}>Season {step.season_index}</div>
-          {step.crop_name ?? step.crop_id}
-        </div>
-      ))}
+    <div role="img" aria-label={t("rotation.timelineLabel", { crops: names })} style={{ display: "flex", gap: 4, margin: "10px 0", flexWrap: "wrap" }}>
+      {sequence.map((step) => {
+        const bg = colorFor(step.crop_id);
+        return (
+          <div
+            key={step.season_index}
+            style={{
+              flex: "1 1 70px",
+              background: bg,
+              color: textColorFor(bg),
+              borderRadius: 6,
+              padding: "10px 6px",
+              textAlign: "center",
+              fontWeight: 600,
+              fontSize: 13,
+            }}
+          >
+            <div style={{ fontSize: 11 }}>{t("rotation.seasonN", { n: step.season_index })}</div>
+            {step.crop_name ?? step.crop_id}
+          </div>
+        );
+      })}
     </div>
   );
 }
-

@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { api } from "../api";
 import { useAppStore } from "../hooks/useAppStore";
 import { ErrorMessage } from "../components/ui/ErrorMessage";
+import { listCachedPlanIds } from "../utils/offlineCache";
 
 export function HomePage() {
   const { t } = useTranslation();
@@ -16,6 +17,7 @@ export function HomePage() {
   const recentPlans = useAppStore((s) => s.recentPlans);
   const setFarm = useAppStore((s) => s.setFarm);
   const [busy, setBusy] = useState(false);
+  const [offlineIds] = useState(() => new Set(listCachedPlanIds()));
   const [error, setError] = useState<unknown>(null);
 
   const loadDemo = async () => {
@@ -69,6 +71,7 @@ export function HomePage() {
           {recentPlans.map((p) => (
             <li key={p.id} style={{ padding: "6px 0" }}>
               <Link to={`/plans/${p.id}`}>{p.name}</Link> <span className="muted">({p.id})</span>
+              {offlineIds.has(p.id) && <span className="badge-offline">{t("offline.availableBadge")}</span>}
             </li>
           ))}
         </ul>

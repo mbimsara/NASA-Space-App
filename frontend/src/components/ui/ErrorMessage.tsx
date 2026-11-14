@@ -31,11 +31,11 @@ export function ErrorMessage({ error, onRetry }: Props) {
     <div
       role="alert"
       style={{
-        background: "#f8d7da",
-        border: "1px solid #f5c2c7",
+        background: "var(--error-bg)",
+        border: "1px solid var(--error-border)",
         borderRadius: 6,
         padding: "12px 16px",
-        color: "#842029",
+        color: "var(--error-text)",
         marginBottom: 12,
       }}
     >

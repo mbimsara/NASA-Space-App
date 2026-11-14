@@ -21,19 +21,19 @@ export function SyntheticDataBanner({ dataKind, limitations }: Props) {
   return (
     <div
       role="status"
-      aria-label={isSynthetic ? t("observations.syntheticBadge") : `Data kind: ${dataKind}`}
+      aria-label={isSynthetic ? t("observations.syntheticBadge") : t("observations.dataKindLabel", { kind: dataKind })}
       style={{
-        background: isSynthetic ? "#fff3cd" : "#cff4fc",
-        border: `2px solid ${isSynthetic ? "#ffc107" : "#0dcaf0"}`,
+        background: isSynthetic ? "var(--warn-bg)" : "var(--info-bg)",
+        border: `2px solid ${isSynthetic ? "var(--warn-border)" : "var(--info-border)"}`,
         borderRadius: 6,
         padding: "10px 16px",
         marginBottom: 12,
         fontSize: 14,
         fontWeight: 600,
-        color: "#333",
+        color: isSynthetic ? "var(--warn-text)" : "var(--text)",
       }}
     >
-      {isSynthetic ? t("observations.syntheticBadge") : `Data kind: ${dataKind}`}
+      {isSynthetic ? t("observations.syntheticBadge") : t("observations.dataKindLabel", { kind: dataKind })}
       {limitations && limitations.length > 0 && (
         <ul style={{ marginTop: 6, fontWeight: 400, fontSize: 13 }}>
           {limitations.map((l, i) => <li key={i}>{l}</li>)}

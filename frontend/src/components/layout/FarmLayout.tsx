@@ -5,17 +5,16 @@
  * Owner: Shehani.
  */
 import { useCallback, useEffect, useState } from "react";
-import { NavLink, Outlet, useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { Outlet, useParams } from "react-router-dom";
 import { api } from "../../api";
 import { isAbortError } from "../../api/requestGuard";
 import { useAppStore } from "../../hooks/useAppStore";
 import { useLatestRequest } from "../../hooks/useLatestRequest";
 import { ErrorMessage } from "../ui/ErrorMessage";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
+import { JourneyStepper } from "./JourneyStepper";
 
 export function FarmLayout() {
-  const { t } = useTranslation();
   const { farmId } = useParams<{ farmId: string }>();
   const farm = useAppStore((s) => s.farm);
   const setFarm = useAppStore((s) => s.setFarm);
@@ -53,29 +52,9 @@ export function FarmLayout() {
   }
   if (!ready) return <LoadingSpinner />;
 
-  const links: [string, string][] = [
-    ["", t("nav.observations")],
-    ["rotations", t("nav.rotations")],
-    ["scenario", t("nav.scenarios")],
-    ["assistant", t("nav.assistant")],
-    ["finance", t("nav.finance")],
-    ["edit", t("nav.editFarm")],
-  ];
-
   return (
     <>
-      <nav className="farm-nav" aria-label={t("nav.farmSections")}>
-        <div className="farm-nav__inner">
-          <span className="farm-nav__title" title={farm.profile.name}>
-            {farm.profile.name}
-          </span>
-          {links.map(([to, label]) => (
-            <NavLink key={to} to={to === "" ? `/farms/${farmId}` : `/farms/${farmId}/${to}`} end={to === ""}>
-              {label}
-            </NavLink>
-          ))}
-        </div>
-      </nav>
+      <JourneyStepper farmId={farm.id} />
       <Outlet />
     </>
   );

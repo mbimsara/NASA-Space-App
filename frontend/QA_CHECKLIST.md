@@ -26,10 +26,18 @@ Owner: Shehani. Run before each integration merge and at feature freeze. Record 
 
 - [ ] Required name, positive area, coordinate range, harvest ≥ planting, no future planting, soil tests need a unit.
 - [ ] Area in acres/perches shows the stored hectares.
-- [ ] "Unknown / not irrigated" keeps irrigation as unknown (not 0) after save and reload.
+- [ ] Irrigation: "Unknown" saves null and Rotations shows the "water screening unavailable" notice with water values Unknown; "Rainfed" saves 0 and water values appear; "Irrigated" with no amount shows a clear error.
 - [ ] Map click updates the coordinates; typing coordinates moves the marker.
 - [ ] Type a farm name, leave without saving, return → draft banner; **Resume** restores; **Clear** removes it.
 - [ ] On a validation error, focus moves to the error summary.
+
+## Saved plan follow-ons
+
+- [ ] Action calendar: enter planting dates per season, add a harvest before planting → error and download disabled; fix it → entries sorted by date; download `.ics` opens in a phone calendar.
+- [ ] Reopen the plan after reload → calendar entries kept. "Season feedback" is shown as a planned feature.
+- [ ] Offline: open a saved plan once, then go offline (DevTools → Network → Offline) → offline banner; the plan reopens with "Showing the copy saved on this device on …". In live mode, saving/generating buttons are disabled with an offline note.
+- [ ] Production build only (`npm run build && npm run preview`): after one online visit, the app shell loads offline.
+- [ ] Roadmap page lists every planned feature with "Planned feature — not yet implemented".
 
 ## Failure and isolation cases
 

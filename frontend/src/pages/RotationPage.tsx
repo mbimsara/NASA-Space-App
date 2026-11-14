@@ -3,21 +3,24 @@
  * select and save. Outdated analyses are flagged and cannot be saved.
  * Owner: Shehani. Score formula and catalog values: Bhagya.
  */
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { api } from "../api";
+import { api, USE_FIXTURES } from "../api";
 import { isAbortError } from "../api/requestGuard";
 import { isAnalysisOutdated, selectCurrentAnalysis, useAppStore } from "../hooks/useAppStore";
 import { useLatestRequest } from "../hooks/useLatestRequest";
+import { useCanWrite } from "../hooks/useCanWrite";
 import { useSavePlan } from "../hooks/useSavePlan";
 import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 import { ErrorMessage } from "../components/ui/ErrorMessage";
 import { SyntheticDataBanner } from "../components/ui/SyntheticDataBanner";
 import { OutdatedAnalysisBanner } from "../components/ui/OutdatedAnalysisBanner";
 import { SourceBadge } from "../components/ui/SourceBadge";
+import { IrrigationUnknownNotice } from "../components/ui/IrrigationUnknownNotice";
 import { CandidateCard } from "../components/rotations/CandidateCard";
 import { CATALOG_VERSION, loadedCatalog } from "../catalog";
+import { SEASON_LABELS, type SeasonLabel } from "../api/client";
 import { normalizeWeights } from "../utils/validation";
 import type { PriorityWeights } from "../types/api";
 
@@ -30,14 +33,37 @@ export function RotationPage() {
   const selectCandidate = useAppStore((s) => s.selectCandidate);
   const latestObservation = useAppStore((s) => s.latestObservation);
   const guard = useLatestRequest();
+  const canWrite = useCanWrite();
   const { save, saving, error: saveError } = useSavePlan();
+  const { hash } = useLocation();
+
+  // Result navigation: /rotations#candidate-<id> (e.g. from assistant citations) jumps to that plan.
+  useEffect(() => {
+    if (!hash.startsWith("#candidate-")) return;
+    const el = document.getElementById(decodeURIComponent(hash.slice(1)));
+    if (el) {
+      el.scrollIntoView({ block: "start" });
+      el.focus({ preventScroll: true });
+    }
+  }, [hash, analysis]);
 
   const [seasons, setSeasons] = useState(analysis?.candidates[0]?.sequence.length ?? 3);
+  const defaultLabels = (n: number): SeasonLabel[] => Array.from({ length: n }, (_, i) => (i % 2 === 0 ? "maha" : "yala"));
+  const [seasonLabels, setSeasonLabels] = useState<SeasonLabel[]>(() => defaultLabels(seasons));
+  const changeSeasons = (n: number) => {
+    setSeasons(n);
+    setSeasonLabels((cur) => [...cur.slice(0, n), ...defaultLabels(n).slice(cur.length)].slice(0, n));
+  };
   const [weights, setWeights] = useState<PriorityWeights>(farm.profile.priority_weights);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
   const outdated = isAnalysisOutdated(analysis, farm.input_version);
+  // The live API requires an observation snapshot for this farm at its current version.
+  const observationId =
+    latestObservation && latestObservation.farmId === farm.id && latestObservation.inputVersion === farm.input_version
+      ? latestObservation.observationId
+      : null;
   const weightTotal = weights.water + weights.soil + weights.climate;
 
   const runRotation = async () => {
@@ -50,13 +76,9 @@ export function RotationPage() {
         {
           input_version: farm.input_version,
           // Only reference an observation loaded for this farm at its current version.
-          observation_id:
-            latestObservation &&
-            latestObservation.farmId === farm.id &&
-            latestObservation.inputVersion === farm.input_version
-              ? latestObservation.observationId
-              : null,
+          observation_id: observationId,
           seasons,
+          season_labels: seasonLabels,
           catalog_version: CATALOG_VERSION,
           priority_weights: normalizeWeights(weights),
         },
@@ -80,19 +102,25 @@ export function RotationPage() {
           {t("catalog.invalidBlocking")} <Link to="/catalog">{t("nav.catalog")}</Link>
         </div>
       )}
+      <IrrigationUnknownNotice farmId={farm.id} irrigation={farm.profile.irrigation_supply_mm_per_season} />
       {loadedCatalog.ok && loadedCatalog.approvedCrops.length === 0 && (
         <div className="notice notice-info" role="note">
-          {t("catalog.emptyNote")}
+          {USE_FIXTURES ? t("catalog.emptyNoteFixture") : t("catalog.emptyNoteLive")}
         </div>
       )}
 
-      <OutdatedAnalysisBanner isOutdated={outdated} onRerun={runRotation} />
+      <OutdatedAnalysisBanner isOutdated={outdated} onRerun={observationId ? runRotation : undefined} />
+      {!observationId && (
+        <div className="notice notice-warn" role="note">
+          {t("rotation.needsObservation")} <Link to={`/farms/${farm.id}`}>{t("rotation.loadObservations")}</Link>
+        </div>
+      )}
 
       <div className="card">
         <div className="row">
           <div className="field">
             <label htmlFor="seasons-select">{t("rotation.seasons")}</label>
-            <select id="seasons-select" value={seasons} onChange={(e) => setSeasons(Number(e.target.value))}>
+            <select id="seasons-select" value={seasons} onChange={(e) => changeSeasons(Number(e.target.value))}>
               {[3, 4, 5].map((n) => (
                 <option key={n} value={n}>
                   {n}
@@ -101,6 +129,43 @@ export function RotationPage() {
             </select>
           </div>
         </div>
+        <fieldset style={{ border: 0, padding: 0, margin: "12px 0 0" }}>
+          <legend style={{ fontWeight: 600 }}>{t("rotation.seasonLabels")}</legend>
+          <div className="row" style={{ alignItems: "flex-start" }}>
+            {seasonLabels.map((label, i) => (
+              <div className="field" key={i}>
+                <label htmlFor={`season-label-${i}`}>{t("rotation.seasonN", { n: i + 1 })}</label>
+                <select
+                  id={`season-label-${i}`}
+                  value={label}
+                  onChange={(e) => setSeasonLabels((ls) => ls.map((l, j) => (j === i ? (e.target.value as SeasonLabel) : l)))}
+                >
+                  {SEASON_LABELS.map((s) => (
+                    <option key={s} value={s}>
+                      {t(`rotation.seasonLabel.${s}`)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+          <p className="muted">{t("rotation.seasonLabelsHelp")}</p>
+        </fieldset>
+        <fieldset style={{ border: 0, padding: 0, margin: "12px 0 0" }}>
+          <legend style={{ fontWeight: 600 }}>{t("rotation.mode")}</legend>
+          <div className="row" style={{ alignItems: "flex-start" }}>
+            {(["standard", "soilRevive", "farmRecovery"] as const).map((m) => (
+              <label key={m} style={{ display: "flex", gap: 6, alignItems: "center", fontWeight: 400, opacity: m === "standard" ? 1 : 0.75 }}>
+                <input type="radio" name="planning-mode" checked={m === "standard"} disabled={m !== "standard"} readOnly />
+                {t(`rotation.modes.${m}`)}
+                {m !== "standard" && <span className="badge-planned">{t("common.roadmapFeature")}</span>}
+              </label>
+            ))}
+          </div>
+          <p className="muted">
+            {t("rotation.modeHelp")} <Link to="/roadmap">{t("nav.roadmap")}</Link>
+          </p>
+        </fieldset>
         <fieldset style={{ border: 0, padding: 0, margin: "12px 0 0" }}>
           <legend style={{ fontWeight: 600 }}>{t("rotation.priorityControls")}</legend>
           <div className="grid-2">
@@ -129,13 +194,14 @@ export function RotationPage() {
           type="button"
           className="btn btn-primary"
           onClick={runRotation}
-          disabled={loading || !(weightTotal > 0)}
+          disabled={loading || !(weightTotal > 0) || !canWrite || !observationId}
         >
           {loading ? t("common.loading") : analysis ? t("rotation.rerun") : t("rotation.run")}
         </button>
         {!(weightTotal > 0) && <span className="field-error"> {t("rotation.weightsZero")}</span>}
       </div>
 
+      {!canWrite && <p className="muted" role="note">{t("offline.writeBlocked")}</p>}
       {loading && <LoadingSpinner label={t("rotation.running")} />}
       {!loading && error != null && <ErrorMessage error={error} onRetry={runRotation} />}
       <ErrorMessage error={saveError} />
@@ -193,7 +259,7 @@ export function RotationPage() {
                       <button
                         type="button"
                         className="btn btn-primary"
-                        disabled={outdated || saving}
+                        disabled={outdated || saving || !canWrite}
                         title={outdated ? t("rotation.cannotSaveOutdated") : undefined}
                         onClick={() => save(analysis, cand.candidate_id)}
                       >

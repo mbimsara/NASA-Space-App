@@ -166,6 +166,8 @@ export interface WaterBudget {
 export interface WaterBudgetRange {
   /** Per season/crop record (rotation-score-0.1). */
   season_index?: number;
+  /** maha / yala / inter-season, when supplied. */
+  season_label?: string;
   crop_id?: string;
   demand_low_mm: number | null;
   demand_nominal_mm?: number | null;
@@ -173,6 +175,11 @@ export interface WaterBudgetRange {
   baseline_rainfall_mm: number | null;
   scenario_rainfall_mm: number | null;
   irrigation_mm: number | null;
+  /** Baseline (no scenario) available water and coverage, kept separate from the scenario values. */
+  baseline_available_water_mm?: number | null;
+  baseline_coverage_low_percent?: number | null;
+  baseline_coverage_high_percent?: number | null;
+  /** Scenario (or baseline when no scenario) available water. */
   available_water_mm: number | null;
   /** available − high demand */
   balance_low_mm: number | null;
@@ -249,8 +256,10 @@ export interface AssistantMessage {
   content: string;
   source_ids: string[];
   limitations: string[];
-  /** Optional extra metadata from Akash's service; the UI only relies on the four fields above. */
-  status?: string;
+  /** Optional extras from Akash's respond(); the UI only requires the four fields above. */
+  status?: "answered" | "insufficient_context" | "unsupported_question" | (string & {});
+  assumptions?: string[];
+  language?: string;
 }
 
 export interface AssistantRequest {

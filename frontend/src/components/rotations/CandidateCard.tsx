@@ -14,21 +14,25 @@ import { asSeasonRanges } from "../../utils/format";
 
 interface Props {
   candidate: RotationCandidate;
-  rank: number;
+  /** Rank in the current analysis; omit for a saved selection (no rank is stored). */
+  rank?: number;
   selected?: boolean;
   children?: ReactNode;
 }
 
 export function CandidateCard({ candidate: cand, rank, selected = false, children }: Props) {
   const { t } = useTranslation();
+  const title = rank === undefined ? t("plan.savedSelection", { id: cand.candidate_id }) : t("rotation.candidate", { index: rank });
   return (
     <article
+      id={`candidate-${cand.candidate_id}`}
+      tabIndex={-1}
       className="card"
-      aria-label={t("rotation.candidate", { index: rank })}
+      aria-label={title}
       style={selected ? { borderColor: "var(--green-600)", borderWidth: 2, background: "var(--green-50)" } : undefined}
     >
       <h3 style={{ margin: "0 0 8px", fontSize: "1rem" }}>
-        {t("rotation.candidate", { index: rank })}
+        {title}
         {selected && <span style={{ marginLeft: 8, fontSize: 12, color: "var(--green-700)" }}>✓ {t("rotation.selected")}</span>}
       </h3>
       <CropTimeline sequence={cand.sequence} />
