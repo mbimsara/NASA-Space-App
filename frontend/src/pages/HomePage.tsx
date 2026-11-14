@@ -46,7 +46,7 @@ export function HomePage() {
   return (
     <div className="landing" data-theme={theme}>
       <header className="land-nav">
-        <button className="brand" type="button" onClick={() => window.scrollTo(0, 0)}><span className="brand-mark"><Icon name="leaf" /></span><span>AgroSphere <b>AI</b></span></button>
+        <button className="brand" type="button" onClick={() => window.scrollTo(0, 0)}><span className="brand-mark"><img src="/images/agrosphere-logo.png" alt="AgroSphere AI Logo" className="brand-logo-img" /></span><span>AgroSphere <b>AI</b></span></button>
         <nav id="landing-navigation" className={menu ? "open" : ""} aria-label="Landing navigation" onClick={() => setMenu(false)}><a href="#platform">Platform</a><a href="#data">NASA data</a><a href="#impact">Impact</a><a href="#workspace">Workspace</a></nav>
         <div className="land-actions">
           <button className="icon-btn theme-toggle" type="button" onClick={toggleTheme} aria-label="Toggle theme"><Icon name={theme === "dark" ? "sun" : "moon"} /></button>
@@ -96,7 +96,7 @@ export function HomePage() {
         <section id="impact" className="land-section impact"><div className="section-kicker">DESIGNED FOR REAL-WORLD RESILIENCE</div><h2>Every tool supports the rotation decision.</h2><div className="impact-grid"><div><Icon name="climate" /><h3>Water security</h3><p>Compare rainfall, known field-applied irrigation, and crop demand.</p></div><div><Icon name="farm" /><h3>Soil and recovery</h3><p>Keep measured soil inputs distinct from modeled screening indicators.</p></div><div><Icon name="coin" /><h3>Financial scenarios</h3><p>Inspect ranges, sources, dates, and omitted cost categories.</p></div><div><Icon name="overview" /><h3>Climate context</h3><p>Explore observations, scenarios, and future climate-twin methods.</p></div></div></section>
         <section id="workspace" className="land-section intro"><div className="section-kicker">YOUR WORKSPACE</div><h2>Pick up where you left off.</h2><ErrorMessage error={error} onRetry={loadDemo} /><div className="feature-grid"><article className="feature-card"><h3>Recent farms</h3>{recentFarms.length ? recentFarms.map((farm) => <Link key={farm.id} to={`/farms/${farm.id}`}>{farm.name}</Link>) : <p>No farms yet on this device.</p>}</article><article className="feature-card"><h3>Saved plans</h3>{recentPlans.length ? recentPlans.map((plan) => <Link key={plan.id} to={`/plans/${plan.id}`}>{plan.name}{offlineIds.has(plan.id) ? " · Offline" : ""}</Link>) : <p>No saved plans yet on this device.</p>}</article><article className="feature-card"><h3>Start planning</h3><p>Create a farm or load the clearly labelled synthetic demonstration.</p><Link to="/farms/new">Create farm →</Link></article></div></section>
       </main>
-      <footer><div className="brand"><span className="brand-mark"><Icon name="leaf" /></span><span>AgroSphere <b>AI</b></span></div><p>NASA Space Apps Challenge 2026</p><span>Sources and uncertainty shown with results</span></footer>
+      <footer><div className="brand"><span className="brand-mark"><img src="/images/agrosphere-logo.png" alt="AgroSphere AI Logo" className="brand-logo-img" /></span><span>AgroSphere <b>AI</b></span></div><p>NASA Space Apps Challenge 2026</p><span>Sources and uncertainty shown with results</span></footer>
     </div>
   );
 }

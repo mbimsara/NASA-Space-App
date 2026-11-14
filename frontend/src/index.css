@@ -240,12 +240,22 @@ code {
 .brand-mark {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 11px;
-  background: #ffffff14;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #0a261a;
+  border: 1px solid #1c4b37;
+  box-shadow: 0 2px 8px rgba(10, 38, 26, 0.5);
   color: #72e2b1;
   flex: none;
+  padding: 3px;
+  box-sizing: border-box;
+}
+.brand-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .farm-switch {
