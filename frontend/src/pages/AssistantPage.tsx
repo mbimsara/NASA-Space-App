@@ -38,7 +38,7 @@ export function AssistantPage() {
   const [error, setError] = useState<unknown>(null);
   const logRef = useRef<HTMLDivElement>(null);
 
-  const contextKey = `${farm.id}|${analysis?.analysis_id}|${scenario?.scenario_id}|${candidateId}`;
+  const contextKey = `${farm.id}|${farm.input_version}|${analysis?.analysis_id}|${scenario?.scenario_id}|${candidateId}`;
   useEffect(() => {
     guard.cancel();
     // A conversation cannot cross farm/analysis/scenario context boundaries.
@@ -72,7 +72,7 @@ export function AssistantPage() {
   const planLink = (id: string) => `/farms/${farm.id}/rotations#candidate-${id}`;
 
   const sendMessage = async (text: string, lang: Language = language) => {
-    if (!text.trim()) return;
+    if (!text.trim() || outdated || !canWrite) return;
     const ticket = guard.next();
     setLoading(true);
     setError(null);
@@ -291,7 +291,7 @@ export function AssistantPage() {
       <ErrorMessage error={error} />
       {error instanceof ApiClientError && error.code === "UNSUPPORTED_LANGUAGE" && language !== "en" && (
         <div className="row" style={{ marginBottom: 12 }}>
-          <button type="button" className="btn btn-secondary" onClick={() => sendMessage(input, "en")} disabled={loading || !input.trim() || !canWrite || outdated}>
+          <button data-testid="assistant-english-retry" type="button" className="btn btn-secondary" onClick={() => sendMessage(input, "en")} disabled={loading || !input.trim() || !canWrite || outdated}>
             {t("assistant.askInEnglish")}
           </button>
           <span className="muted">{t("assistant.languagePending")}</span>
@@ -310,7 +310,7 @@ export function AssistantPage() {
           <label htmlFor="assistant-input" className="muted" style={{ fontWeight: 400 }}>
             {t("assistant.placeholder")}
           </label>
-          <input id="assistant-input" type="text" value={input} onChange={(e) => setInput(e.target.value)} disabled={loading} />
+          <input id="assistant-input" type="text" maxLength={2000} value={input} onChange={(e) => setInput(e.target.value)} disabled={loading} />
         </div>
         <button type="submit" className="btn btn-secondary" disabled={loading || !input.trim() || !canWrite || outdated}>
           {t("assistant.send")}

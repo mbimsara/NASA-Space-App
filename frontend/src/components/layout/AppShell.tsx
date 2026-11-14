@@ -59,6 +59,7 @@ export function AppShell() {
     return (
       <div>
         <a className="skip-link" href="#main">{t("nav.skipToContent")}</a>
+        {USE_FIXTURES && <div className="fixture-ribbon" role="note">{t("common.fixtureMode")}</div>}
         {!online && (
           <div className="offline-banner" role="status">
             <strong>{t("offline.title")}</strong> {t("offline.body")}

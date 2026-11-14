@@ -12,6 +12,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { FarmEnvelope, Language, RotationAnalysis, ScenarioResult } from "../types/api";
+import { APP_STORAGE_KEY } from "../api/config";
 
 export interface RecentItem {
   id: string;
@@ -64,7 +65,7 @@ function upsertRecent<T extends RecentItem>(list: T[], item: T, max = 8): T[] {
 
 export function initialLanguage(): Language {
   try {
-    const raw = localStorage.getItem("agrosphere_app");
+    const raw = localStorage.getItem(APP_STORAGE_KEY);
     const lang = raw ? JSON.parse(raw)?.state?.language : null;
     if (lang === "si" || lang === "ta" || lang === "en") return lang;
   } catch {
@@ -94,6 +95,7 @@ export const useAppStore = create<AppState>()(
         set((s) => ({
           ...(sameFarm ? {} : cleared),
           farm: env,
+          latestObservation: sameFarm && s.selectedFarmInputVersion === env.input_version ? s.latestObservation : null,
           selectedFarmId: env.id,
           selectedFarmInputVersion: env.input_version,
           recentFarms: upsertRecent(s.recentFarms, { id: env.id, name: env.profile.name }),
@@ -113,7 +115,7 @@ export const useAppStore = create<AppState>()(
         set({ ...cleared, farm: null, selectedFarmId: null, selectedFarmInputVersion: null }),
 
       putAnalysis: (analysis) => {
-        if (analysis.farm_id !== get().selectedFarmId) return false;
+        if (analysis.farm_id !== get().selectedFarmId || analysis.input_version !== get().selectedFarmInputVersion) return false;
         set((s) => ({
           analyses: { ...s.analyses, [analysis.analysis_id]: analysis },
           selectedAnalysisId: analysis.analysis_id,
@@ -124,7 +126,7 @@ export const useAppStore = create<AppState>()(
       },
 
       setLatestObservation: (o) => {
-        if (o.farmId !== get().selectedFarmId) return false;
+        if (o.farmId !== get().selectedFarmId || o.inputVersion !== get().selectedFarmInputVersion) return false;
         set({ latestObservation: o });
         return true;
       },
@@ -155,7 +157,7 @@ export const useAppStore = create<AppState>()(
       setLanguage: (lang) => set({ language: lang }),
     }),
     {
-      name: "agrosphere_app",
+      name: APP_STORAGE_KEY,
       // v2: rotation-score-0.1 shapes (0–100 scores, per-season water). Older cached results are dropped.
       version: 2,
       migrate: (persisted, version) => {
