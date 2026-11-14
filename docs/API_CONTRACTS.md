@@ -152,5 +152,11 @@ hypothetical labels remain explicit. No translations, external LLM requests,
 NASA retrievals, message storage or new scientific calculations occur.
 
 Unknown references return 404, relationship/version conflicts 409, invalid
-bodies/languages 422, and missing required persisted data or normalization/storage
+bodies 422 / `VALIDATION_ERROR`, unsupported assistant language 422 /
+`UNSUPPORTED_LANGUAGE`, and missing required persisted data or normalization/storage
 failures 503. See [examples and detailed assistant behavior](../backend/ASSISTANT.md).
+
+Frontend compatibility checks and outstanding UI changes are documented in
+[the integration report](../backend/FRONTEND_INTEGRATION.md). The assistant
+language error preserves HTTP 422 and field details while enabling Shehani's
+existing explicit English retry action. Other validation conventions are unchanged.
