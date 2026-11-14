@@ -25,7 +25,9 @@ def season_inputs(observations, start, end):
     source_refs = list(dict.fromkeys(source_refs))
     source_url = observations.get("source_url")
     if source_url is not None:
-        if not isinstance(source_url, str) or not source_url.startswith("https://power.larc.nasa.gov/"):
+        is_https = isinstance(source_url, str) and source_url.startswith("https://")
+        is_power = is_https and source_url.startswith("https://power.larc.nasa.gov/")
+        if not is_https or (observations.get("data_kind") != "synthetic" and not is_power):
             raise ValueError("Unexpected POWER source URL")
         if source_url not in source_refs:
             source_refs.append(source_url)

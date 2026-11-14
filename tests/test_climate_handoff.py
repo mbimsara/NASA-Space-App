@@ -57,6 +57,16 @@ class HandoffTests(unittest.TestCase):
         self.assertTrue(any("Incomplete seasonal rainfall" in note for note in result["limitations"]))
         self.assertTrue(any("retrieval time is unknown" in note for note in result["limitations"]))
 
+    def test_synthetic_https_fixture_source_is_allowed_but_modeled_non_nasa_is_not(self):
+        obs = example()["observation"]
+        obs["data_kind"] = "synthetic"
+        obs["source_url"] = "https://example.invalid/synthetic-power-fixture"
+        result = season_inputs(obs, "2025-01-01", "2025-01-03")
+        self.assertIn(obs["source_url"], result["source_refs"])
+        obs["data_kind"] = "modeled"
+        with self.assertRaises(ValueError):
+            season_inputs(obs, "2025-01-01", "2025-01-03")
+
     def test_invalid_provenance_is_not_silently_defaulted(self):
         obs = example()["observation"]
         obs["source_refs"] = []

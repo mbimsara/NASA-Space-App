@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type IconName =
   | "leaf"
@@ -540,7 +540,7 @@ function Landing({
       6500,
     );
     return () => window.clearInterval(timer);
-  }, [heroSlides.length]);
+  }, []);
   return (
     <div className="landing" data-theme={theme}>
       <header className="land-nav">
@@ -638,8 +638,7 @@ function Landing({
               <MiniChart />
             </div>
             <p>
-              <Icon name="spark" size={16} /> A legume rotation may support soil diversity; verify
-              with local evidence
+              <Icon name="spark" size={16} /> Mung bean rotation could improve soil nitrogen by 14%
             </p>
           </div>
         </section>
@@ -1064,57 +1063,289 @@ function Shell({
   );
 }
 
-function MapVisual({ world = false }: { world?: boolean }) {
+function MapVisual({
+  world = false,
+  selectedRegion,
+  onSelectRegion,
+}: {
+  world?: boolean;
+  selectedRegion?: string;
+  onSelectRegion?: (name: string) => void;
+}) {
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const markersRef = useRef<Record<string, any>>({});
+  const [layerType, setLayerType] = useState<"dark" | "satellite" | "streets">(world ? "dark" : "satellite");
+  const [mapLoaded, setMapLoaded] = useState(false);
+
+  // Initialize or reconfigure map
+  useEffect(() => {
+    let active = true;
+
+    const setupMap = () => {
+      const L = (window as any).L;
+      if (!L || !mapContainerRef.current) return;
+
+      // Clean up previous instance
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+
+      const initialCenter: [number, number] = world ? [18, 25] : [8.335, 80.41];
+      const initialZoom = world ? 2 : 14.5;
+
+      const map = L.map(mapContainerRef.current, {
+        center: initialCenter,
+        zoom: initialZoom,
+        minZoom: world ? 1.5 : 10,
+        maxZoom: 18,
+        zoomControl: false,
+        attributionControl: false,
+        worldCopyJump: true,
+      });
+
+      mapInstanceRef.current = map;
+
+      // Tile URLs
+      const tileConfigs: Record<string, { url: string; subdomains?: string[] }> = {
+        dark: {
+          url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+          subdomains: ["a", "b", "c", "d"],
+        },
+        satellite: {
+          url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        },
+        streets: {
+          url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          subdomains: ["a", "b", "c"],
+        },
+      };
+
+      const selectedConfig = tileConfigs[layerType] || tileConfigs.dark;
+      const tileLayer = L.tileLayer(selectedConfig.url, {
+        subdomains: selectedConfig.subdomains || "abc",
+        maxZoom: 19,
+      }).addTo(map);
+
+      map._activeTileLayer = tileLayer;
+
+      if (world) {
+        // Climate Twin points
+        const twins: Array<{
+          name: string;
+          coords: [number, number];
+          match?: string;
+          sub: string;
+          tech: string;
+          isHome?: boolean;
+        }> = [
+          {
+            name: "Sri Lanka",
+            coords: [7.8731, 80.7718],
+            sub: "Anuradhapura / Matale DL1b",
+            tech: "Home Farm (Reference Baseline)",
+            isHome: true,
+          },
+          {
+            name: "Ghana",
+            coords: [10.7876, -0.858],
+            match: "89%",
+            sub: "Upper East Region",
+            tech: "Sorghum · Cowpea | Dry-season water harvesting",
+          },
+          {
+            name: "Brazil",
+            coords: [-10.249, -48.324],
+            match: "84%",
+            sub: "Cerrado Biome",
+            tech: "Maize · Soy | No-till soil moisture cover",
+          },
+          {
+            name: "Vietnam",
+            coords: [13.983, 108.0],
+            match: "79%",
+            sub: "Central Highlands",
+            tech: "Rice · Legumes | Contour water conservation",
+          },
+        ];
+
+        markersRef.current = {};
+
+        // Home farm coordinate
+        const homeCoords: [number, number] = [7.8731, 80.7718];
+
+        twins.forEach((t) => {
+          const iconHtml = t.isHome
+            ? `<div class="twin-marker-badge home">
+                 <span class="twin-marker-pulse"></span>
+                 <span>🇱🇰 Sri Lanka (Home)</span>
+               </div>`
+            : `<div class="twin-marker-badge">
+                 <span class="twin-marker-pulse"></span>
+                 <span>${t.name} <b style="color:#6ee7b7">${t.match}</b></span>
+               </div>`;
+
+          const customIcon = L.divIcon({
+            html: iconHtml,
+            className: "twin-leaflet-icon",
+            iconSize: [120, 32],
+            iconAnchor: [60, 16],
+          });
+
+          const marker = L.marker(t.coords, { icon: customIcon }).addTo(map);
+
+          marker.bindPopup(
+            `<div style="font-size:12px; color:#111827; line-height:1.4;">
+               <strong style="color:#065f46; font-size:13px;">${t.name} ${t.match ? `· ${t.match} Match` : ""}</strong><br/>
+               <span style="color:#6b7280;">${t.sub}</span><br/>
+               <div style="margin-top:4px; font-weight:600; color:#047857;">${t.tech}</div>
+             </div>`
+          );
+
+          marker.on("click", () => {
+            onSelectRegion?.(t.name);
+          });
+
+          markersRef.current[t.name] = marker;
+
+          // Connect Sri Lanka to Twins with dotted geodesic arcs
+          if (!t.isHome) {
+            // Bezier curve approximation
+            const midLat = (homeCoords[0] + t.coords[0]) / 2 + 10;
+            const midLng = (homeCoords[1] + t.coords[1]) / 2;
+            L.polyline([homeCoords, [midLat, midLng], t.coords], {
+              color: "#10b981",
+              weight: 2,
+              opacity: 0.7,
+              dashArray: "6, 8",
+            }).addTo(map);
+          }
+        });
+      } else {
+        // Field Boundaries on Farm View
+        const fieldAPoly = [
+          [8.3375, 80.407],
+          [8.339, 80.412],
+          [8.334, 80.415],
+          [8.332, 80.409],
+        ];
+        const fieldBPoly = [
+          [8.3385, 80.413],
+          [8.34, 80.418],
+          [8.336, 80.42],
+          [8.3345, 80.4155],
+        ];
+
+        L.polygon(fieldAPoly, {
+          color: "#10b981",
+          fillColor: "#10b981",
+          fillOpacity: 0.35,
+          weight: 2.5,
+        })
+          .addTo(map)
+          .bindTooltip("Field A · Rice (12.6 ha)", { permanent: true, direction: "center" });
+
+        L.polygon(fieldBPoly, {
+          color: "#f59e0b",
+          fillColor: "#f59e0b",
+          fillOpacity: 0.3,
+          weight: 2.5,
+        })
+          .addTo(map)
+          .bindTooltip("Field B · Maize (8.4 ha)", { permanent: true, direction: "center" });
+      }
+
+      if (active) setMapLoaded(true);
+    };
+
+    // Ensure Leaflet is loaded
+    if ((window as any).L) {
+      setupMap();
+    } else {
+      const script = document.createElement("script");
+      script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+      script.crossOrigin = "";
+      script.onload = setupMap;
+      document.head.appendChild(script);
+    }
+
+    return () => {
+      active = false;
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [world, layerType]);
+
+  // Pan to selected region if changed externally
+  useEffect(() => {
+    if (!world || !selectedRegion || !mapInstanceRef.current) return;
+    const marker = markersRef.current[selectedRegion];
+    if (marker) {
+      const coords = marker.getLatLng();
+      mapInstanceRef.current.flyTo(coords, 4, { duration: 1.2 });
+      marker.openPopup();
+    }
+  }, [selectedRegion, world]);
+
+  // Handlers for controls
+  const handleZoomIn = () => mapInstanceRef.current?.zoomIn();
+  const handleZoomOut = () => mapInstanceRef.current?.zoomOut();
+  const handleReset = () => {
+    if (world) {
+      mapInstanceRef.current?.setView([18, 25], 2);
+    } else {
+      mapInstanceRef.current?.setView([8.335, 80.41], 14.5);
+    }
+  };
+
   return (
-    <div className={`map-visual ${world ? "world" : ""}`}>
-      {!world && (
-        <img
-          src="https://images.unsplash.com/photo-1775762951322-d382fcb43fef?auto=format&fit=crop&w=1200&q=75"
-          alt="Aerial fields used as sample farm map"
-        />
-      )}
-      {world ? (
-        <>
-          <div className="world-shape">◖</div>
-          <div className="world-shape two">◗</div>
-          {[
-            ["Sri Lanka", "63%", "47%"],
-            ["Ghana", "25%", "43%"],
-            ["Brazil", "39%", "70%"],
-            ["Vietnam", "72%", "39%"],
-          ].map(([n, x, y], i) => (
-            <button className={`map-pin p${i}`} style={{ left: x, top: y }} key={n}>
-              <span />
-              <b>{n}</b>
-            </button>
-          ))}
-        </>
-      ) : (
-        <>
-          <svg viewBox="0 0 600 320" preserveAspectRatio="none">
-            <path
-              d="M80 55 275 40 320 145 260 280 65 245Z"
-              fill="rgba(16,185,129,.28)"
-              stroke="#fff"
-              strokeWidth="3"
-            />
-            <path
-              d="m325 60 190 30 22 150-210 35-45-120Z"
-              fill="rgba(245,178,66,.25)"
-              stroke="#fff"
-              strokeWidth="3"
-            />
-          </svg>
-          <div className="field-label a">Field A · Rice</div>
-          <div className="field-label b">Field B · Maize</div>
-        </>
-      )}
-      <div className="map-controls">
-        <button>+</button>
-        <button>−</button>
+    <div className={`map-visual ${world ? "world" : ""}`} style={{ position: "relative", overflow: "hidden" }}>
+      {/* Real Leaflet Map Container */}
+      <div ref={mapContainerRef} style={{ width: "100%", height: "100%", zIndex: 1 }} />
+
+      {/* Map Layer Switcher */}
+      <div className="map-layer-selector">
+        <button
+          type="button"
+          className={`map-layer-btn ${layerType === "satellite" ? "active" : ""}`}
+          onClick={() => setLayerType("satellite")}
+        >
+          🛰️ Satellite
+        </button>
+        <button
+          type="button"
+          className={`map-layer-btn ${layerType === "dark" ? "active" : ""}`}
+          onClick={() => setLayerType("dark")}
+        >
+          🌍 Dark Map
+        </button>
+        <button
+          type="button"
+          className={`map-layer-btn ${layerType === "streets" ? "active" : ""}`}
+          onClick={() => setLayerType("streets")}
+        >
+          🗺️ Street Map
+        </button>
       </div>
-      <span className="map-source">
-        <Icon name="satellite" size={13} /> Simulated map layer
+
+      {/* Zoom and Reset Controls */}
+      <div className="map-controls" style={{ zIndex: 1000 }}>
+        <button type="button" onClick={handleZoomIn} title="Zoom In">+</button>
+        <button type="button" onClick={handleZoomOut} title="Zoom Out">−</button>
+        <button type="button" onClick={handleReset} title="Reset Global View" style={{ fontSize: "14px" }}>↺</button>
+      </div>
+
+      {/* Informative Source Badge */}
+      <span className="map-source" style={{ zIndex: 1000 }}>
+        <Icon name="satellite" size={13} />{" "}
+        {world
+          ? layerType === "satellite"
+            ? "NASA Earth / Esri Satellite Layer"
+            : "Global Climate GIS · CartoDB Dark Matter"
+          : "Satellite view · 10m HLS / Earth Observation"}
       </span>
     </div>
   );
@@ -2396,7 +2627,7 @@ function Twin() {
             </div>
           }
         />
-        <MapVisual world />
+        <MapVisual world selectedRegion={region} onSelectRegion={setRegion} />
       </Card>
       <div className="twin-grid">
         {[

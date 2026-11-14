@@ -1,6 +1,16 @@
 # Design handoff
 
-Owner: Tharuka. Implementation: Shehani. Figma project/file link: **pending — Tharuka to add the shareable design-file URL**.
+Owner: Tharuka. Implementation: Shehani.
+Interactive Prototype: [`figma-prototype/Build AgroSphere AI MVP/`](../figma-prototype/Build%20AgroSphere%20AI%20MVP/)
+
+The interactive Figma prototype has been exported and structured under [`figma-prototype/Build AgroSphere AI MVP/`](../figma-prototype/Build%20AgroSphere%20AI%20MVP/). It runs as a Vite/React application showcasing the end-to-end user experience for the Sri Lankan demonstration farm (Matale).
+
+To run locally:
+```bash
+cd "figma-prototype/Build AgroSphere AI MVP"
+pnpm install
+pnpm dev
+```
 
 Core journey: farm setup → observations → three rotation alternatives where feasible → climate scenario → grounded explanation → saved plan.
 
