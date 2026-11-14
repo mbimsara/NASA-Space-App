@@ -1,7 +1,9 @@
 # Bhagya review — Sri Lankan crop catalog draft v0.1
 
-Review date: 2026-11-14  
-Research commit: `486b081` by Tharuka  
+Review date: 2026-11-14
+
+Research commit: `486b081` by Tharuka
+
 Decision: **structure accepted; scientific values and rules remain pending**
 
 ## Catalog decision
