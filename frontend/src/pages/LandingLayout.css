@@ -2,6 +2,11 @@
 .landing { --landing-gutter: clamp(20px, 6.5vw, 112px); }
 .landing .land-nav { position: sticky; top: 0; height: 76px; padding-inline: var(--landing-gutter); gap: 24px; }
 .landing .brand { flex-shrink: 0; padding: 0; white-space: nowrap; }
+.landing .landing-brand-logo { display: block; width: clamp(140px, 18vw, 230px); height: auto; object-fit: contain; }
+.landing .land-nav, .landing footer { background: #0e1d17; border-color: #294138; color: #edf8f2; }
+.landing .land-nav nav { color: #edf8f2; }
+.landing .land-nav .icon-btn, .landing .land-nav .btn-secondary { color: #edf8f2; background: #172a22; border-color: #345047; }
+.landing .brand:focus-visible { outline: 2px solid #6ee7b7; outline-offset: 4px; }
 .landing .brand-mark { flex: none; }
 .landing .brand-mark svg { width: 28px; height: 28px; }
 .landing .land-nav nav { gap: clamp(18px, 2.4vw, 36px); }
@@ -53,6 +58,7 @@
 @media (max-width: 850px) {
   .landing .land-nav nav { display: none; position: absolute; inset: 75px 0 auto; padding: 24px; background: var(--surface); flex-direction: column; border-bottom: 1px solid var(--line); }
   .landing .land-nav nav.open { display: flex; }
+  .landing .land-nav nav { background: #0e1d17; border-color: #294138; }
   .landing .mobile-menu { display: grid; }
   .landing .land-actions > .btn-secondary { display: none; }
 }
