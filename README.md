@@ -17,6 +17,7 @@ The repository contains development plans, shared data contracts, synthetic fixt
 | [First milestone backlog](docs/BACKLOG.md) | Concrete starting tasks and acceptance checks |
 | [Data sources](docs/DATA_SOURCES.md) | NASA integration research register |
 | [Climate handoff](docs/CLIMATE_HANDOFF.md) | Working module interface, examples and teammate integration instructions |
+| [SMAP preparation](docs/SMAP.md) | Verified public discovery, quality filtering and account/download prerequisites |
 | [Attribution](docs/ATTRIBUTION.md) | NASA POWER credit and metadata requirements |
 | [Agronomy rules](docs/AGRONOMY_RULES.md) | Evidence and model review process |
 | [Design handoff](docs/DESIGN.md) | Tharuka's UI/UX handoff to Shehani |

@@ -10,7 +10,7 @@ Use resources listed on the [competition resources page](https://www.spaceappsch
 | --- | --- | --- |
 | NASA POWER | Daily T2M and PRECTOTCORR via AG community, UTC | Live 2025 demo retrieval verified; see adapter guide |
 | GPM | Precipitation observations | Product/version, access, coverage and resolution to verify |
-| SMAP | Regional soil-moisture context | Product, quality flags, coverage and field-scale limitations to verify |
+| SMAP SPL3SMP_E V006 | Regional soil-moisture context | Public granule discovery verified; quality gate tested; authenticated subset/extraction pending. See [SMAP guide](SMAP.md) |
 | Landsat / MODIS / VIIRS | Competition-listed vegetation/land-surface history | Specific products, access and quality processing to verify; HLS is not currently approved |
 
 Additional listed candidates include SRTM, ECOSTRESS, GLDAS/NLDAS, FAO GAEZ, and partner resources Sentinel-2/ERA5. Evaluate geographic coverage and relevance before adding integrations; many other resources on the page focus on the United States.
