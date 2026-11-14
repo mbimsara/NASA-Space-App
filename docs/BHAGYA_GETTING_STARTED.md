@@ -69,12 +69,66 @@ Access credentials, provider downloads, caching, and geospatial processing
 belong in Matheesha's adapter/backend work. This package accepts normalized
 values and preserves their source label.
 
+### Current NASA POWER handoff
+
+Matheesha's `matheesha/nasa-power-integration` branch now produces a normalized
+NASA POWER result. For the connected first milestone, pass that result to
+`ClimateInput.from_nasa_power(...)`, then pass the returned input to
+`calculate_water_budget(...)`.
+
+Only `summary.rainfall_total_mm` is accepted. It represents the complete
+requested period in millimetres. If even one daily rainfall value is missing,
+Matheesha's adapter returns `null` for the total and this engine rejects it.
+Never replace it with `rainfall_available_days_mm`, and never interpret NASA
+POWER as an individual-field measurement.
+
+The requested POWER dates must cover the same period as the crop-demand value.
+Before integration, Bhagya and Matheesha still need to agree on:
+
+- crop-cycle start and end dates;
+- whether crop demand uses total or effective rainfall;
+- irrigation efficiency, runoff, and soil-storage assumptions;
+- acceptable observation coverage and source/version metadata.
+
+SMAP can later add regional surface-moisture context, while GPM IMERG can later
+provide a precipitation comparison. Neither is needed to run the initial
+candidate generator. Landsat/HLS, MODIS/VIIRS, SRTM, and ECOSTRESS are later
+contextual inputs and should not delay the connected core.
+
+## Current shared contracts
+
+The branch includes the shared `origin/main` contract commit. The crop loader
+reads `data/catalogs/crops.json` according to
+`data/schemas/crop-catalog.schema.json`. The committed catalog is deliberately
+empty and research-pending, so it produces no recommendations.
+
+Candidate generation example:
+
+```python
+from agrosphere_rotation import RepeatPolicy, generate_candidates, load_catalog
+
+catalog_version, crops = load_catalog("data/catalogs/crops.json")
+result = generate_candidates(
+    crops,
+    ("maha", "yala", "maha"),
+    excluded_crop_ids=frozenset(),
+    repeat_policy=RepeatPolicy(
+        forbid_consecutive_crop=False,
+        forbid_consecutive_family=False,
+    ),
+)
+```
+
+Repeat constraints default to disabled because no scientific rule has been
+approved. Enable them only after recording evidence and Bhagya's review in
+`docs/AGRONOMY_RULES.md`.
+
 ## Next implementation order
 
-1. Approve a small sourced crop catalog.
-2. Add three-to-five-season candidate generation.
-3. Add hard exclusions before ranking: season, farmer exclusions, crop history,
-   and documented repeat-family/crop rules.
-4. Add score components with reasons and assumptions in every result.
+1. Approve a small sourced crop catalog; the shared catalog is currently empty.
+2. Record and approve repeat-crop/family rules in the agronomy register.
+3. Connect farm history and farmer exclusions from the shared farm contract.
+4. Specify score components, normalization, tie-breaking, reasons, and model
+   version before implementing numerical ranking.
 5. Confirm effective-rainfall and irrigation-efficiency assumptions with
    Matheesha, then extend the water budget and scenario tests.

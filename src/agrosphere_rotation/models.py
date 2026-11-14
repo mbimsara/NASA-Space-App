@@ -20,9 +20,10 @@ class Crop:
     id: str
     name: str
     family: str
-    suitable_seasons: frozenset[Season]
+    suitable_seasons: frozenset[str]
     source_urls: tuple[str, ...]
     water_demand_mm: float | None = None
+    review_status: str = "draft"
     limitations: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
@@ -36,6 +37,8 @@ class Crop:
             raise ValueError("water_demand_mm must be positive when known")
         if not self.source_urls or any(urlparse(url).scheme not in {"http", "https"} for url in self.source_urls):
             raise ValueError("at least one HTTP(S) source URL is required")
+        if self.review_status not in {"draft", "approved"}:
+            raise ValueError("review_status must be draft or approved")
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,6 +59,35 @@ class ClimateInput:
             raise ValueError("rainfall change cannot be below -100 percent")
         if not self.source.strip():
             raise ValueError("climate source is required")
+
+    @classmethod
+    def from_nasa_power(
+        cls,
+        normalized: dict,
+        *,
+        irrigation_mm: float = 0,
+        rainfall_change_percent: float = 0,
+    ) -> "ClimateInput":
+        """Create an input from Matheesha's normalized NASA POWER result.
+
+        Incomplete periods have a null rainfall total and are rejected. The
+        available-days partial sum must never be substituted for a full total.
+        """
+
+        if normalized.get("provider") != "NASA POWER":
+            raise ValueError("expected a normalized NASA POWER result")
+        summary = normalized.get("summary", {})
+        rainfall = summary.get("rainfall_total_mm")
+        if rainfall is None:
+            raise ValueError("complete-period rainfall_total_mm is required")
+        return cls(
+            rainfall_mm=rainfall,
+            irrigation_mm=irrigation_mm,
+            rainfall_change_percent=rainfall_change_percent,
+            source="NASA POWER (modeled gridded estimate)",
+            observation_start=summary["start"],
+            observation_end=summary["end"],
+        )
 
 
 @dataclass(frozen=True, slots=True)
