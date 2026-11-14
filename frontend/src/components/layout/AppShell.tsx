@@ -63,7 +63,7 @@ export function AppShell() {
             <strong>{t("offline.title")}</strong> {t("offline.body")}
           </div>
         )}
-        <main id="main" ref={mainRef} tabIndex={-1} style={{ outline: "none" }}>
+        <main id="main" className="landing-main" ref={mainRef} tabIndex={-1} style={{ outline: "none" }}>
           <Outlet />
         </main>
       </div>
