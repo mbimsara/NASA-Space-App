@@ -151,6 +151,11 @@ export interface RotationRequest {
   season_labels?: SeasonLabel[];
   catalog_version: string;
   priority_weights: { water: number; soil: number; climate: number };
+  /**
+   * Season-specific rainfall: "calendar" lets the server pick one historical season
+   * per planned season; a list gives explicit chronological dates. Omit to keep water unknown.
+   */
+  season_periods?: "calendar" | { start: string; end: string }[];
 }
 
 /** POST /farms/:id/rotations — returns immutable rotation analysis */

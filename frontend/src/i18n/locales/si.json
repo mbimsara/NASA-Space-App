@@ -194,6 +194,16 @@
     "loadObservations": "නිරීක්ෂණ පූරණය කරන්න",
     "seasonLabels": "මෙම භ්‍රමණයේ කන්න",
     "seasonLabelsHelp": "එක් එක් පියවර සඳහා කන්නය තෝරන්න. කන්න ගණනෙන් පමණක් දින දර්ශනයක් තීරණය නොකරයි.",
+    "seasonInputsTitle": "කන්න වර්ෂාපතන දත්ත",
+    "seasonInputsHelp": "සැලසුම් කළ සෑම කන්නයක්ම තමන්ගේම පසුගිය කන්නයක NASA POWER වර්ෂාපතනය භාවිත කරයි. මේවා ඓතිහාසික යොමු කාල පරිච්ඡේද මිස අනාවැකි නොවේ.",
+    "seasonColumn": "කන්නය",
+    "seasonPeriod": "යොමු කාල පරිච්ඡේදය",
+    "seasonRainfall": "සමස්ත වර්ෂාපතනය",
+    "seasonCoverage": "දත්ත ඇති දින",
+    "seasonPeriodSource": {
+      "season_calendar": "කන්න දින දර්ශනය",
+      "request": "තෝරාගත් දින"
+    },
     "seasonLabel": {
       "maha": "මහ",
       "yala": "යල",

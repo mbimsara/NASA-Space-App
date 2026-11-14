@@ -225,6 +225,16 @@
     "loadObservations": "Load observations",
     "seasonLabels": "Seasons in this rotation",
     "seasonLabelsHelp": "Choose the season for each step. The engine does not infer a calendar from the number of seasons.",
+    "seasonInputsTitle": "Season rainfall inputs",
+    "seasonInputsHelp": "Each planned season uses NASA POWER rainfall from its own past season. These are historical reference periods, not forecasts.",
+    "seasonColumn": "Season",
+    "seasonPeriod": "Reference period",
+    "seasonRainfall": "Rainfall total",
+    "seasonCoverage": "Days with data",
+    "seasonPeriodSource": {
+      "season_calendar": "Season calendar",
+      "request": "Chosen dates"
+    },
     "seasonLabel": {
       "maha": "Maha",
       "yala": "Yala",

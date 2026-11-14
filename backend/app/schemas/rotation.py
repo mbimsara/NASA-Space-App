@@ -1,5 +1,6 @@
 """Strict HTTP contracts for immutable rotation analyses."""
 
+from datetime import date
 from typing import Literal
 
 from pydantic import AwareDatetime, Field, model_validator
@@ -10,6 +11,28 @@ from app.schemas.farm import PriorityWeights, StrictSchema
 SeasonLabel = Literal["maha", "yala", "inter-season"]
 
 
+class SeasonPeriodRequest(StrictSchema):
+    """Inclusive historical reference period (UTC dates) for one planned season."""
+
+    start: date
+    end: date
+
+
+class SeasonInputResponse(StrictSchema):
+    season_index: int = Field(ge=1)
+    season_label: SeasonLabel
+    period_start: date
+    period_end: date
+    period_source: Literal["season_calendar", "request"]
+    observation_id: str
+    data_kind: Literal["observed", "modeled", "synthetic", "mixed"]
+    expected_days: int = Field(gt=0)
+    rainfall_valid_days: int = Field(ge=0)
+    rainfall_total_mm: float | None = Field(ge=0, allow_inf_nan=False)
+    source_refs: list[str]
+    limitations: list[str]
+
+
 class RotationRequest(StrictSchema):
     input_version: int = Field(ge=1, strict=True)
     observation_id: str = Field(min_length=1)
@@ -17,6 +40,10 @@ class RotationRequest(StrictSchema):
     season_labels: list[SeasonLabel]
     catalog_version: str = Field(min_length=1)
     priority_weights: PriorityWeights
+    # Optional season-specific water inputs. Omitted: water stays unknown (original
+    # behavior). "calendar": the server picks the latest matching historical season
+    # for each planned season. A list: one explicit chronological period per season.
+    season_periods: Literal["calendar"] | list[SeasonPeriodRequest] | None = None
 
     @model_validator(mode="after")
     def labels_match_seasons(self):
@@ -107,3 +134,5 @@ class RotationAnalysisResponse(StrictSchema):
     assumptions: list[str]
     source_refs: list[str]
     limitations: list[str]
+    # Present only when season_periods was requested; one dated rainfall input per season.
+    season_inputs: list[SeasonInputResponse] = Field(default_factory=list)
