@@ -1,65 +1,69 @@
-# AgroSphere AI
+﻿<div align="center">
+  <img src="frontend/public/images/agrosphere-logo-transparent.png" alt="AgroSphere AI" width="560" />
+  <h1>Earth intelligence. Thoughtful farming.</h1>
+  <p>Compare crop rotations, explore water trade-offs, and plan with NASA observations.</p>
+  <p><strong>NASA Space Apps Challenge 2026 · Field Shift: Adapting Farms with NASA Data</strong></p>
+  <p>
+    <a href="#quick-start">Quick start</a> ·
+    <a href="#platform">Platform</a> ·
+    <a href="#architecture">Architecture</a> ·
+    <a href="#documentation">Documentation</a> ·
+    <a href="CONTRIBUTING.md">Contribute</a>
+  </p>
+  <p>
+    <img src="https://img.shields.io/badge/React-TypeScript-149ECA?style=flat-square" alt="React and TypeScript" />
+    <img src="https://img.shields.io/badge/FastAPI-Python-009688?style=flat-square" alt="FastAPI and Python" />
+    <img src="https://img.shields.io/badge/Data-NASA_POWER_%2B_SMAP-166534?style=flat-square" alt="NASA POWER and SMAP data" />
+    <img src="https://img.shields.io/badge/Stage-Development-F0B429?style=flat-square" alt="Development stage" />
+  </p>
+</div>
 
-A farming decision-support platform for NASA Space Apps Challenge 2026: **Field Shift: Adapting Farms with NASA Data**.
+---
 
-AgroSphere combines Earth observations, farmer inputs, and local agronomy to help farmers compare crop rotations. Every feature supports the same farm profile and rotation decision.
+AgroSphere AI connects Earth observations, farmer inputs, and crop-rotation models in one decision workspace. Start with a farm profile, compare three to five seasons, test rainfall changes, and inspect the evidence behind each result.
 
-## Start here
+**Built for transparent decisions:** observations, hypothetical scenarios, synthetic demonstrations, and measured field inputs keep their own labels. The platform is under development; crop catalogs remain draft and outputs require agronomic review.
 
-The repository includes a runnable React frontend and FastAPI backend with SQLite farm persistence, validation, version checks, and environment-based database/CORS configuration. Farm observations integrate Matheesha's NASA POWER adapter. Rotation scoring is implemented as a Python domain package; its HTTP endpoint and the scenario, assistant, and saved-plan endpoints remain to be connected.
+## Platform
 
-| Resource | Purpose |
+| Capability | What you can explore |
 | --- | --- |
-| [Implementation plan](IMPLEMENTATION_PLAN.md) | Detailed responsibilities for all six members |
-| [Contributing](CONTRIBUTING.md) | Setup status, workflow, review and verification |
-| [Architecture](docs/ARCHITECTURE.md) | System boundaries and open decisions |
-| [API contracts](docs/API_CONTRACTS.md) | Proposed endpoints, fields, units and errors |
-| [First milestone backlog](docs/BACKLOG.md) | Concrete starting tasks and acceptance checks |
-| [Data sources](docs/DATA_SOURCES.md) | NASA integration research register |
-| [Climate handoff](docs/CLIMATE_HANDOFF.md) | Working module interface, examples and teammate integration instructions |
-| [Environment contract](docs/ENVIRONMENT_CONTRACT.md) | Unified POWER/SMAP response, reproducible examples and twin sensitivity |
-| [SMAP preparation](docs/SMAP.md) | Verified public discovery, quality filtering and account/download prerequisites |
-| [SMAP automation](docs/SMAP_AUTOMATION.md) | Private local sign-in, resumable subset jobs, retries and coverage checks |
-| [Attribution](docs/ATTRIBUTION.md) | NASA POWER credit and metadata requirements |
-| [Agronomy rules](docs/AGRONOMY_RULES.md) | Evidence and model review process |
-| [Design handoff](docs/DESIGN.md) | Tharuka's design system as integrated into Shehani's functional frontend |
-| [Demo guide](docs/DEMO.md) | Connected walkthrough and fallback rules |
-| [Shared data](data/README.md) | Synthetic farm, catalog and schemas |
+| Farm workspace | Location, crop history, goals, constraints, irrigation, and measured soil inputs in a shared farm record. |
+| Earth observations | NASA POWER climate observations with persisted snapshots and caching; SMAP preparation and regional soil-moisture processing tools. |
+| Crop rotation | Candidate sequences, constraints, rankings, explanations, and seasonal water budgets. |
+| Climate scenarios | Hypothetical rainfall sensitivity applied to saved analyses without changing the original observations. |
+| Financial scenarios | Frontend cost and income comparisons using explicit inputs and ranges. |
+| Grounded assistant | Deterministic explanations from persisted analysis context, without an external AI provider. The backend currently supports English. |
+| Saved plans | Immutable plan APIs, frontend reporting, action-calendar, and cached offline viewing flows. |
+| Accessible interface | Responsive layouts, light and dark themes, and English, Sinhala, and Tamil interface resources. |
 
-## Repository structure
+WeedShield, advanced climate twins, voice interaction, and other capabilities awaiting validated models or data remain on the roadmap. Interface translation availability does not imply multilingual backend assistant support.
 
-| Path | Contents and owner boundary |
-| --- | --- |
-| `backend/app/` | Dulanjaya's FastAPI application, routes, configuration, SQLAlchemy models, persistence, and observation services |
-| `backend/services/` | Matheesha's provider-facing NASA POWER and climate modules used by the backend |
-| `backend/tests/` | Backend API, configuration, cache, persistence, and provider-boundary tests |
-| `frontend/src/` | Shehani's React/TypeScript application, pages, API client, fixture API, state, catalog validation, and finance calculator |
-| `src/agrosphere_rotation/` | Bhagya's crop-rotation domain package: catalog loading, candidates, constraints, scoring, and water budgets |
-| `data/catalogs/` | Versioned crop and crop-water catalogs; all eight crops currently remain `draft` |
-| `data/fixtures/` | Explicitly synthetic farm, climate, environment, and interface-development examples |
-| `data/schemas/` | Shared JSON schemas for persisted and exchanged data |
-| `docs/` | API contracts, model specifications, evidence, architecture, data sources, and teammate handoffs |
-| `scripts/` | Data validation plus climate, NASA POWER, SMAP, and environment utilities |
-| `tests/` | Shared climate, SMAP, environment, rotation, and water-model tests |
-| `.github/workflows/` | Shared-data and backend continuous-integration checks |
+### A connected journey
 
-Generated or local-only directories such as `.venv/`, `frontend/node_modules/`,
-`frontend/dist/`, caches, SQLite databases, and `.env` files must remain uncommitted.
+**Create a farm → review observations → compare rotations → test rainfall changes → inspect water and financial trade-offs → ask for an explanation → save a plan.**
+
+Use **View demo** on the welcome page to enter the demonstration experience. Synthetic data is explicitly labelled; it is not evidence about a real farm.
 
 ## Quick start
 
 ### Requirements
 
-- Git
-- Python 3.10 or newer (Python 3.12 is used in CI)
-- Node.js 24 and npm 11 for the frontend
+- **Python 3.11+** for the root domain package; CI uses Python 3.12.
+- **Node.js 24 and npm 11** for the frontend.
+- **Git** and two terminal windows for the full application.
 
-Clone the repository and enter it before running the following commands.
+Clone the repository and enter the project:
 
-### 1. Start the backend
+```bash
+git clone https://github.com/shehani419/NASA-Space-App.git
+cd NASA-Space-App
+```
 
-The backend loads configuration from `.env` at the repository root. On Windows
-PowerShell:
+### 1. Run the backend
+
+<details open>
+<summary><strong>Windows PowerShell</strong></summary>
 
 ```powershell
 python -m venv .venv
@@ -70,7 +74,10 @@ Set-Location backend
 python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-On Linux or macOS:
+</details>
+
+<details>
+<summary><strong>Linux / macOS</strong></summary>
 
 ```bash
 python3 -m venv .venv
@@ -81,23 +88,19 @@ cd backend
 python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-If `.env` already exists, edit it instead of overwriting it. The default SQLite
-database is created under `backend/` when the server is started there.
+</details>
 
-- Health check: <http://127.0.0.1:8000/api/v1/health>
-- Swagger UI: <http://127.0.0.1:8000/docs>
-- OpenAPI document: <http://127.0.0.1:8000/openapi.json>
+If `.env` already exists, edit it instead of copying over it. Configuration loads from the repository root. Starting the backend from `backend/` places the default SQLite database there.
 
-Currently implemented HTTP routes cover health, farm create/read/update, NASA
-POWER observation retrieval, stored observation snapshots, and immutable crop-
-rotation analyses. Scenario, assistant, and saved-plan HTTP routes still need to
-be connected.
-See the [complete backend guide](backend/README.md) for configuration, request
-examples, cache behavior, database paths, and tests.
+| Local endpoint | Purpose |
+| --- | --- |
+| [Health](http://127.0.0.1:8000/api/v1/health) | Check backend availability |
+| [API explorer](http://127.0.0.1:8000/docs) | Interactive request documentation |
+| [OpenAPI](http://127.0.0.1:8000/openapi.json) | Machine-readable API schema |
 
-### 2. Start the frontend
+### 2. Run the frontend
 
-Open a second terminal from the repository root:
+In a second terminal, from the repository root:
 
 ```powershell
 Set-Location frontend
@@ -106,19 +109,59 @@ npm ci
 npm run dev
 ```
 
-Linux/macOS uses `cp .env.example .env.local` instead of `Copy-Item`. Open
-<http://localhost:5173> after Vite starts.
+On Linux/macOS, use `cd frontend` and `cp .env.example .env.local`. If the environment file already exists, edit it instead. On PowerShell systems that block `npm.ps1`, use `npm.cmd` for these commands.
 
-The frontend defaults to `VITE_USE_FIXTURES=true`, which supports the complete
-demonstration journey with clearly labelled synthetic data. To exercise the
-implemented backend routes, set `VITE_USE_FIXTURES=false` in
-`frontend/.env.local` and restart Vite. The full journey cannot use live mode
-until the remaining HTTP routes are implemented. See the
-[frontend guide](frontend/README.md) for its structure and integration notes.
+Open **[localhost:5173](http://localhost:5173)** after Vite starts.
 
-### 3. Run verification
+### 3. Choose your data mode
 
-Root data and domain checks:
+Configure `frontend/.env.local`, then restart Vite:
+
+| Setting | Behavior |
+| --- | --- |
+| `VITE_USE_FIXTURES=false` | Default live mode. Calls the backend at `VITE_API_BASE_URL`. |
+| `VITE_USE_FIXTURES=true` | Explicit synthetic demonstration mode for UI exploration without the backend. |
+| `VITE_API_BASE_URL=http://localhost:8000/api/v1` | Local backend URL. |
+
+Live NASA retrieval requires provider connectivity. SMAP downloads and optional HDF5 processing have separate prerequisites documented in the SMAP guides.
+
+## Architecture
+
+```text
+React + TypeScript workspace
+           |
+           +-- live API --> FastAPI --> SQLite snapshots and farm records
+           |                  |
+           |                  +-- crop-rotation and water-budget domain engine
+           |                  +-- NASA POWER observation services
+           |                  +-- scenarios, grounded assistant, saved plans
+           |
+           +-- explicit fixture mode --> labelled synthetic examples
+
+SMAP utilities --> discovery, quality filtering, regional environment context
+```
+
+| Location | Responsibility |
+| --- | --- |
+| `frontend/src/` | React pages, routing, API clients, state, translations, finance, and offline flows |
+| `backend/app/` | FastAPI routes, validation, persistence, configuration, and application services |
+| `backend/services/` | Provider-facing NASA POWER and climate modules |
+| `src/agrosphere_rotation/` | Crop catalogs, candidates, constraints, scoring, and water budgets |
+| `data/catalogs/` | Versioned crop and water catalogs; all eight crops currently remain draft |
+| `data/fixtures/` | Explicitly synthetic development examples |
+| `data/schemas/` | Shared JSON contracts |
+| `scripts/` | Data validation, POWER, SMAP, and environment utilities |
+| `tests/` and `backend/tests/` | Domain, provider, API, persistence, and integration checks |
+| `docs/` | Scientific assumptions, contracts, architecture, and integration handoffs |
+| `.github/workflows/` | Shared-data, backend, and frontend CI |
+
+### Backend coverage
+
+Implemented routes cover health, farm creation and versioned updates, observation snapshots, rainfall sensitivity, immutable rotation analyses, analysis scenarios, grounded assistant messages, and saved plans. See the [backend guide](backend/README.md), [API contracts](docs/API_CONTRACTS.md), and [assistant and saved-plan handoff](docs/ASSISTANT_SAVED_PLANS_INTEGRATION.md) for exact contracts.
+
+## Verification
+
+From the repository root, with the Python environment active:
 
 ```bash
 python -m pip install -e ".[dev]"
@@ -126,96 +169,71 @@ python scripts/validate_data.py
 python -m pytest tests -v
 ```
 
-Frontend checks, from `frontend/`:
-
-```bash
-npm run lint
-npm test
-npm run build
-```
-
-Backend checks require the backend dependencies and run from `backend/`:
+From `backend/`, after installing backend dependencies:
 
 ```bash
 python -m pytest -q
 ```
 
-GitHub Actions runs shared-data and backend checks on relevant pushes and pull
-requests. Optional SMAP HDF5 tests install the dependencies in
-`backend/requirements-smap.txt` in their separate CI job.
+From `frontend/`, after `npm ci`:
 
-## Product scope
+```bash
+npm run typecheck
+npm test
+npm run build
+```
 
-### Original modules
+Additional checks are available through `npm run lint` and `npm run test:e2e`; browser tests require their Playwright setup. Optional SMAP HDF5 tests use `backend/requirements-smap.txt`. CI runs checks according to each workflow's path filters.
 
-1. **My Farm Digital Twin:** select a farm and explore historical rainfall, temperature, regional soil moisture, and vegetation observations.
-2. **Smart Crop Rotation:** compare crop sequences over three to five seasons using farm conditions, constraints, and priorities.
-3. **Climate Scenarios:** explore historical climate risk indicators and test hypothetical changes such as reduced rainfall.
-4. **WeedShield:** explore photo-based weed coverage analysis after selecting and validating a suitable model.
-5. **SoilRevive:** compare rotation strategies for soil cover, crop diversity, and legumes.
-6. **FarmRecovery:** compare recovery strategies following floods or droughts.
-7. **Global Climate Twin Finder:** identify regions with similar historical climate patterns.
-8. **AI Assistant:** explain actual farm analysis and rotation results in English, Sinhala, and Tamil.
+## Data and model principles
 
-### Added features
+- **Traceable sources:** show dates, units, coverage, and spatial context with observations.
+- **Measured inputs stay distinct:** regional soil-moisture context does not establish field nutrient levels or replace soil tests.
+- **Scenarios stay hypothetical:** rainfall sensitivity is not a weather forecast; saved baselines remain unchanged.
+- **Unknown values stay visible:** missing water inputs are not silently converted into known supply.
+- **Estimates carry assumptions:** rotation scores and financial ranges depend on the catalog, model, local inputs, and their review status.
+- **Explanations use actual context:** assistant responses resolve stored farm and analysis records.
+- **Demonstrations stay labelled:** synthetic fixtures are for development and walkthroughs.
 
-| Feature | Intended behavior | Delivery priority |
-| --- | --- | --- |
-| Farm History & Seasonal Calendar | Record previous crops, planting dates, irrigation, and harvests; use history when evaluating rotations. | Core |
-| Farmer Goals & Constraints | Capture water limits, budget, labor, preferred crops, and household food needs. | Core |
-| Rotation Comparison Workspace | Compare crop sequences, suitability, water demand, soil benefits, risks, and ranking explanations. | Core |
-| Water Budget Planner | Compare estimated seasonal crop water requirements with rainfall and farmer-entered irrigation supply. | Core |
-| Soil Test Integration | Accept measured soil pH, organic matter, and nutrient results with units and sampling dates. | Core |
-| Cost & Income Scenarios | Compare estimated costs and potential returns using local inputs and price ranges. | Next |
-| Cover Crop Planner | Include locally suitable cover crops between main growing seasons. | Next |
-| Farm Alerts & Action Calendar | Turn a selected rotation into planting, monitoring, and soil-testing reminders. | Next |
-| Offline Farm Notebook | Save farm details and previously generated plans for limited-connectivity use. | Next |
-| Season Review & Feedback | Record actual outcomes and compare them with previous estimates. | Next |
-| Agronomist Review & Shareable Report | Export farm inputs, rotation comparisons, sources, and assumptions for expert review. | Next |
-| Voice Input & Read-Aloud | Support accessible input and spoken explanations in English, Sinhala, and Tamil. | Advanced |
+POWER and SMAP have implemented integration or processing paths. GPM and HLS remain sources to evaluate for appropriate access, coverage, licensing, and resolution.
 
-## Delivery sequence
+## Roadmap
 
-1. **Connected core:** farm profile, history, goals, soil inputs, NASA observation dashboard, rotation comparison, water budget, climate scenarios, and grounded assistant explanations.
-2. **Planning and follow-through:** soil improvement and disaster recovery modes in the rotation planner, cover crops, financial scenarios, action calendar, reports, offline notebook, and season feedback.
-3. **Advanced capabilities:** validated weed analysis, climate twins, and multilingual voice interaction.
+| Phase | Focus |
+| --- | --- |
+| Connected core | Farm records, historical observations, rotations, water budgets, rainfall scenarios, grounded explanations, and saved plans |
+| Planning and follow-through | SoilRevive and FarmRecovery planning modes, cover crops, financial scenarios, reminders, reporting, and season feedback |
+| Advanced capabilities | Validated weed analysis, climate twins, and reviewed multilingual voice interaction |
 
-All features are in the product scope. These phases describe implementation order, not completed functionality.
+These phases describe product direction, not a claim that every feature is complete. See the [implementation plan](IMPLEMENTATION_PLAN.md) and [backlog](docs/BACKLOG.md) for responsibilities and acceptance criteria.
 
-## Hackathon demonstration
+## Documentation
 
-Use one Sri Lankan demonstration farm and a researched local crop catalog:
+| Guide | Start here when you need… |
+| --- | --- |
+| [Frontend](frontend/README.md) / [Backend](backend/README.md) | Application setup and integration details |
+| [Demo walkthrough](docs/DEMO.md) | A connected demonstration and fallback rules |
+| [Contributing](CONTRIBUTING.md) | Development workflow and review expectations |
+| [Architecture](docs/ARCHITECTURE.md) / [API contracts](docs/API_CONTRACTS.md) | Boundaries, fields, units, and errors |
+| [Implementation plan](IMPLEMENTATION_PLAN.md) / [Backlog](docs/BACKLOG.md) | Team responsibilities and delivery work |
+| [Data sources](docs/DATA_SOURCES.md) / [Attribution](docs/ATTRIBUTION.md) | Provider research and credit requirements |
+| [Climate handoff](docs/CLIMATE_HANDOFF.md) | Working climate interfaces and examples |
+| [Environment contract](docs/ENVIRONMENT_CONTRACT.md) | Unified POWER/SMAP responses and sensitivity examples |
+| [SMAP preparation](docs/SMAP.md) / [Automation](docs/SMAP_AUTOMATION.md) | Discovery, filtering, sign-in, and resumable downloads |
+| [Agronomy rules](docs/AGRONOMY_RULES.md) | Evidence and model review |
+| [Design handoff](docs/DESIGN.md) | The integrated visual system |
+| [Assistant and saved plans](docs/ASSISTANT_SAVED_PLANS_INTEGRATION.md) | Grounded explanations and immutable plan APIs |
+| [Shared data](data/README.md) | Catalogs, fixtures, and schemas |
 
-**Select farm → enter history, soil results, and priorities → review NASA observations → compare three rotations → simulate reduced rainfall → compare water and soil tradeoffs → ask the assistant to explain → save or share the plan.**
+## Contributing
 
-Keep crop rotation central. SoilRevive and FarmRecovery are planning modes that influence the same rotation comparison rather than separate disconnected tools.
+Use the single application in `frontend/` and follow [CONTRIBUTING.md](CONTRIBUTING.md). Keep changes focused, update affected contracts, and run the relevant checks before opening a pull request.
 
-## Unified frontend
+Keep `.env` files, credentials, SQLite databases, caches, `.venv/`, `node_modules/`, and generated build output out of Git. Team ownership and integration responsibilities are recorded in the [six-member implementation plan](IMPLEMENTATION_PLAN.md).
 
-Tharuka's approved visual system and landing experience are integrated into
-Shehani's functional application in `frontend/`. The former standalone sample
-prototypes were removed to prevent the team from running or extending the wrong
-application. Use the single frontend command in the quick start above.
+---
 
-The unified app retains the working farm setup, Earth-observation display,
-rotation comparison, climate scenario, finance, assistant, saved-plan, offline
-viewing, action-calendar, and reporting flows. Features without validated data
-or backend/model support remain explicitly identified on the roadmap instead of
-showing fabricated results.
-
-## Data and model requirements
-
-- Evaluate NASA POWER, GPM, SMAP, and HLS for their appropriate roles; verify access, licensing, resolution, and coverage before integration.
-- Show observation sources, dates, units, and spatial resolution. Distinguish regional observations from field measurements.
-- Label climate scenarios as hypothetical and disclose rotation scoring and soil-model assumptions.
-- Use measured soil tests when available; do not infer exact field nutrient levels from satellite observations.
-- Present financial estimates as ranges with input sources and dates; do not promise returns or crop success.
-- Ground assistant explanations in actual module outputs and identify missing information.
-- Validate photo analysis before claiming reliable weed identification or coverage measurement.
-- Store shared farm inputs once so every module uses consistent location, season, crop history, and constraints.
-
-## Current status
-
-The frontend core journey, FastAPI health/farm/observation/rotation APIs, SQLite persistence, NASA POWER and SMAP processing, and the rotation-scoring domain package are implemented with automated tests. The frontend currently defaults to synthetic fixtures. Scenario, assistant, and saved-plan HTTP services remain to be connected before switching the complete frontend journey to the live API.
-
-See the [six-member implementation plan](IMPLEMENTATION_PLAN.md) for responsibilities, Tharuka's UI/UX design assignment, integration contracts, milestones, and acceptance checks.
+<div align="center">
+  <strong>AgroSphere AI</strong><br />
+  Earth data. Local knowledge. Thoughtful farming.
+</div>
