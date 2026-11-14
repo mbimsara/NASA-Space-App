@@ -1,6 +1,23 @@
 # Repeatable SMAP subset automation
 
-Status: implemented and verified with offline/mocked pipeline tests and an SDK-valid request. Private user sign-in successfully submitted the January 2025 live job; NASA processing/download verification is underway. Do not describe the full month as downloaded until `state.json` and extraction results confirm it.
+Status: January 2025 authenticated live run completed and verified on 2026-11-14. All 31 subset files downloaded, validated and extracted. Independent hash verification and re-extraction matched the saved time series. Quality-filtered moisture coverage remains partial, as described below.
+
+## Full-month verification
+
+| Check | Result |
+| --- | --- |
+| NASA processing | Successful, 100% |
+| Expected / supplied granule dates | 31 / 31 |
+| Accepted AM retrievals | 12 |
+| Accepted PM retrievals | 11 |
+| Unavailable/rejected pass slots | 39 of 62 |
+| Integrity and replay | All 31 SHA-256 hashes matched; independently rebuilt daily series and coverage matched saved results |
+| Unified environment response | POWER complete; SMAP partial; calendar-label overlap January 1–31, 2025 |
+| Automated verification | 40 tests pass; shared-data validation passes |
+
+Private user sign-in resumed the same job from 27 ready files to all 31 without a new request. This demonstrates processing/download resumption with real NASA outputs. Files remain under ignored `.cache/smap/january-2025/`; no credentials or downloaded data are committed. A second authenticated rerun after successful completion was not performed; verified-file reuse is covered by mocked tests and independent local replay.
+
+These counts measure accepted pass slots, not 23 distinct dates or continuous daily soil-moisture coverage. Unknown passes remain null. This sample does not establish drought or crop suitability.
 
 Uses NASA's [official harmony-py client](https://github.com/nasa/harmony-py) and [Harmony service](https://harmony.earthdata.nasa.gov/docs). The dependency is pinned in `backend/requirements-smap.txt`. Spatial trimming is always requested for the fixed Sri Lankan demonstration box (80.3–80.5 E, 8.2–8.4 N). No global downloads, alternative providers or forecast products are requested.
 

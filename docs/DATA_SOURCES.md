@@ -10,7 +10,7 @@ Use resources listed on the [competition resources page](https://www.spaceappsch
 | --- | --- | --- |
 | NASA POWER | Daily T2M and PRECTOTCORR via AG community, UTC | Live 2025 demo retrieval verified; see adapter guide |
 | GPM | Precipitation observations | Product/version, access, coverage and resolution to verify |
-| SMAP SPL3SMP_E V006 | Regional soil-moisture context | All January 1–3 Sri Lankan subsets downloaded/extracted; separate AM/PM time series verified. See [SMAP guide](SMAP.md) |
+| SMAP SPL3SMP_E V006 | Regional soil-moisture context | January 2025 Sri Lankan subset automation verified: 31 files, 12 accepted AM / 11 accepted PM retrievals. See [SMAP guide](SMAP.md) |
 | Landsat / MODIS / VIIRS | Competition-listed vegetation/land-surface history | Specific products, access and quality processing to verify; HLS is not currently approved |
 
 Additional listed candidates include SRTM, ECOSTRESS, GLDAS/NLDAS, FAO GAEZ, and partner resources Sentinel-2/ERA5. Evaluate geographic coverage and relevance before adding integrations; many other resources on the page focus on the United States.

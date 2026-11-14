@@ -55,4 +55,4 @@ The importable `sensitivity(ranking, settings)` function accepts explicit settin
 
 ## Independent readiness
 
-Source adapters, missing-data handling, combined payloads, sample fixtures, contract checks and sensitivity reporting are ready for integration. Still pending: repeatable authenticated SMAP subset automation and longer live soil-moisture coverage; crop-model and twin-metric review; HTTP endpoints and actual UI. This milestone does not claim those tasks are completed.
+Source adapters, missing-data handling, combined payloads, sample fixtures, contract checks and sensitivity reporting are ready for integration. The [authenticated SMAP automation](SMAP_AUTOMATION.md) has now completed a live full-month test: 31 files, 12 accepted AM and 11 accepted PM retrievals. The unified payload was verified against those saved results and correctly marks moisture coverage partial. Still pending: crop-model and twin-metric review; HTTP endpoints and actual UI. Longer seasonal/multi-year moisture analysis remains future work.
