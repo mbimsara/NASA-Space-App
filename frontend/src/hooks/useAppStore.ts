@@ -27,6 +27,8 @@ export interface AppState {
   selectedCandidateId: string | null;
   analyses: Record<string, RotationAnalysis>;
   scenarios: Record<string, ScenarioResult>;
+  /** Observation loaded for the selected farm; sent with rotation requests. */
+  latestObservation: { farmId: string; observationId: string; inputVersion: number } | null;
   recentFarms: RecentItem[];
   recentPlans: (RecentItem & { farmId: string })[];
   language: Language;
@@ -35,6 +37,7 @@ export interface AppState {
   selectFarm: (farmId: string, inputVersion: number) => void;
   clearFarm: () => void;
   putAnalysis: (analysis: RotationAnalysis) => boolean;
+  setLatestObservation: (o: { farmId: string; observationId: string; inputVersion: number }) => boolean;
   selectAnalysis: (analysisId: string) => void;
   clearAnalysis: () => void;
   putScenario: (scenario: ScenarioResult) => boolean;
@@ -52,6 +55,7 @@ const cleared = {
   selectedCandidateId: null,
   analyses: {},
   scenarios: {},
+  latestObservation: null,
 } as const;
 
 function upsertRecent<T extends RecentItem>(list: T[], item: T, max = 8): T[] {
@@ -80,6 +84,7 @@ export const useAppStore = create<AppState>()(
       selectedCandidateId: null,
       analyses: {},
       scenarios: {},
+      latestObservation: null,
       recentFarms: [],
       recentPlans: [],
       language: "en",
@@ -118,6 +123,12 @@ export const useAppStore = create<AppState>()(
         return true;
       },
 
+      setLatestObservation: (o) => {
+        if (o.farmId !== get().selectedFarmId) return false;
+        set({ latestObservation: o });
+        return true;
+      },
+
       selectAnalysis: (analysisId) =>
         set({ selectedAnalysisId: analysisId, selectedScenarioId: null, selectedCandidateId: null }),
       clearAnalysis: () =>
@@ -145,7 +156,24 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: "agrosphere_app",
-      version: 1,
+      // v2: rotation-score-0.1 shapes (0–100 scores, per-season water). Older cached results are dropped.
+      version: 2,
+      migrate: (persisted, version) => {
+        const p = (persisted ?? {}) as Partial<AppState>;
+        if (version < 2) {
+          return {
+            ...p,
+            analyses: {},
+            scenarios: {},
+            selectedAnalysisId: null,
+            selectedScenarioId: null,
+            selectedCandidateId: null,
+            latestObservation: null,
+            recentPlans: [],
+          } as AppState;
+        }
+        return p as AppState;
+      },
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({
         selectedFarmId: s.selectedFarmId,
@@ -155,6 +183,7 @@ export const useAppStore = create<AppState>()(
         selectedCandidateId: s.selectedCandidateId,
         analyses: s.analyses,
         scenarios: s.scenarios,
+        latestObservation: s.latestObservation,
         recentFarms: s.recentFarms,
         recentPlans: s.recentPlans,
         language: s.language,

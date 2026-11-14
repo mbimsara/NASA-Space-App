@@ -1,11 +1,12 @@
 /**
- * BaselineVsScenario — per-candidate comparison of baseline and hypothetical scenario.
- * Matches candidates by ID (not by position) so re-ranking is visible.
+ * BaselineVsScenario — per-plan comparison of baseline and hypothetical scenario
+ * (rotation-score-0.1). Matches plans by candidate_id so re-ranking is visible.
  * Always labelled "Hypothetical scenario" — never presented as a forecast.
  * Owner: Shehani.
  */
 import { useTranslation } from "react-i18next";
-import type { RotationAnalysis, ScenarioResult } from "../../types/api";
+import type { RotationAnalysis, RotationCandidate, ScenarioResult } from "../../types/api";
+import { asSeasonRanges, fmtScore, fmtSignedMm, isKnown } from "../../utils/format";
 
 interface Props {
   baseline: RotationAnalysis;
@@ -14,29 +15,45 @@ interface Props {
 
 const signed = (n: number) => `${n > 0 ? "+" : ""}${n}`;
 
+const comp = (c: RotationCandidate | null, name: string) =>
+  c?.score_components.find((x) => x.name === name)?.value ?? null;
+
+/** Lowest conservative season balance (available − high demand); null if any season is unknown. */
+function worstBalance(c: RotationCandidate | null): number | null {
+  if (!c) return null;
+  const vals = asSeasonRanges(c.water_budget_range).map((r) => r.balance_low_mm);
+  if (vals.length === 0 || vals.some((v) => !isKnown(v))) return null;
+  return Math.min(...(vals as number[]));
+}
+
 export function BaselineVsScenario({ baseline, scenario }: Props) {
   const { t } = useTranslation();
   const pct = scenario.parameters.rainfall_change_pct;
-  const mm = (v: number | null) => (v === null ? t("common.unknown") : `${v} mm`);
+  const u = t("common.unknown");
+  const na = t("common.notAvailable");
 
   return (
     <div className="card">
       <div className="notice notice-warn" role="status" style={{ fontWeight: 600 }}>
         {t("scenario.hypotheticalLabel")} — {t("scenario.rainfallChange")} {signed(pct)}%
       </div>
+      <p className="muted" style={{ fontSize: 12 }}>
+        {t("rotation.compHelp.scenario_resilience")}
+      </p>
 
       {baseline.candidates.length === 0 ? (
         <p className="muted">{t("rotation.noCandidates")}</p>
       ) : (
         <div className="table-scroll">
-          <table className="data">
+          <table className="data" style={{ minWidth: 560 }}>
             <thead>
               <tr>
                 <th scope="col">{t("scenario.plan")}</th>
                 <th scope="col">{t("scenario.rank")}</th>
                 <th scope="col">{t("rotation.score")}</th>
-                <th scope="col">{t("rotation.effectiveRainfall")}</th>
-                <th scope="col">{t("rotation.deficit")}</th>
+                <th scope="col">{t("rotation.comp.water_sufficiency")}</th>
+                <th scope="col">{t("rotation.comp.scenario_resilience")}</th>
+                <th scope="col">{t("scenario.worstBalance")}</th>
               </tr>
             </thead>
             <tbody>
@@ -44,11 +61,9 @@ export function BaselineVsScenario({ baseline, scenario }: Props) {
                 const sIdx = scenario.candidates.findIndex((c) => c.candidate_id === b.candidate_id);
                 const s = sIdx >= 0 ? scenario.candidates[sIdx] : null;
                 const crops = b.sequence.map((x) => x.crop_name ?? x.crop_id).join(" → ");
-                const scoreDelta = s ? Math.round((s.score - b.score) * 100) : null;
-                const deficitDelta =
-                  s && s.water_budget.deficit_mm !== null && b.water_budget.deficit_mm !== null
-                    ? s.water_budget.deficit_mm - b.water_budget.deficit_mm
-                    : null;
+                const delta = s && isKnown(s.score) && isKnown(b.score) ? Math.round((s.score - b.score) * 10) / 10 : null;
+                const wb = worstBalance(b);
+                const ws = worstBalance(s);
                 return (
                   <tr key={b.candidate_id}>
                     <th scope="row" style={{ fontWeight: 400 }}>
@@ -56,23 +71,16 @@ export function BaselineVsScenario({ baseline, scenario }: Props) {
                       <div className="muted">{crops}</div>
                     </th>
                     <td>
-                      {i + 1} → {s ? sIdx + 1 : t("common.notAvailable")}
+                      {i + 1} → {s ? sIdx + 1 : na}
                     </td>
                     <td>
-                      {Math.round(b.score * 100)} → {s ? Math.round(s.score * 100) : t("common.notAvailable")}
-                      {scoreDelta !== null && <span className="muted"> ({signed(scoreDelta)})</span>}
+                      {fmtScore(b.score, u)} → {s ? fmtScore(s.score, u) : na}
+                      {delta !== null && <span className="muted"> ({signed(delta)})</span>}
                     </td>
+                    <td>{fmtScore(comp(b, "water_sufficiency"), u)}</td>
+                    <td>{s ? fmtScore(comp(s, "scenario_resilience"), u) : na}</td>
                     <td>
-                      {mm(b.water_budget.effective_rainfall_mm)} → {s ? mm(s.water_budget.effective_rainfall_mm) : "—"}
-                    </td>
-                    <td>
-                      {mm(b.water_budget.deficit_mm)} → {s ? mm(s.water_budget.deficit_mm) : "—"}
-                      {deficitDelta !== null && (
-                        <span style={{ color: deficitDelta > 0 ? "var(--red-700)" : "var(--green-700)" }}>
-                          {" "}
-                          ({signed(deficitDelta)} mm)
-                        </span>
-                      )}
+                      {fmtSignedMm(wb, u)} → {s ? fmtSignedMm(ws, u) : na}
                     </td>
                   </tr>
                 );
@@ -83,6 +91,9 @@ export function BaselineVsScenario({ baseline, scenario }: Props) {
       )}
 
       <p className="muted">{t("scenario.sameBaseline", { id: scenario.baseline_analysis_id })}</p>
+      <p className="muted" style={{ fontSize: 12 }}>
+        {t("rotation.smallDifferences")}
+      </p>
       {scenario.limitations.length > 0 && (
         <div className="muted">
           <strong>{t("common.limitations")}:</strong>

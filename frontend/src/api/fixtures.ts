@@ -24,12 +24,17 @@ import type {
   SavedPlan,
   ScenarioResult,
   ScoreComponent,
+  WaterBudgetRange,
 } from "../types/api";
 
 const STORE_KEY = "agrosphere_fixture_db";
 const SOURCE = "synthetic-fixture-v1";
 
+/** Bump when fixture result shapes change; older analyses/plans are dropped, farms kept. */
+const FIXTURE_DB_VERSION = 2;
+
 interface FixtureDb {
+  version?: number;
   farms: Record<string, FarmEnvelope>;
   analyses: Record<string, RotationAnalysis>;
   plans: Record<string, SavedPlan>;
@@ -42,11 +47,19 @@ function load(): FixtureDb {
   if (memoryDb) return memoryDb;
   try {
     const raw = localStorage.getItem(STORE_KEY);
-    if (raw) return (memoryDb = JSON.parse(raw) as FixtureDb);
+    if (raw) {
+      const db = JSON.parse(raw) as FixtureDb;
+      if (db.version !== FIXTURE_DB_VERSION) {
+        db.analyses = {};
+        db.plans = {};
+        db.version = FIXTURE_DB_VERSION;
+      }
+      return (memoryDb = db);
+    }
   } catch {
     /* storage unavailable or corrupt — start fresh */
   }
-  return (memoryDb = { farms: {}, analyses: {}, plans: {}, seq: 0 });
+  return (memoryDb = { version: FIXTURE_DB_VERSION, farms: {}, analyses: {}, plans: {}, seq: 0 });
 }
 
 function save(db: FixtureDb) {
@@ -65,7 +78,7 @@ function nextId(db: FixtureDb, prefix: string) {
 
 /** Test helper: wipe fixture state. */
 export function resetFixtures() {
-  memoryDb = { farms: {}, analyses: {}, plans: {}, seq: 0 };
+  memoryDb = { version: FIXTURE_DB_VERSION, farms: {}, analyses: {}, plans: {}, seq: 0 };
   try {
     localStorage.removeItem(STORE_KEY);
   } catch {
@@ -140,7 +153,7 @@ export async function updateFarmFixture(
 }
 
 // ---------------------------------------------------------------------------
-// Observations (synthetic, deterministic, with deliberate gaps)
+// Observations (synthetic, deterministic; Matheesha's normalized shape)
 // ---------------------------------------------------------------------------
 
 /** Rough Sri Lanka bounding box; outside it the fixture reports no coverage. */
@@ -149,8 +162,12 @@ function insideDemoRegion(lat: number, lon: number) {
 }
 
 function seeded(seed: number) {
-  let x = seed % 2147483647 || 1;
+  let x = Math.abs(Math.round(seed)) % 2147483647 || 1;
   return () => (x = (x * 16807) % 2147483647) / 2147483647;
+}
+
+function todayUtc() {
+  return new Date().toISOString().slice(0, 10);
 }
 
 export async function getObservationsFixture(
@@ -160,156 +177,228 @@ export async function getObservationsFixture(
   signal?: AbortSignal,
 ): Promise<ObservationSummary> {
   await delay(500, signal);
-  if (start > end) fail(422, "VALIDATION_ERROR", "Start date must be on or before end date.", { start: "Must be ≤ end." });
+  // Same validation as Dulanjaya's endpoint.
+  if (start > end) fail(422, "VALIDATION_ERROR", "Start date must not be later than end date.", { start: "Must be ≤ end." });
+  if (start < "1981-01-01") fail(422, "VALIDATION_ERROR", "NASA POWER historical dates start at 1981-01-01.", { start: "≥ 1981-01-01" });
+  if (end >= todayUtc()) fail(422, "VALIDATION_ERROR", "End date must be before today in UTC.", { end: "Before today (UTC)" });
   const farm = load().farms[farmId];
   if (!farm) fail(404, "NOT_FOUND", `Farm ${farmId} was not found.`);
 
   const days = Math.round((Date.parse(end) - Date.parse(start)) / 86_400_000) + 1;
   const { latitude, longitude } = farm.profile.location;
   const covered = insideDemoRegion(latitude, longitude);
-  const rand = seeded(Math.round(latitude * 1000 + longitude * 1000) + Date.parse(start) / 86_400_000);
+  const rand = seeded(latitude * 1000 + longitude * 1000 + Date.parse(start) / 86_400_000);
 
-  const series = Array.from({ length: days }, (_, i) => {
+  const daily = Array.from({ length: days }, (_, i) => {
     const date = new Date(Date.parse(start) + i * 86_400_000).toISOString().slice(0, 10);
-    // Every 9th day is missing to demonstrate gaps (never zero-filled).
-    const missing = !covered || i % 9 === 4;
+    // Temperature is missing every 9th day to demonstrate per-variable gaps (never zero-filled).
+    const tempMissing = !covered || i % 9 === 4;
     return {
       date,
-      rainfall_mm: missing ? null : Math.round(rand() * 14 * 10) / 10,
-      mean_temperature_c: missing ? null : Math.round((25 + rand() * 5) * 10) / 10,
+      precipitation_mm_per_day: covered ? Math.round(rand() * 14 * 10) / 10 : null,
+      temperature_c: tempMissing ? null : Math.round((25 + rand() * 5) * 10) / 10,
+      temperature_max_c: null,
+      temperature_min_c: null,
     };
   });
-  const present = series.filter((p) => p.rainfall_mm !== null);
+  const rain = daily.filter((d) => d.precipitation_mm_per_day !== null);
+  const temp = daily.filter((d) => d.temperature_c !== null);
+  const both = daily.filter((d) => d.precipitation_mm_per_day !== null && d.temperature_c !== null);
   const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
+  const rainComplete = rain.length === days;
+  const partialRain = rain.length ? Math.round(sum(rain.map((d) => d.precipitation_mm_per_day!)) * 10) / 10 : null;
 
   return {
-    observation_id: `obs-${farmId}-${start}-${end}`,
+    observation_id: `obs-${farmId}-v${farm.input_version}-${start}-${end}`,
     farm_id: farmId,
     input_version: farm.input_version,
     data_kind: "synthetic",
+    provider: "Synthetic fixture (not NASA POWER)",
     period: { start, end },
     retrieved_at: null,
     source_refs: [SOURCE],
-    spatial_resolution: null,
-    coverage: { expected_days: days, available_days: present.length },
-    summary: {
-      rainfall_mm: present.length ? Math.round(sum(present.map((p) => p.rainfall_mm!)) * 10) / 10 : null,
-      mean_temperature_c: present.length
-        ? Math.round((sum(present.map((p) => p.mean_temperature_c!)) / present.length) * 10) / 10
-        : null,
+    source_url: null,
+    spatial_resolution: { description: "synthetic fixture — no real grid" },
+    time_standard: "UTC",
+    coverage: {
+      expected_days: days,
+      available_days: both.length,
+      precipitation_valid_days: rain.length,
+      temperature_valid_days: temp.length,
     },
+    summary: {
+      // Full-period total is null when any rainfall day is missing; partial sum labelled separately.
+      rainfall_mm: rainComplete ? partialRain : null,
+      rainfall_total_mm: rainComplete ? partialRain : null,
+      rainfall_available_days_mm: partialRain,
+      mean_temperature_c: temp.length ? Math.round((sum(temp.map((d) => d.temperature_c!)) / temp.length) * 10) / 10 : null,
+    },
+    units: { precipitation_mm_per_day: "mm/day", temperature_c: "°C" },
+    missing_data: {
+      precipitation_mm_per_day: daily.filter((d) => d.precipitation_mm_per_day === null).map((d) => d.date),
+      temperature_c: daily.filter((d) => d.temperature_c === null).map((d) => d.date),
+    },
+    daily,
     limitations: [
       "Invented values for interface development; not NASA data.",
       ...(covered ? [] : ["Location is outside the fixture's demonstration region, so no values are available."]),
     ],
-    time_series: series,
   };
 }
 
 // ---------------------------------------------------------------------------
-// Rotations (synthetic)
+// Rotations — synthetic implementation of rotation-score-0.1
+// (docs/ROTATION_SCORING_SPEC.md, Bhagya). Crop values and seasonal rainfall
+// below are INVENTED for UI development; they are not catalog or NASA values.
 // ---------------------------------------------------------------------------
 
-interface Template {
-  crops: { id: string; name: string; demand: number }[];
-  values: { water: number; soil: number; climate: number };
-  reasons: string[];
+export const FIXTURE_MODEL_VERSION = "rotation-score-0.1 (fixture)";
+const FIXTURE_WATER_MODEL = "fixture-water-range-v1";
+
+interface FixtureCrop {
+  id: string;
+  name: string;
+  /** Synthetic seasonal ETc range, mm per crop cycle. */
+  demand_low: number;
+  demand_high: number;
 }
 
-const TEMPLATES: Template[] = [
-  {
-    crops: [
-      { id: "rice", name: "Rice", demand: 200 },
-      { id: "cowpea", name: "Cowpea", demand: 110 },
-      { id: "maize", name: "Maize", demand: 140 },
-    ],
-    values: { water: 0.78, soil: 0.9, climate: 0.8 },
-    reasons: ["Includes a legume (cowpea) between cereals", "Alternates crop families each season"],
-  },
-  {
-    crops: [
-      { id: "rice", name: "Rice", demand: 200 },
-      { id: "groundnut", name: "Groundnut", demand: 130 },
-      { id: "vegetables", name: "Mixed vegetables", demand: 170 },
-    ],
-    values: { water: 0.7, soil: 0.82, climate: 0.72 },
-    reasons: ["Includes a legume (groundnut)", "Vegetables add diversity"],
-  },
-  {
-    crops: [
-      { id: "maize", name: "Maize", demand: 140 },
-      { id: "soybean", name: "Soybean", demand: 120 },
-      { id: "rice", name: "Rice", demand: 200 },
-    ],
-    values: { water: 0.65, soil: 0.78, climate: 0.68 },
-    reasons: ["Opens with lower-demand crops before rice"],
-  },
+const FIXTURE_CROPS: Record<string, FixtureCrop> = {
+  rice: { id: "rice", name: "Rice", demand_low: 450, demand_high: 700 },
+  cowpea: { id: "cowpea", name: "Cowpea", demand_low: 250, demand_high: 350 },
+  maize: { id: "maize", name: "Maize", demand_low: 400, demand_high: 550 },
+  groundnut: { id: "groundnut", name: "Groundnut", demand_low: 350, demand_high: 500 },
+  vegetables: { id: "vegetables", name: "Mixed vegetables", demand_low: 300, demand_high: 450 },
+  soybean: { id: "soybean", name: "Soybean", demand_low: 350, demand_high: 450 },
+};
+
+/** Synthetic seasonal rainfall totals (mm) for the demo; not observations. */
+const FIXTURE_SEASON_RAINFALL: Record<string, number> = { maha: 650, yala: 300 };
+
+const TEMPLATES: string[][] = [
+  ["rice", "cowpea", "maize"],
+  ["rice", "groundnut", "vegetables"],
+  ["maize", "soybean", "rice"],
 ];
 
-const FIXTURE_RAINFALL_PER_SEASON_MM = 100;
-const EFFECTIVE_RAINFALL_FRACTION = 0.8;
+const seasonLabels = (n: number) => Array.from({ length: n }, (_, i) => (i % 2 === 0 ? "maha" : "yala"));
+const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
 
-function weightedScore(components: ScoreComponent[]) {
-  const total = components.reduce((a, c) => a + c.weight, 0);
-  if (!(total > 0)) return 0;
-  return Math.round((components.reduce((a, c) => a + c.weight * c.value, 0) / total) * 1000) / 1000;
+interface ScoreInputs {
+  weights: RotationRequest["priority_weights"];
+  irrigationPerSeason: number | null;
+  /** null = baseline only (no scenario); otherwise 1 + pct/100. */
+  scenarioFactor: number | null;
 }
 
-function buildCandidate(
-  t: Template,
-  index: number,
-  seasons: number,
-  weights: RotationRequest["priority_weights"],
-  irrigationPerSeason: number | null,
-  rainfallFactor = 1,
-): RotationCandidate {
-  const steps = Array.from({ length: seasons }, (_, i) => t.crops[i % t.crops.length]);
-  const demand = steps.reduce((a, c) => a + c.demand, 0);
-  const rainfall = Math.round(FIXTURE_RAINFALL_PER_SEASON_MM * seasons * rainfallFactor);
-  const effective = Math.round(rainfall * EFFECTIVE_RAINFALL_FRACTION);
-  const irrigation = irrigationPerSeason === null ? null : irrigationPerSeason * seasons;
-  const deficit = irrigation === null ? null : Math.max(0, demand - effective - irrigation);
-  const unmetShare = deficit === null ? 0 : Math.min(1, deficit / demand);
-  const waterValue = Math.max(0, Math.round((t.values.water - unmetShare * 0.5 - (1 - rainfallFactor) * 0.2) * 100) / 100);
+/** Score one sequence per rotation-score-0.1. Unknown inputs stay null; nothing becomes 0. */
+export function scoreSequence(cropIds: string[], candidateId: string, inp: ScoreInputs): RotationCandidate & { _tie: number[] } {
+  const labels = seasonLabels(cropIds.length);
+  const crops = cropIds.map((id) => FIXTURE_CROPS[id]);
+  const factor = inp.scenarioFactor ?? 1;
+  const irr = inp.irrigationPerSeason;
 
-  const components: ScoreComponent[] = [
-    { name: "Water efficiency", weight: weights.water, value: waterValue, direction: "higher_is_better" },
-    { name: "Soil health", weight: weights.soil, value: t.values.soil, direction: "higher_is_better" },
-    { name: "Climate resilience", weight: weights.climate, value: t.values.climate, direction: "higher_is_better" },
+  const ranges: WaterBudgetRange[] = crops.map((c, i) => {
+    const base = FIXTURE_SEASON_RAINFALL[labels[i]];
+    const scen = base * factor;
+    // Unknown irrigation stays null; screening then uses rainfall only (disclosed, not stored as 0).
+    const available = scen + (irr ?? 0);
+    return {
+      season_index: i + 1,
+      crop_id: c.id,
+      demand_low_mm: c.demand_low,
+      demand_high_mm: c.demand_high,
+      baseline_rainfall_mm: base,
+      scenario_rainfall_mm: scen,
+      irrigation_mm: irr,
+      available_water_mm: available,
+      balance_low_mm: available - c.demand_high,
+      balance_high_mm: available - c.demand_low,
+      coverage_low_percent: (available / c.demand_high) * 100,
+      coverage_high_percent: (available / c.demand_low) * 100,
+      demand_basis: "seasonal_crop_water_need_etc",
+      model_version: FIXTURE_WATER_MODEL,
+      source_url: null,
+      assumptions: [
+        "Synthetic demand range and seasonal rainfall for interface development; not catalog or NASA values.",
+        "Total rainfall is used only for provisional screening; effective rainfall and field losses are not modeled.",
+        inp.scenarioFactor === null
+          ? "Baseline: no rainfall-change scenario applied."
+          : `Hypothetical rainfall change of ${Math.round((factor - 1) * 100)}% applied; not a forecast.`,
+      ],
+      limitations:
+        irr === null
+          ? ["Irrigation supply unknown: available water and coverage use rainfall only (irrigation not assumed zero)."]
+          : [],
+    };
+  });
+
+  const baseCov = crops.map((c, i) => {
+    const avail = FIXTURE_SEASON_RAINFALL[labels[i]] + (irr ?? 0);
+    return avail / c.demand_high * 100;
+  });
+  const water = mean(baseCov.map((v) => Math.min(100, v)));
+  const diversity = (new Set(cropIds).size / cropIds.length) * 100;
+  const resilience =
+    inp.scenarioFactor === null
+      ? null
+      : mean(ranges.map((r) => Math.min(100, (r.available_water_mm as number) / (r.demand_high_mm as number) * 100)));
+
+  const raw = [
+    { name: "water_sufficiency", requested_weight: inp.weights.water, value: water },
+    { name: "crop_diversity", requested_weight: inp.weights.soil, value: diversity },
+    { name: "scenario_resilience", requested_weight: inp.weights.climate, value: resilience },
   ];
+  const availableWeight = raw.filter((c) => c.value !== null).reduce((a, c) => a + c.requested_weight, 0);
+  const components: ScoreComponent[] = raw.map((c) => ({
+    ...c,
+    effective_weight: c.value === null || !(availableWeight > 0) ? 0 : c.requested_weight / availableWeight,
+    direction: "higher_is_better" as const,
+  }));
+  const score = availableWeight > 0 ? components.reduce((a, c) => a + (c.value ?? 0) * c.effective_weight, 0) : null;
+
+  const demandHigh = crops.reduce((a, c) => a + c.demand_high, 0);
+  const rainTotal = labels.reduce((a, l) => a + FIXTURE_SEASON_RAINFALL[l] * factor, 0);
+  const irrTotal = irr === null ? null : irr * cropIds.length;
+
   return {
-    candidate_id: `cand-${index + 1}`,
-    sequence: steps.map((c, i) => ({ season_index: i + 1, crop_id: c.id, crop_name: c.name })),
-    score: weightedScore(components),
+    candidate_id: candidateId,
+    sequence: crops.map((c, i) => ({ season_index: i + 1, crop_id: c.id, crop_name: c.name })),
+    score,
     score_components: components,
+    water_budget_range: ranges,
     water_budget: {
-      period: `${seasons}-season cycle`,
-      demand_mm: demand,
-      rainfall_mm: rainfall,
-      effective_rainfall_mm: effective,
-      irrigation_supply_mm: irrigation,
-      deficit_mm: deficit,
+      period: `${cropIds.length}-season aggregate`,
+      demand_mm: demandHigh,
+      rainfall_mm: rainTotal,
+      rainfall_total_mm: rainTotal,
+      effective_rainfall_mm: null,
+      irrigation_supply_mm: irrTotal,
+      deficit_mm: irrTotal === null ? null : Math.max(0, demandHigh - rainTotal - irrTotal),
       unit: "mm",
       assumptions: [
-        `Fixture rainfall of ${FIXTURE_RAINFALL_PER_SEASON_MM} mm per season${rainfallFactor !== 1 ? `, scaled by ${rainfallFactor.toFixed(2)}` : ""}`,
-        `Effective rainfall = ${EFFECTIVE_RAINFALL_FRACTION * 100}% of rainfall (placeholder, pending Bhagya)`,
-        irrigation === null ? "Irrigation supply unknown — deficit cannot be computed" : "Irrigation supply from farm profile",
+        "Optional aggregate of non-overlapping fixture seasons using high-end demand; see the per-season table.",
+        "Effective rainfall: no approved method (null).",
       ],
     },
-    reasons: t.reasons,
+    reasons: ["Feasible under the currently enabled documented constraints."],
     constraint_checks: [
-      { rule: "No same crop in consecutive seasons", passed: steps.every((c, i) => i === 0 || c.id !== steps[i - 1].id), note: null },
-      {
-        rule: "Water budget feasibility",
-        passed: deficit !== null && deficit === 0,
-        note: deficit === null ? "Unknown irrigation supply" : deficit === 0 ? null : `${deficit} mm deficit`,
-      },
+      { rule: "catalog_review", passed: true, note: "Fixture crops bypass review; the real catalog has no approved crops yet." },
+      { rule: "season_eligibility", passed: true, note: `Seasons: ${labels.join(", ")}` },
+      { rule: "farmer_exclusion", passed: true, note: null },
     ],
+    _tie: [score ?? -Infinity, mean(baseCov), diversity],
   };
 }
 
-function rank(cands: RotationCandidate[]) {
-  return [...cands].sort((a, b) => b.score - a.score || a.candidate_id.localeCompare(b.candidate_id));
+/** Spec ordering: score ↓, conservative baseline coverage ↓, diversity ↓, crop-ID sequence ↑. */
+function rank(cands: (RotationCandidate & { _tie: number[] })[]): RotationCandidate[] {
+  return [...cands]
+    .sort((a, b) => {
+      for (let i = 0; i < 3; i++) if (b._tie[i] !== a._tie[i]) return b._tie[i] - a._tie[i];
+      return a.sequence.map((s) => s.crop_id).join(",").localeCompare(b.sequence.map((s) => s.crop_id).join(","));
+    })
+    .map(({ _tie: _t, ...c }) => c);
 }
 
 export async function createRotationFixture(
@@ -319,6 +408,10 @@ export async function createRotationFixture(
 ): Promise<RotationAnalysis> {
   await delay(700, signal);
   if (body.seasons < 3 || body.seasons > 5) fail(422, "VALIDATION_ERROR", "Seasons must be 3–5.", { seasons: "3–5" });
+  const w = body.priority_weights;
+  if (![w.water, w.soil, w.climate].every((x) => Number.isFinite(x) && x >= 0) || !(w.water + w.soil + w.climate > 0)) {
+    fail(422, "VALIDATION_ERROR", "Priority weights must be nonnegative with a positive total.");
+  }
   const db = load();
   const farm = db.farms[farmId];
   if (!farm) fail(404, "NOT_FOUND", `Farm ${farmId} was not found.`);
@@ -327,13 +420,25 @@ export async function createRotationFixture(
   }
 
   const excluded = new Set(farm.profile.excluded_crop_ids.map((c) => c.toLowerCase()));
-  const rejected: string[] = [];
-  const candidates: RotationCandidate[] = [];
-  TEMPLATES.forEach((t, i) => {
-    const hit = t.crops.find((c) => excluded.has(c.id));
-    if (hit) rejected.push(`Plan template ${i + 1} rejected: contains excluded crop "${hit.id}".`);
-    else candidates.push(buildCandidate(t, i, body.seasons, body.priority_weights, farm.profile.irrigation_supply_mm_per_season));
+  const reasons: string[] = [];
+  const scored: (RotationCandidate & { _tie: number[] })[] = [];
+  TEMPLATES.forEach((tpl, i) => {
+    const seq = Array.from({ length: body.seasons }, (_, k) => tpl[k % tpl.length]);
+    const hit = seq.find((c) => excluded.has(c));
+    if (hit) {
+      reasons.push(`Sequence ${seq.join(" → ")} rejected: farmer_exclusion failed ("${hit}" is excluded).`);
+      return;
+    }
+    scored.push(
+      scoreSequence(seq, `cand-${i + 1}`, {
+        weights: w,
+        irrigationPerSeason: farm.profile.irrigation_supply_mm_per_season,
+        scenarioFactor: null,
+      }),
+    );
   });
+  if (scored.length === 0) reasons.push("No fixture sequence remains after the farmer's exclusions.");
+  else if (scored.length < 3) reasons.push(`Only ${scored.length} feasible plan(s) after applying exclusions.`);
 
   const analysis: RotationAnalysis = {
     analysis_id: nextId(db, "analysis"),
@@ -341,20 +446,18 @@ export async function createRotationFixture(
     input_version: body.input_version,
     observation_id: body.observation_id,
     catalog_version: body.catalog_version,
-    model_version: "fixture-v1",
+    model_version: FIXTURE_MODEL_VERSION,
     data_kind: "synthetic",
     created_at: new Date().toISOString(),
-    candidates: rank(candidates),
+    candidates: rank(scored),
+    reasons,
     assumptions: [
       "All values are synthetic fixtures for UI development.",
-      "Score = weighted mean of component values using the request's priority weights (placeholder, pending Bhagya).",
+      "Scoring follows rotation-score-0.1; scenario_resilience is null until a rainfall scenario is run, so its weight is renormalized away.",
+      "Total rainfall is used for provisional screening only; effective rainfall is not modeled.",
     ],
     source_refs: [SOURCE],
-    limitations: [
-      "Scores are illustrative only. Do not use for agronomic decisions.",
-      ...rejected,
-      ...(candidates.length < 3 ? [`Only ${candidates.length} feasible plan(s) after applying exclusions.`] : []),
-    ],
+    limitations: ["Heuristic comparison only; not a yield prediction or agronomic advice."],
   };
   db.analyses[analysis.analysis_id] = analysis;
   save(db);
@@ -362,7 +465,7 @@ export async function createRotationFixture(
 }
 
 // ---------------------------------------------------------------------------
-// Scenarios (synthetic recalculation from the baseline)
+// Scenarios — recomputed from the SAME baseline sequences
 // ---------------------------------------------------------------------------
 
 export async function createScenarioFixture(
@@ -378,38 +481,33 @@ export async function createScenarioFixture(
   const baseline = db.analyses[analysisId];
   if (!baseline) fail(404, "NOT_FOUND", `Analysis ${analysisId} was not found.`);
   const farm = db.farms[baseline.farm_id];
-  const seasons = baseline.candidates[0]?.sequence.length ?? 3;
-  const weights = baseline.candidates[0]
-    ? Object.fromEntries(baseline.candidates[0].score_components.map((c) => [c.name, c.weight]))
-    : {};
-  const w = {
-    water: weights["Water efficiency"] ?? 0.5,
-    soil: weights["Soil health"] ?? 0.3,
-    climate: weights["Climate resilience"] ?? 0.2,
-  };
-  const factor = 1 + rainfallChangePct / 100;
+  const req = (c: RotationCandidate, name: string) => c.score_components.find((x) => x.name === name)?.requested_weight ?? 0;
 
   const recalculated = rank(
-    baseline.candidates.map((b) => {
-      const tIndex = Number(b.candidate_id.split("-")[1]) - 1;
-      return buildCandidate(TEMPLATES[tIndex], tIndex, seasons, w, farm?.profile.irrigation_supply_mm_per_season ?? null, factor);
-    }),
+    baseline.candidates.map((b) =>
+      scoreSequence(
+        b.sequence.map((s) => s.crop_id),
+        b.candidate_id,
+        {
+          weights: { water: req(b, "water_sufficiency"), soil: req(b, "crop_diversity"), climate: req(b, "scenario_resilience") },
+          irrigationPerSeason: farm?.profile.irrigation_supply_mm_per_season ?? null,
+          scenarioFactor: 1 + rainfallChangePct / 100,
+        },
+      ),
+    ),
   );
 
   const differences = Object.fromEntries(
     recalculated.map((s, newRank) => {
-      const b = baseline.candidates.find((c) => c.candidate_id === s.candidate_id)!;
-      const oldRank = baseline.candidates.indexOf(b);
+      const oldRank = baseline.candidates.findIndex((c) => c.candidate_id === s.candidate_id);
+      const b = baseline.candidates[oldRank];
       return [
         s.candidate_id,
         {
-          score_change: Math.round((s.score - b.score) * 1000) / 1000,
-          deficit_change_mm:
-            s.water_budget.deficit_mm === null || b.water_budget.deficit_mm === null
-              ? null
-              : s.water_budget.deficit_mm - b.water_budget.deficit_mm,
+          score_change: s.score === null || b.score === null ? null : s.score - b.score,
           rank_baseline: oldRank + 1,
           rank_scenario: newRank + 1,
+          scenario_resilience: s.score_components.find((c) => c.name === "scenario_resilience")?.value ?? null,
         },
       ];
     }),
@@ -422,8 +520,8 @@ export async function createScenarioFixture(
     candidates: recalculated,
     baseline_differences: differences,
     limitations: [
-      `Hypothetical scenario: rainfall ${rainfallChangePct > 0 ? "+" : ""}${rainfallChangePct}% relative to the baseline. Not a forecast.`,
-      "Synthetic fixture recalculation; the approved water-budget model (Bhagya) will replace it.",
+      `Hypothetical scenario: rainfall ${rainfallChangePct > 0 ? "+" : ""}${rainfallChangePct}% relative to the baseline. Not a weather forecast.`,
+      "Synthetic fixture recalculation; Bhagya's engine will replace it.",
     ],
     data_kind: "synthetic",
     created_at: new Date().toISOString(),
@@ -436,25 +534,34 @@ export async function createScenarioFixture(
 
 export async function sendAssistantMessageFixture(body: AssistantRequest, signal?: AbortSignal): Promise<AssistantMessage> {
   await delay(600, signal);
+  // Mirrors Akash's service: only English until si/ta are implemented and reviewed.
+  if (body.language !== "en") {
+    fail(422, "UNSUPPORTED_LANGUAGE", `Language "${body.language}" is not supported yet. English is available.`);
+  }
   const db = load();
   const analysis = db.analyses[body.analysis_id];
   if (!analysis || analysis.farm_id !== body.farm_id) {
     fail(409, "CONTEXT_MISMATCH", "The selected analysis does not belong to this farm.");
   }
-  const cand =
-    analysis.candidates.find((c) => c.candidate_id === body.candidate_id) ?? analysis.candidates[0];
+  const cand = analysis.candidates.find((c) => c.candidate_id === body.candidate_id) ?? analysis.candidates[0];
+  const water = cand?.score_components.find((c) => c.name === "water_sufficiency")?.value;
   const content = cand
-    ? `[Fixture response — ${body.language}] For "${body.message}": in analysis ${analysis.analysis_id}, ` +
-      `${cand.candidate_id} (${cand.sequence.map((s) => s.crop_name ?? s.crop_id).join(" → ")}) has score ` +
-      `${Math.round(cand.score * 100)}; its water deficit ` +
-      `${cand.water_budget.deficit_mm === null ? "is unknown because irrigation supply was not provided" : `is ${cand.water_budget.deficit_mm} mm`}. ` +
+    ? `[Fixture response] For "${body.message}": in analysis ${analysis.analysis_id}, ${cand.candidate_id} ` +
+      `(${cand.sequence.map((s) => s.crop_name ?? s.crop_id).join(" → ")}) has a heuristic comparison score of ` +
+      `${cand.score === null ? "unknown" : cand.score.toFixed(1)} out of 100 and water sufficiency of ` +
+      `${water === null || water === undefined ? "unknown" : water.toFixed(1)}. This is a screening estimate, not a yield prediction. ` +
       `Real grounded explanations come from the assistant service (Akash).`
     : `[Fixture response] Analysis ${analysis.analysis_id} has no feasible plans, so there is nothing to explain yet.`;
   return {
     role: "assistant",
     content,
-    source_ids: [analysis.analysis_id, ...(body.scenario_id ? [body.scenario_id] : []), SOURCE],
-    limitations: ["Synthetic fixture response, not a model-generated answer."],
+    source_ids: [analysis.analysis_id, ...(body.scenario_id ? [body.scenario_id] : []), ...(analysis.observation_id ? [analysis.observation_id] : []), SOURCE],
+    limitations: [
+      "Synthetic fixture response, not a model-generated answer.",
+      ...(cand && cand.water_budget_range && cand.score_components.some((c) => c.value === null)
+        ? ["Some score components are unavailable for this plan."]
+        : []),
+    ],
   };
 }
 

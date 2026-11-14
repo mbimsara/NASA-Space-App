@@ -28,6 +28,7 @@ export function RotationPage() {
   const putAnalysis = useAppStore((s) => s.putAnalysis);
   const selectedCandidateId = useAppStore((s) => s.selectedCandidateId);
   const selectCandidate = useAppStore((s) => s.selectCandidate);
+  const latestObservation = useAppStore((s) => s.latestObservation);
   const guard = useLatestRequest();
   const { save, saving, error: saveError } = useSavePlan();
 
@@ -48,7 +49,13 @@ export function RotationPage() {
         farm.id,
         {
           input_version: farm.input_version,
-          observation_id: null,
+          // Only reference an observation loaded for this farm at its current version.
+          observation_id:
+            latestObservation &&
+            latestObservation.farmId === farm.id &&
+            latestObservation.inputVersion === farm.input_version
+              ? latestObservation.observationId
+              : null,
           seasons,
           catalog_version: CATALOG_VERSION,
           priority_weights: normalizeWeights(weights),
@@ -144,6 +151,19 @@ export function RotationPage() {
               : t("rotation.candidates", { count: analysis.candidates.length })}
             {analysis.candidates.length > 0 && analysis.candidates.length < 3 && ` ${t("rotation.fewerThanThree")}`}
           </p>
+          {(analysis.reasons?.length ?? 0) > 0 && (
+            <div
+              className={`notice ${analysis.candidates.length === 0 ? "notice-warn" : "notice-info"}`}
+              role={analysis.candidates.length === 0 ? "alert" : "note"}
+            >
+              <strong>{analysis.candidates.length === 0 ? t("rotation.infeasibleTitle") : t("rotation.reasonsTitle")}</strong>
+              <ul style={{ margin: "4px 0 0" }}>
+                {analysis.reasons!.map((r, i) => (
+                  <li key={i}>{r}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           {analysis.limitations.length > 0 && (
             <div className="notice notice-warn">
               <strong>{t("common.limitations")}</strong>

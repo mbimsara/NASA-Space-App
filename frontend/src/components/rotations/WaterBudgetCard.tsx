@@ -1,57 +1,56 @@
 /**
- * WaterBudgetCard — displays the water budget for a rotation candidate.
- * Shows deficit with a visual indicator. Unknown values are null, never 0.
+ * WaterBudgetCard — optional plan-level aggregate. Per Bhagya's spec it never
+ * replaces the per-season records (SeasonWaterTable), so it is shown collapsed.
+ * Effective rainfall has no approved method: null is shown as "Not modeled".
  * Owner: Shehani.
  */
 import { useTranslation } from "react-i18next";
 import type { WaterBudget } from "../../types/api";
+import { fmtMm, isKnown } from "../../utils/format";
 
-interface Props {
-  budget: WaterBudget;
-}
-
-function mmOrUnknown(value: number | null, t: (k: string) => string): string {
-  return value === null ? t("common.unknown") : `${value} mm`;
-}
-
-export function WaterBudgetCard({ budget }: Props) {
+export function WaterBudgetCard({ budget }: { budget: WaterBudget }) {
   const { t } = useTranslation();
-  const isDeficit = budget.deficit_mm !== null && budget.deficit_mm > 0;
+  const u = t("common.unknown");
+  const isDeficit = isKnown(budget.deficit_mm) && budget.deficit_mm > 0;
+  const rows: [string, string, string?][] = [
+    [t("rotation.demand"), fmtMm(budget.demand_mm, u)],
+    [t("rotation.rainfallTotal"), fmtMm(budget.rainfall_total_mm ?? budget.rainfall_mm, u)],
+    [
+      t("rotation.effectiveRainfall"),
+      budget.effective_rainfall_mm === null ? t("rotation.notModeled") : fmtMm(budget.effective_rainfall_mm, u),
+    ],
+    [t("rotation.irrigation"), fmtMm(budget.irrigation_supply_mm, u)],
+    [
+      t("rotation.deficit"),
+      fmtMm(budget.deficit_mm, u) + (isDeficit ? " ⚠" : ""),
+      isKnown(budget.deficit_mm) ? (isDeficit ? "var(--red-700)" : "var(--green-700)") : undefined,
+    ],
+  ];
 
   return (
-    <div style={{ background: "#f0f7ff", border: "1px solid #cce0ff", borderRadius: 8, padding: 16, marginTop: 12 }}>
-      <h4 style={{ margin: "0 0 10px", fontSize: 14, color: "#0066cc" }}>{t("rotation.waterBudget")}</h4>
-      <table style={{ width: "100%", fontSize: 13, borderCollapse: "collapse" }}>
+    <details style={{ marginTop: 8, fontSize: 13 }}>
+      <summary style={{ cursor: "pointer", fontWeight: 600 }}>
+        {t("rotation.planAggregate")} <span className="muted">({budget.period})</span>
+      </summary>
+      <table className="data" style={{ fontSize: 12, marginTop: 6 }}>
         <tbody>
-          {[
-            [t("rotation.demand"), mmOrUnknown(budget.demand_mm, t)],
-            [t("rotation.rainfall"), mmOrUnknown(budget.rainfall_mm, t)],
-            [t("rotation.effectiveRainfall"), mmOrUnknown(budget.effective_rainfall_mm, t)],
-            [t("rotation.irrigation"), mmOrUnknown(budget.irrigation_supply_mm, t)],
-          ].map(([label, val]) => (
+          {rows.map(([label, val, color]) => (
             <tr key={label}>
-              <td style={{ padding: "3px 0", color: "#555", width: "55%" }}>{label}</td>
-              <td style={{ fontWeight: 600 }}>{val}</td>
+              <th scope="row" style={{ fontWeight: 400, width: "55%", background: "transparent" }}>
+                {label}
+              </th>
+              <td style={{ fontWeight: 600, color }}>{val}</td>
             </tr>
           ))}
-          <tr>
-            <td style={{ padding: "3px 0", color: "#555" }}>{t("rotation.deficit")}</td>
-            <td style={{ fontWeight: 700, color: isDeficit ? "#c0392b" : "#27ae60" }}>
-              {mmOrUnknown(budget.deficit_mm, t)}
-              {isDeficit && " ⚠"}
-            </td>
-          </tr>
         </tbody>
       </table>
       {budget.assumptions.length > 0 && (
-        <details style={{ marginTop: 8, fontSize: 12 }}>
-          <summary style={{ cursor: "pointer", color: "#555" }}>{t("common.assumptions")}</summary>
-          <ul style={{ margin: "4px 0 0 16px" }}>
-            {budget.assumptions.map((a, i) => <li key={i}>{a}</li>)}
-          </ul>
-        </details>
+        <ul className="muted" style={{ fontSize: 12, margin: "4px 0 0 16px" }}>
+          {budget.assumptions.map((a, i) => (
+            <li key={i}>{a}</li>
+          ))}
+        </ul>
       )}
-    </div>
+    </details>
   );
 }
-

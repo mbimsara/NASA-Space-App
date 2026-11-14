@@ -78,13 +78,24 @@
     "retrievedAt": "Retrieved",
     "unknownRetrieval": "Retrieval date not recorded",
     "load": "Load observations",
-    "rangeInvalid": "Start date must be on or before end date.",
+    "rangeInvalid": "Choose dates between {{min}} and {{max}}, with the start on or before the end.",
     "rainfallTotal": "Total rainfall",
     "temperatureMean": "Mean temperature",
     "gapsNote": "Some days have no data; gaps are shown as gaps, not zeros.",
     "nextStep": "Compare rotation plans",
     "noDataPoint": "No data",
-    "noSeries": "Time-series data not available for this period or location."
+    "noSeries": "Time-series data not available for this period or location.",
+    "rangeHint": "NASA POWER history: {{min}} to {{max}} (end date must be before today, UTC).",
+    "rainCoverage": "Rainfall: {{available}} of {{expected}} days",
+    "tempCoverage": "Temperature: {{available}} of {{expected}} days",
+    "missingDates": "{{count}} missing day(s)",
+    "partialRain": "Full-period total unknown; {{mm}} mm on days with data",
+    "provider": "Provider",
+    "kind": "Kind",
+    "resolutionUnknown": "not reported",
+    "sourceLink": "Source",
+    "docsLink": "Documentation",
+    "idNote": "Observation ID {{id}} is sent with rotation requests."
   },
   "rotation": {
     "title": "Rotation Plans",
@@ -94,7 +105,7 @@
     "noCandidatesReason": "Reason: {{reason}}",
     "candidate": "Plan {{index}}",
     "score": "Score",
-    "scoreNote": "Score components and weights are shown below. This is not a yield prediction.",
+    "scoreNote": "Heuristic comparison score — not a yield prediction.",
     "waterBudget": "Water Budget",
     "demand": "Demand",
     "rainfall": "Rainfall",
@@ -121,7 +132,48 @@
     "toAssistant": "Ask the assistant",
     "inputVersion": "Farm input version",
     "candidates_one": "{{count}} rotation plan found",
-    "candidates_other": "{{count}} rotation plans found"
+    "candidates_other": "{{count}} rotation plans found",
+    "component": "Component",
+    "value": "Value",
+    "direction": "Direction",
+    "higher": "higher",
+    "lower": "lower",
+    "missingComponents": "Unavailable (shown as Unknown, not 0): {{names}}.",
+    "demandRange": "Crop water demand range",
+    "nominal": "nominal",
+    "baselineRainfall": "Baseline rainfall",
+    "scenarioRainfall": "Scenario rainfall",
+    "availableWater": "Available water (rainfall + irrigation)",
+    "balanceRange": "Water balance range",
+    "coverageRange": "Coverage range (uncapped)",
+    "balanceHelp": "Balance = available water − demand; negative means a shortfall",
+    "demandBasis": "Demand basis",
+    "deficitUnknown": "Deficit is unknown because an input (e.g. irrigation supply) is unknown.",
+    "infeasibleTitle": "No feasible rotation — reasons",
+    "reasonsTitle": "Why some plans are not shown",
+    "comp": {
+      "water_sufficiency": "Water sufficiency",
+      "crop_diversity": "Crop diversity",
+      "scenario_resilience": "Scenario resilience"
+    },
+    "compHelp": {
+      "water_sufficiency": "Water sufficiency is a screening estimate using total modeled rainfall; effective rainfall and field losses are not yet modeled.",
+      "crop_diversity": "Crop diversity is a rotation-structure proxy, not a measured soil-health change.",
+      "scenario_resilience": "Scenario resilience describes a hypothetical rainfall adjustment, not a weather forecast."
+    },
+    "requestedWeight": "Requested weight",
+    "effectiveWeight": "Effective weight",
+    "renormalized": "Their weight is set to 0 and the remaining weights are renormalized.",
+    "aboutComponents": "What these components mean",
+    "smallDifferences": "Small score differences are not statistically meaningful.",
+    "seasonWaterTitle": "Water screening by season",
+    "waterWording": "Water sufficiency is a screening estimate using total modeled rainfall; effective rainfall and field losses are not yet modeled.",
+    "season": "Season / crop",
+    "noSeasonWater": "No per-season water screening available for this plan.",
+    "planAggregate": "Plan aggregate (optional, does not replace per-season values)",
+    "rainfallTotal": "Total rainfall",
+    "notModeled": "Not modeled (no approved method)",
+    "rangeAssumptions": "Assumptions and limitations"
   },
   "scenario": {
     "title": "Scenario Comparison",
@@ -141,7 +193,8 @@
     "backToBaseline": "Show baseline only",
     "sliderChanged": "The slider changed since the last run. Run the scenario again to update results.",
     "askAssistant": "Ask the assistant about this scenario",
-    "hypothetical": "hypothetical"
+    "hypothetical": "hypothetical",
+    "worstBalance": "Lowest season balance (conservative)"
   },
   "assistant": {
     "title": "AI Assistant",
@@ -161,7 +214,9 @@
     "empty": "Ask a question or choose a suggestion below.",
     "q1": "Why is the first rotation plan ranked highest?",
     "q2": "What does the water deficit mean for my farm?",
-    "q3": "How would reduced rainfall affect my top plan?"
+    "q3": "How would reduced rainfall affect my top plan?",
+    "askInEnglish": "Ask in English instead",
+    "languagePending": "Sinhala and Tamil answers are not available yet."
   },
   "plan": {
     "title": "Saved Plan",
@@ -253,7 +308,9 @@
     "UNAVAILABLE": "A required service is temporarily unavailable. Please try again.",
     "network": "Network error — check your connection and retry.",
     "CONTEXT_MISMATCH": "The selected results no longer match this farm. Please re-run the analysis.",
-    "HTTP_ERROR": "The server returned an unexpected error."
+    "HTTP_ERROR": "The server returned an unexpected error.",
+    "SERVICE_UNAVAILABLE": "The observation service is temporarily unavailable. Please try again later.",
+    "UNSUPPORTED_LANGUAGE": "The assistant does not support this language yet."
   },
   "home": {
     "title": "Plan your next crop rotation",

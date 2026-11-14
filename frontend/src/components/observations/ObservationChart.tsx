@@ -19,6 +19,7 @@ import type { TimeSeriesPoint } from "../../types/api";
 import { MissingDataPlaceholder } from "../ui/MissingDataPlaceholder";
 
 interface Props {
+  /** Normalized points (see utils/observations.toChartPoints). */
   timeSeries: TimeSeriesPoint[] | undefined;
   hasData: boolean;
 }

@@ -12,6 +12,8 @@ import { selectCurrentAnalysis, selectCurrentScenario, useAppStore } from "../ho
 import { useLatestRequest } from "../hooks/useLatestRequest";
 import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 import { ErrorMessage } from "../components/ui/ErrorMessage";
+import { ApiClientError } from "../api/client";
+import type { Language } from "../types/api";
 import type { AssistantMessage } from "../types/api";
 
 export function AssistantPage() {
@@ -54,7 +56,7 @@ export function AssistantPage() {
 
   const candidateRank = analysis.candidates.findIndex((c) => c.candidate_id === candidateId);
 
-  const sendMessage = async (text: string) => {
+  const sendMessage = async (text: string, lang: Language = language) => {
     if (!text.trim()) return;
     const ticket = guard.next();
     setLoading(true);
@@ -68,7 +70,7 @@ export function AssistantPage() {
           analysis_id: analysis.analysis_id,
           scenario_id: scenario?.scenario_id,
           candidate_id: candidateId ?? undefined,
-          language,
+          language: lang,
           message: text,
         },
         ticket.signal,
@@ -186,6 +188,14 @@ export function AssistantPage() {
       </div>
 
       <ErrorMessage error={error} />
+      {error instanceof ApiClientError && error.code === "UNSUPPORTED_LANGUAGE" && language !== "en" && (
+        <div className="row" style={{ marginBottom: 12 }}>
+          <button type="button" className="btn btn-secondary" onClick={() => sendMessage(input, "en")} disabled={loading || !input.trim()}>
+            {t("assistant.askInEnglish")}
+          </button>
+          <span className="muted">{t("assistant.languagePending")}</span>
+        </div>
+      )}
 
       <form
         onSubmit={(e) => {

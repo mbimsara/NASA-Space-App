@@ -9,6 +9,8 @@ import type { RotationCandidate } from "../../types/api";
 import { CropTimeline } from "./CropTimeline";
 import { ScoreBreakdown } from "./ScoreBreakdown";
 import { WaterBudgetCard } from "./WaterBudgetCard";
+import { SeasonWaterTable } from "./SeasonWaterTable";
+import { asSeasonRanges } from "../../utils/format";
 
 interface Props {
   candidate: RotationCandidate;
@@ -31,6 +33,7 @@ export function CandidateCard({ candidate: cand, rank, selected = false, childre
       </h3>
       <CropTimeline sequence={cand.sequence} />
       <ScoreBreakdown score={cand.score} components={cand.score_components} />
+      <SeasonWaterTable ranges={asSeasonRanges(cand.water_budget_range)} sequence={cand.sequence} />
       <WaterBudgetCard budget={cand.water_budget} />
 
       {cand.reasons.length > 0 && (
