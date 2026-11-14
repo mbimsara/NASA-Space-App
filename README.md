@@ -64,3 +64,5 @@ Keep crop rotation central. SoilRevive and FarmRecovery are planning modes that 
 ## Current status
 
 Product scope documented. Application implementation has not started.
+
+See the [six-member implementation plan](IMPLEMENTATION_PLAN.md) for responsibilities, Tharuka's UI/UX design assignment, integration contracts, milestones, and acceptance checks.
