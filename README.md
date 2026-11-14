@@ -6,7 +6,7 @@ AgroSphere combines Earth observations, farmer inputs, and local agronomy to hel
 
 ## Start here
 
-The repository currently contains development plans, shared data contracts, and synthetic fixtures. There is no runnable frontend/backend yet.
+The repository contains development plans, shared data contracts, synthetic fixtures, and a [working NASA POWER Python adapter](docs/NASA_POWER.md). The web frontend and HTTP backend have not been implemented yet.
 
 | Resource | Purpose |
 | --- | --- |
@@ -16,6 +16,11 @@ The repository currently contains development plans, shared data contracts, and 
 | [API contracts](docs/API_CONTRACTS.md) | Proposed endpoints, fields, units and errors |
 | [First milestone backlog](docs/BACKLOG.md) | Concrete starting tasks and acceptance checks |
 | [Data sources](docs/DATA_SOURCES.md) | NASA integration research register |
+| [Climate handoff](docs/CLIMATE_HANDOFF.md) | Working module interface, examples and teammate integration instructions |
+| [Environment contract](docs/ENVIRONMENT_CONTRACT.md) | Unified POWER/SMAP response, reproducible examples and twin sensitivity |
+| [SMAP preparation](docs/SMAP.md) | Verified public discovery, quality filtering and account/download prerequisites |
+| [SMAP automation](docs/SMAP_AUTOMATION.md) | Private local sign-in, resumable subset jobs, retries and coverage checks |
+| [Attribution](docs/ATTRIBUTION.md) | NASA POWER credit and metadata requirements |
 | [Agronomy rules](docs/AGRONOMY_RULES.md) | Evidence and model review process |
 | [Design handoff](docs/DESIGN.md) | Tharuka's UI/UX handoff to Shehani |
 | [Demo guide](docs/DEMO.md) | Connected walkthrough and fallback rules |
@@ -82,6 +87,6 @@ Keep crop rotation central. SoilRevive and FarmRecovery are planning modes that 
 
 ## Current status
 
-Product scope documented. Application implementation has not started.
+NASA POWER daily retrieval, normalization, monthly summaries, configurable historical threshold indicators, hypothetical rainfall scaling, multi-year monthly comparisons, an experimental supplied-location climate twin finder, and offline tests are implemented. Web application implementation and crop-model research are pending. See [adapter usage and verified results](docs/NASA_POWER.md).
 
 See the [six-member implementation plan](IMPLEMENTATION_PLAN.md) for responsibilities, Tharuka's UI/UX design assignment, integration contracts, milestones, and acceptance checks.

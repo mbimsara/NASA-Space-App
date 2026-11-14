@@ -2,6 +2,8 @@
 
 Owner: Dulanjaya. Reviewers: all module owners. These endpoints are not implemented. Use `/api/v1` and JSON; freeze changes together before independent development.
 
+The implemented climate functions and proposed serializer are documented in [the climate handoff](CLIMATE_HANDOFF.md). Its committed synthetic bundle is the current integration example. The observation serializer exposes separate temperature/rain coverage and the adapter's explicit `rainfall_total_mm` field; the simplified example below predates that implementation. Dulanjaya should adopt/review that payload when implementing the route rather than assume the abbreviated example is a complete schema.
+
 ## Conventions
 
 WGS84 coordinates; hectares; millimeters; Celsius; ISO dates; timezone-bearing timestamps. Unknown values are `null`, never assumed zero. Responses carry `data_kind` (`observed`, `modeled`, `synthetic`, or `mixed`) where appropriate, source references, and assumptions. Never relabel synthetic fixtures as NASA observations.
