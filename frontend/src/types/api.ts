@@ -71,6 +71,8 @@ export interface SourceRef {
 export interface ObservationCoverage {
   expected_days: number;
   available_days: number;
+  temperature_valid_days?: number;
+  precipitation_valid_days?: number;
 }
 
 export interface ObservationSummary {

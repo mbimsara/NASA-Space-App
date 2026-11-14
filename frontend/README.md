@@ -46,5 +46,6 @@ React Router 6 (routing), Zustand (selected farm/analysis state, persisted), Zod
 
 - Every result is accepted only for the selected farm (analysis) or the selected baseline (scenario), so late responses are dropped.
 - `PATCH /farms/{id}` sends `expected_input_version`. A changed profile marks analyses outdated, and saving an outdated analysis is blocked in the UI.
-- The observation chart expects `time_series: [{date, rainfall_mm, mean_temperature_c}]`. Confirm field names with Matheesha.
+- The live client maps the backend's `daily[]` values into chart `time_series[]`, preserving nulls, zeros, and per-variable coverage. Historical queries end before the current UTC date.
+- Farm and observation HTTP routes are implemented. Rotation, scenario, assistant, and saved-plan routes remain integration work; keep fixture mode enabled for the full demonstration journey.
 - The backend should store `input_snapshot` and `analysis_snapshot` with saved plans (see `SavedPlan` in `src/types/api.ts`).

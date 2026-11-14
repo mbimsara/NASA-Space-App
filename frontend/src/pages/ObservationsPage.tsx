@@ -16,13 +16,13 @@ import { SyntheticDataBanner } from "../components/ui/SyntheticDataBanner";
 import { SourceBadge } from "../components/ui/SourceBadge";
 import { MissingDataPlaceholder } from "../components/ui/MissingDataPlaceholder";
 import { ObservationChart } from "../components/observations/ObservationChart";
-import { todayIso } from "../utils/validation";
+import { latestHistoricalDate } from "../api/observations";
 import type { ObservationSummary } from "../types/api";
 
 function monthAgo() {
-  const d = new Date();
-  d.setMonth(d.getMonth() - 1);
-  return todayIso(d);
+  const d = new Date(`${latestHistoricalDate()}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - 30);
+  return d.toISOString().slice(0, 10);
 }
 
 export function ObservationsPage() {
@@ -31,11 +31,11 @@ export function ObservationsPage() {
   const guard = useLatestRequest();
 
   const [start, setStart] = useState(monthAgo);
-  const [end, setEnd] = useState(() => todayIso());
+  const [end, setEnd] = useState(() => latestHistoricalDate());
   const [obs, setObs] = useState<ObservationSummary | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
-  const rangeInvalid = !start || !end || start > end;
+  const rangeInvalid = !start || !end || start > end || end > latestHistoricalDate();
 
   const fetchObs = useCallback(
     (from: string, to: string) => {
@@ -60,10 +60,11 @@ export function ObservationsPage() {
 
   useEffect(() => {
     setObs(null);
-    fetchObs(monthAgo(), todayIso());
+    fetchObs(monthAgo(), latestHistoricalDate());
   }, [fetchObs]);
 
   const s = obs?.summary;
+  const hasAnyData = obs?.time_series?.some(row => row.rainfall_mm !== null || row.mean_temperature_c !== null) ?? false;
 
   return (
     <div className="page">
@@ -87,7 +88,7 @@ export function ObservationsPage() {
             type="date"
             value={end}
             min={start}
-            max={todayIso()}
+            max={latestHistoricalDate()}
             onChange={(e) => setEnd(e.target.value)}
           />
         </div>
@@ -130,7 +131,10 @@ export function ObservationsPage() {
                 expected: obs.coverage.expected_days,
               })}
             </p>
-            {obs.coverage.available_days === 0 ? (
+            {obs.coverage.temperature_valid_days !== undefined && (
+              <p className="muted">Temperature: {obs.coverage.temperature_valid_days}/{obs.coverage.expected_days} valid days · Rainfall: {obs.coverage.precipitation_valid_days}/{obs.coverage.expected_days} valid days</p>
+            )}
+            {!hasAnyData ? (
               <MissingDataPlaceholder reason={obs.limitations.join(" ")} />
             ) : (
               <>

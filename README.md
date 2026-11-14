@@ -6,7 +6,7 @@ AgroSphere combines Earth observations, farmer inputs, and local agronomy to hel
 
 ## Start here
 
-The repository includes a runnable FastAPI backend with SQLite farm persistence, validation, version checks, and environment-based database/CORS configuration. See [backend setup and tests](backend/README.md). Farm observations integrate Matheesha's NASA POWER adapter; other analytical endpoints and the frontend remain planned.
+The integration branch combines all six members' work: a React frontend, FastAPI farm and NASA POWER observation APIs, rotation and water-budget modules, climate analysis, and an English grounded assistant service. See the [team integration report](docs/TEAM_INTEGRATION_REPORT.md) for tested boundaries and remaining work. Rotation, scenario, assistant, and saved-plan HTTP endpoints are still needed for a complete live journey. Frontend fixture mode demonstrates that journey with explicitly synthetic data.
 
 | Resource | Purpose |
 | --- | --- |
@@ -27,7 +27,7 @@ The repository includes a runnable FastAPI backend with SQLite farm persistence,
 | [Demo guide](docs/DEMO.md) | Connected walkthrough and fallback rules |
 | [Shared data](data/README.md) | Synthetic farm, catalog and schemas |
 
-Validate shared inputs with `python scripts/validate_data.py` (Python 3.10+). GitHub Actions runs this check on pushes and pull requests. The crop catalog is intentionally empty pending research and approval. Backend installation, startup, configuration, and test instructions are in [backend/README.md](backend/README.md). See [frontend](frontend/README.md) for its separate status.
+Validate shared inputs with `python scripts/validate_data.py` (Python 3.10+). GitHub Actions checks shared data, Python modules/APIs, and the frontend on pushes and pull requests. The crop catalog contains eight draft crops; none are approved for recommendations. Backend installation, startup, configuration, and test instructions are in [backend/README.md](backend/README.md). See [frontend setup](frontend/README.md) for fixture and live modes.
 
 ## Product scope
 

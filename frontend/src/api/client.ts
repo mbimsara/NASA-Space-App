@@ -8,6 +8,8 @@
  */
 
 import axios from "axios";
+import { observationView } from "./observations";
+import type { ObservationWire } from "./observations";
 import demoFarmProfile from "../../../data/fixtures/farm.synthetic.json";
 import type { AxiosError, AxiosRequestConfig } from "axios";
 import type {
@@ -127,11 +129,11 @@ export async function getObservations(
   end: string,
   signal?: AbortSignal
 ): Promise<ObservationSummary> {
-  return request<ObservationSummary>({
+  return observationView(await request<ObservationWire>({
     method: "GET",
     url: `/farms/${farmId}/observations`,
     params: { start, end },
-  }, signal);
+  }, signal));
 }
 
 // ---------------------------------------------------------------------------

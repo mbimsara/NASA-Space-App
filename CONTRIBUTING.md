@@ -12,7 +12,7 @@
 
 The FastAPI backend is runnable. Follow [backend/README.md](backend/README.md) for Python installation, configuration, startup, and tests. Frontend setup remains separate.
 
-- Frontend owner: Shehani; initialize React/TypeScript in `frontend/` and document exact prerequisites and commands there.
+- Frontend owner: Shehani; the React/TypeScript application is in `frontend/`. Follow its README for setup, fixture/live modes, and checks.
 - Backend owner: Dulanjaya; maintain FastAPI and SQLAlchemy/SQLite persistence in `backend/`. Existing farm APIs and schemas must stay compatible.
 - Commit dependency manifests and lockfiles when scaffolding. Agree on runtime versions and record them.
 - Copy the root `.env.example` to the ignored root `.env` when configuring the backend; process environment variables take precedence. Configure the frontend separately using `frontend/.env.example`.
