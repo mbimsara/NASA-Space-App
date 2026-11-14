@@ -6,7 +6,7 @@ AgroSphere combines Earth observations, farmer inputs, and local agronomy to hel
 
 ## Start here
 
-The repository contains development plans, shared data contracts, synthetic fixtures, and a [working NASA POWER Python adapter](docs/NASA_POWER.md). The web frontend and HTTP backend have not been implemented yet.
+The repository includes a runnable FastAPI backend with SQLite farm persistence, validation, version checks, and environment-based database/CORS configuration. See [backend setup and tests](backend/README.md). Farm observations integrate Matheesha's NASA POWER adapter; other analytical endpoints and the frontend remain planned.
 
 | Resource | Purpose |
 | --- | --- |
@@ -26,7 +26,7 @@ The repository contains development plans, shared data contracts, synthetic fixt
 | [Demo guide](docs/DEMO.md) | Connected walkthrough and fallback rules |
 | [Shared data](data/README.md) | Synthetic farm, catalog and schemas |
 
-Validate shared inputs with `python scripts/validate_data.py` (Python 3.10+). GitHub Actions runs this check on pushes and pull requests. The crop catalog is intentionally empty pending research and approval. Application startup instructions will be added to [frontend](frontend/README.md) and [backend](backend/README.md) when scaffolding is implemented.
+Validate shared inputs with `python scripts/validate_data.py` (Python 3.10+). GitHub Actions runs this check on pushes and pull requests. The crop catalog is intentionally empty pending research and approval. Backend installation, startup, configuration, and test instructions are in [backend/README.md](backend/README.md). See [frontend](frontend/README.md) for its separate status.
 
 ## Product scope
 
@@ -70,7 +70,7 @@ All features are in the product scope. These phases describe implementation orde
 
 Use one Sri Lankan demonstration farm and a researched local crop catalog:
 
-**Select farm → enter history, soil results, and priorities → review NASA observations → compare three rotations → simulate reduced rainfall → compare water and soil tradeoffs → ask the assistant to explain → save or share the plan.**
+**Select farm â†’ enter history, soil results, and priorities â†’ review NASA observations â†’ compare three rotations â†’ simulate reduced rainfall â†’ compare water and soil tradeoffs â†’ ask the assistant to explain â†’ save or share the plan.**
 
 Keep crop rotation central. SoilRevive and FarmRecovery are planning modes that influence the same rotation comparison rather than separate disconnected tools.
 
@@ -88,5 +88,7 @@ Keep crop rotation central. SoilRevive and FarmRecovery are planning modes that 
 ## Current status
 
 NASA POWER daily retrieval, normalization, monthly summaries, configurable historical threshold indicators, hypothetical rainfall scaling, multi-year monthly comparisons, an experimental supplied-location climate twin finder, and offline tests are implemented. Web application implementation and crop-model research are pending. See [adapter usage and verified results](docs/NASA_POWER.md).
+
+The backend implements health and farm create/read/update APIs with SQLite persistence and automated tests. Farm observation requests now integrate Matheesha's NASA POWER adapter. Rotation, scenario, assistant, and saved-plan services remain planned.
 
 See the [six-member implementation plan](IMPLEMENTATION_PLAN.md) for responsibilities, Tharuka's UI/UX design assignment, integration contracts, milestones, and acceptance checks.

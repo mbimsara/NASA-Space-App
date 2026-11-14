@@ -10,12 +10,12 @@
 
 ## Local setup status
 
-This repository contains planning documents, schemas, synthetic fixtures, and a standalone NASA POWER adapter. There is no runnable web application yet. See [adapter commands](docs/NASA_POWER.md); do not expect `npm install` or a backend server start command to work until the application scaffolds are merged.
+The FastAPI backend is runnable. Follow [backend/README.md](backend/README.md) for Python installation, configuration, startup, and tests. Frontend setup remains separate.
 
 - Frontend owner: Shehani; initialize React/TypeScript in `frontend/` and document exact prerequisites and commands there.
-- Backend owner: Dulanjaya; initialize FastAPI in `backend/`, select persistence, and document environment setup, migrations, and startup there.
+- Backend owner: Dulanjaya; maintain FastAPI and SQLAlchemy/SQLite persistence in `backend/`. Existing farm APIs and schemas must stay compatible.
 - Commit dependency manifests and lockfiles when scaffolding. Agree on runtime versions and record them.
-- Copy `.env.example` to an ignored local environment file when configuring services. Configure the frontend separately using `frontend/.env.example`.
+- Copy the root `.env.example` to the ignored root `.env` when configuring the backend; process environment variables take precedence. Configure the frontend separately using `frontend/.env.example`.
 
 ## Shared conventions
 

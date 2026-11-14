@@ -27,4 +27,13 @@ Demonstrate one successful retrieval for the agreed location and date range, rec
 
 ## Provenance rules
 
+The imported POWER module uses the fixed NASA daily point endpoint and no API key. Its
+results retain `data_kind: modeled`, source identifiers, API/parameter metadata and UTC
+retrieval time. It reports MERRA2 grid resolution only when the source metadata matches;
+otherwise resolution is null. Missing days and fill values stay null. The HTTP integration
+adds explicit units, aggregation descriptions and coverage; it does not invent dataset versions
+or substitute fixtures on provider failure. Immutable database snapshots preserve the original
+retrieval metadata and farm version. Fresh-cache lifetime defaults to 24 hours; failed expired
+refreshes return 503. Old snapshots remain explicitly readable by ID.
+
 Keep source references with analyses and reports. Satellite/regional values do not establish exact field nutrients, weed coverage, or guaranteed yields. Historical data does not by itself predict future weather. Synthetic fixtures under `data/fixtures/` are invented and must never appear as live NASA data.
