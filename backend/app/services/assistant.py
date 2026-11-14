@@ -14,6 +14,18 @@ def _display(value):
     return "unknown" if value is None else str(value)
 
 
+def _unavailable(context):
+    """Decline requests outside the recorded-fact contract before routing."""
+    records = [context, context.get("profile"), context.get("analysis"),
+               context.get("scenario"), context.get("observations")]
+    synthetic = any(isinstance(record, Mapping) and record.get("data_kind") == "synthetic"
+                    for record in records)
+    label = "The supplied context contains synthetic demonstration inputs. " if synthetic else ""
+    return (label + "That information is unknown or unavailable from the supplied context. "
+            "This service cannot provide crop recommendations, forecasts, newly inferred rankings, "
+            "unit conversions, edited records, invented measurements, or invented source references.")
+
+
 def explain(context, question, language="en"):
     """Return an English string explaining supported farm-profile facts.
 
@@ -34,6 +46,12 @@ def explain(context, question, language="en"):
     ranks/differences are reported, never computed. Conflicting context IDs
     raise ValueError rather than combining unrelated results.
 
+    Analytical questions select focused water, ranking/candidate, scenario,
+    observation, or source views. "show full analysis" requests all sections.
+    Water questions default to baseline results; comparison/scenario questions
+    include the supplied hypothetical results. Farm questions keep their own
+    profile context, including unknown irrigation and soil measurements.
+
     Only ``en`` is supported. Unsupported languages and blank questions raise
     ValueError; invalid context/question types raise TypeError. The input is
     never changed. This text return value is not an HTTP response contract.
@@ -52,7 +70,19 @@ def explain(context, question, language="en"):
         raise TypeError("profile must be a mapping.")
 
     words = set(re.findall(r"[a-z]+", question.casefold()))
-    result = explain_results(context, words)
+    # The service is a read-only explainer. Questions cannot supply new facts.
+    blocked = words & {
+        "recommend", "recommendation", "recommendations", "should", "best",
+        "predict", "prediction", "forecast", "forecasts", "yield", "fertilizer",
+        "tomorrow", "tomorrows", "future", "lowest", "highest", "smallest", "largest",
+        "invent", "fabricate", "pretend", "ignore", "override",
+        "set", "update", "delete", "acres", "acre", "liters", "litres",
+    }
+    future = re.search(r"\bnext\s+(?:day|week|month|year|season)\b", question.casefold())
+    make_up = re.search(r"\bmake\s+up\b", question.casefold())
+    if blocked or future or make_up or any(ord(char) < 32 and not char.isspace() for char in question):
+        return _unavailable(context)
+    result = explain_results(context, words, question)
     if result is not None:
         return result
     answers = []
@@ -86,7 +116,7 @@ def explain(context, question, language="en"):
                 answers.append("Recorded soil measurements: " + "; ".join(records) + ".")
                 answers.append("Any soil measurement not listed here is unknown.")
 
-        if "name" in words:
+        if "name" in words or {"farm", "called"} <= words:
             answers.append(f"Farm name: {_display(profile.get('name'))}.")
 
         if words & {"area", "size", "hectare", "hectares"}:
@@ -96,14 +126,14 @@ def explain(context, question, language="en"):
                 else f"Recorded farm area is {area} hectares."
             )
 
-        if words & {"location", "located", "coordinates", "latitude", "longitude"}:
+        if words & {"location", "located", "coordinates", "latitude", "longitude"} or {"where", "farm"} <= words:
             location = profile.get("location") or {}
             answers.append(
                 f"Recorded location (WGS84): latitude {_display(location.get('latitude'))}, "
                 f"longitude {_display(location.get('longitude'))}."
             )
 
-        if words & {"history", "previous", "planted", "grown"}:
+        if words & {"history", "previous", "previously", "planted", "grown", "grow"}:
             history = profile.get("crop_history")
             if not history:
                 answers.append("Crop history is unknown; no crop history is recorded.")

@@ -57,6 +57,48 @@ differences, references, and provenance are never inferred. Questions still use
 keyword matching; requests for new recommendations or forecasts are unsupported.
 API-level schema validation and source resolution remain future integration work.
 
+## Focused questions and the interactive demo
+
+Water questions such as "Explain water budgets" and "How much water is needed?"
+show baseline budgets only, including periods, units, and effective-rainfall
+assumptions. "Compare water deficits" shows baseline and hypothetical deficits
+and the supplied differences. Scenario questions such as "What happens if
+rainfall decreases?" compare supplied baseline/scenario results without
+recalculating them. Ranking questions show supplied ranks, scores, and reasons;
+asking for candidate details also includes sequences and score components.
+Observation records appear only when requested, and a source-only question
+shows provenance and metadata without repeating the numerical analyses.
+
+Each focused view preserves its own synthetic-data label, source IDs,
+assumptions, and limitations. Missing required candidate sections are disclosed
+as unknown rather than silently treated as complete results. Multiple explicit
+topics can be combined. Use "show full analysis" for all result sections.
+
+From the repository root, run `python backend/demo_assistant.py`. The `help`
+command lists examples. Use `candidate candidate-test-a` or
+`candidate candidate-test-b` to select one candidate, `candidate all` to reset,
+and `exit` to close. Selection changes only the in-memory demo context.
+
+Questions may name an exact candidate ID or a unique single-character suffix
+alias such as "candidate A". Aliases are derived from IDs, never ranks or list
+positions. A question conflicting with an active selection, naming an unknown
+candidate, or selecting multiple explicit IDs is declined. Explicit "only
+baseline" and "only scenario" constraints in the same question are contradictory.
+
+Forecasts (including tomorrow/next-week questions), invented facts/citations,
+record edits, unit conversions, and new minimum/maximum rankings are unsupported.
+For example, "Which rotation has the lowest supplied water deficit?" cannot
+establish a new ranking; ask to display the supplied deficits instead.
+"Effective rainfall" and candidate-specific irrigation questions use model
+budgets; farm irrigation remains unknown in the original profile fixture.
+
+`assistant_qa_cases.py` defines 72 independently checked questions across 12
+categories. `test_assistant_qa.py` runs each question against both the assistant
+and a real CLI subprocess. Missing-data variations use temporary fixture copies;
+the checked-in JSON files are never changed by the tests. The initial and final
+executed results, reproduction commands, and scope are recorded in
+`backend/tests/QA_REPORT.md`.
+
 Run all assistant tests from the repository root:
 
 ```powershell
