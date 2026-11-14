@@ -1,6 +1,6 @@
 # SMAP integration — access and preparation
 
-Status: public metadata discovery and a pixel-quality filter are implemented. Authenticated download, HDF5 extraction, and live soil-moisture validation are pending. No actual soil-moisture result is claimed yet.
+Status: public discovery, quality filtering, local file inspection, and nearest-pixel extraction are implemented. A spatially trimmed January 1, 2025 Harmony file has been downloaded and verified. The three-day order remains partly processed; the January 3 download timed out, and January 2 was not yet available at the last check.
 
 ## Selected product
 
@@ -31,4 +31,24 @@ The future file reader must inspect dataset units, fill/valid attributes, coordi
 
 ## Tests and remaining gate
 
-`python -m unittest discover -s tests -v` currently runs 25 tests. SMAP tests use synthetic pixel values and mocked metadata, covering quality codes, missing values, coordinates/dates and inclusive-date boundary filtering. The public discovery call was also verified live. Once the account/subset is ready, install a documented HDF5 reader in a project-local environment and verify the science extraction against an actual subset before integrating soil-moisture charts.
+The full optional-dependency environment runs 27 tests. SMAP coverage includes mocked discovery, quality flags, missing values, file inventory, nearest-pixel rejection, distance limits and missing-pass geolocation. Public discovery and the first downloaded science subset were also verified live; further dates and application integration remain pending.
+
+## Verified subset reader
+
+The signed-in Earthdata Search request used V006, January 1–3, 2025, and spatial trimming to 8.2–8.4 N / 80.3–80.5 E. Harmony returned a NetCDF-4 subset; no full global file was downloaded. It contains 4-by-3 global-grid arrays. Files and results stay in ignored `.cache/smap/`.
+
+```powershell
+python -m venv .venv
+.venv/Scripts/python.exe -m pip install -r backend/requirements-smap.txt
+.venv/Scripts/python.exe -m scripts.inspect_smap_file --input .cache/smap/subsets/SMAP_L3_SM_P_E_20250101_R19240_001_subsetted.nc4 --output .cache/smap/inventory-2025-01-01.json
+.venv/Scripts/python.exe -m scripts.extract_smap_point --input .cache/smap/subsets/SMAP_L3_SM_P_E_20250101_R19240_001_subsetted.nc4 --output .cache/smap/point-2025-01-01.json
+.venv/Scripts/python.exe -m unittest discover -s tests -v
+```
+
+The environment/files already exist locally; skip setup and use different output paths when rerunning. Optional dependency: h5py 3.16.0, tested on Python 3.14. The normal standard-library suite skips file-reader tests if h5py is absent; run the full suite in the environment for all 27 tests. CI also runs an optional-dependency job.
+
+Extraction reads global AM/PM groups separately, selects the nearest geolocated pixel before quality checks, rejects pixels farther than the explicit 15 km default, and checks actual file units/fill/valid limits. The input volume ratio `cm**3/cm**3` is numerically identical to output m3/m3. Surface and retrieval flags, raw acquisition time, pixel coordinates, distance, file hash and version-selection basis are preserved. No farther valid pixel replaces a rejected nearest sample. No geolocation in a pass yields an explicit unavailable result.
+
+Live January 1 result: AM unavailable; PM accepted with retrieval flag 8 and surface flag 128, soil moisture 0.4747059 m3/m3 at (8.3252602, 80.4304962), 4.3759 km from the demo point. Raw PM acquisition time is 2025-01-01T12:37:21.592Z. This single retrieval does not establish a drought threshold, field irrigation requirement, or root-zone condition. Product V006 selection is verified through the Earthdata collection, not guessed from the granule release string.
+
+Remaining: obtain/verify the other subset files, retain download/provenance information, and agree how to present passes and quality limitations in the application. Never treat absent passes as zero moisture.
