@@ -15,6 +15,15 @@ const rotationBody = (input_version: number, weights = { water: 0.5, soil: 0.3, 
 const comp = (c: { score_components: { name: string; value: number | null; requested_weight: number; effective_weight: number }[] }, n: string) =>
   c.score_components.find((x) => x.name === n)!;
 
+const confirmRainfed = async () => {
+  const farm = await fx.createDemoFarmFixture();
+  const { schema_version: _v, ...profile } = farm.profile;
+  return fx.updateFarmFixture(farm.id, farm.input_version, {
+    ...profile,
+    irrigation_supply_mm_per_season: 0,
+  });
+};
+
 beforeEach(() => fx.resetFixtures());
 
 describe("fixture API workflow (persistence + regressions)", () => {
@@ -93,8 +102,8 @@ describe("rotation-score-0.1 (synthetic fixture implementation)", () => {
   });
 
   it("baseline: scenario_resilience is null, its weight is 0, others renormalize", async () => {
-    const f = await fx.createDemoFarmFixture();
-    const c = (await fx.createRotationFixture(f.id, rotationBody(1))).candidates[0];
+    const f = await confirmRainfed();
+    const c = (await fx.createRotationFixture(f.id, rotationBody(f.input_version))).candidates[0];
     const sr = comp(c, "scenario_resilience");
     expect(sr.value).toBeNull();
     expect(sr.requested_weight).toBe(0.2);
@@ -115,8 +124,8 @@ describe("rotation-score-0.1 (synthetic fixture implementation)", () => {
   });
 
   it("water_sufficiency = mean of min(100, available / high demand × 100) per season", async () => {
-    const f = await fx.createDemoFarmFixture();
-    const c = (await fx.createRotationFixture(f.id, rotationBody(1))).candidates[0];
+    const f = await confirmRainfed();
+    const c = (await fx.createRotationFixture(f.id, rotationBody(f.input_version))).candidates[0];
     const ranges = asSeasonRanges(c.water_budget_range);
     const expected = ranges.reduce((a, r) => a + Math.min(100, (r.available_water_mm! / r.demand_high_mm!) * 100), 0) / ranges.length;
     expect(comp(c, "water_sufficiency").value).toBeCloseTo(expected, 10);
@@ -142,8 +151,8 @@ describe("rotation-score-0.1 (synthetic fixture implementation)", () => {
   });
 
   it("per-season water records; effective rainfall null; no placeholder fraction", async () => {
-    const f = await fx.createDemoFarmFixture();
-    const c = (await fx.createRotationFixture(f.id, rotationBody(1))).candidates[0];
+    const f = await confirmRainfed();
+    const c = (await fx.createRotationFixture(f.id, rotationBody(f.input_version))).candidates[0];
     const ranges = asSeasonRanges(c.water_budget_range);
     expect(ranges).toHaveLength(3);
     expect(ranges.map((r) => r.season_index)).toEqual([1, 2, 3]);
@@ -154,11 +163,16 @@ describe("rotation-score-0.1 (synthetic fixture implementation)", () => {
     expect(r.balance_high_mm).toBe(r.available_water_mm! - r.demand_low_mm!);
   });
 
-  it("unknown irrigation stays null and is disclosed, never stored as 0", async () => {
+  it("unknown irrigation keeps water screening unavailable, never rainfall-only", async () => {
     const f = await fx.createDemoFarmFixture();
-    const r = asSeasonRanges((await fx.createRotationFixture(f.id, rotationBody(1))).candidates[0].water_budget_range)[0];
+    const candidate = (await fx.createRotationFixture(f.id, rotationBody(1))).candidates[0];
+    const r = asSeasonRanges(candidate.water_budget_range)[0];
     expect(r.irrigation_mm).toBeNull();
-    expect((r.limitations ?? []).join(" ")).toMatch(/not assumed zero/);
+    expect(r.available_water_mm).toBeNull();
+    expect(r.balance_low_mm).toBeNull();
+    expect(r.coverage_low_percent).toBeNull();
+    expect((r.limitations ?? []).join(" ")).toMatch(/unavailable until it is confirmed/);
+    expect(candidate.score_components.find((c) => c.name === "water_sufficiency")?.value).toBeNull();
   });
 
   it("exclusions report farmer_exclusion reasons and fewer plans", async () => {
@@ -174,8 +188,8 @@ describe("rotation-score-0.1 (synthetic fixture implementation)", () => {
 
 describe("scenarios", () => {
   it("recompute from the same baseline: scenario rainfall scaled, resilience computed, IDs stable", async () => {
-    const f = await fx.createDemoFarmFixture();
-    const a = await fx.createRotationFixture(f.id, rotationBody(1));
+    const f = await confirmRainfed();
+    const a = await fx.createRotationFixture(f.id, rotationBody(f.input_version));
     const s = await fx.createScenarioFixture(a.analysis_id, -30);
     expect(s.baseline_analysis_id).toBe(a.analysis_id);
     const r = asSeasonRanges(s.candidates[0].water_budget_range)[0];

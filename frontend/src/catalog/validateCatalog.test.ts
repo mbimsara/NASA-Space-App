@@ -25,10 +25,10 @@ const catalog = (crops: unknown[], over: Record<string, unknown> = {}) => ({
 const paths = (r: ReturnType<typeof validateCatalog>) => r.issues.map((i) => i.path);
 
 describe("validateCatalog", () => {
-  it("accepts the repository catalog and notes that it is empty", () => {
+  it("accepts the repository catalog and excludes its draft crops", () => {
     const r = validateCatalog(repoCatalog);
     expect(r.ok).toBe(true);
-    expect(r.notes.join(" ")).toMatch(/empty/);
+    expect(r.notes.join(" ")).toMatch(/8 crop\(s\) are drafts/);
     expect(r.approvedCrops).toHaveLength(0);
   });
 

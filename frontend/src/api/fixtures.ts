@@ -301,8 +301,8 @@ export function scoreSequence(cropIds: string[], candidateId: string, inp: Score
   const ranges: WaterBudgetRange[] = crops.map((c, i) => {
     const base = FIXTURE_SEASON_RAINFALL[labels[i]];
     const scen = base * factor;
-    // Unknown irrigation stays null; screening then uses rainfall only (disclosed, not stored as 0).
-    const available = scen + (irr ?? 0);
+    // A rainfall-only budget is valid only when irrigation is confirmed as zero.
+    const available = irr === null ? null : scen + irr;
     return {
       season_index: i + 1,
       crop_id: c.id,
@@ -312,10 +312,10 @@ export function scoreSequence(cropIds: string[], candidateId: string, inp: Score
       scenario_rainfall_mm: scen,
       irrigation_mm: irr,
       available_water_mm: available,
-      balance_low_mm: available - c.demand_high,
-      balance_high_mm: available - c.demand_low,
-      coverage_low_percent: (available / c.demand_high) * 100,
-      coverage_high_percent: (available / c.demand_low) * 100,
+      balance_low_mm: available === null ? null : available - c.demand_high,
+      balance_high_mm: available === null ? null : available - c.demand_low,
+      coverage_low_percent: available === null ? null : (available / c.demand_high) * 100,
+      coverage_high_percent: available === null ? null : (available / c.demand_low) * 100,
       demand_basis: "seasonal_crop_water_need_etc",
       model_version: FIXTURE_WATER_MODEL,
       source_url: null,
@@ -328,21 +328,21 @@ export function scoreSequence(cropIds: string[], candidateId: string, inp: Score
       ],
       limitations:
         irr === null
-          ? ["Irrigation supply unknown: available water and coverage use rainfall only (irrigation not assumed zero)."]
+          ? ["Irrigation supply unknown: water availability, balance, and coverage are unavailable until it is confirmed."]
           : [],
     };
   });
 
-  const baseCov = crops.map((c, i) => {
-    const avail = FIXTURE_SEASON_RAINFALL[labels[i]] + (irr ?? 0);
+  const baseCov = irr === null ? [] : crops.map((c, i) => {
+    const avail = FIXTURE_SEASON_RAINFALL[labels[i]] + irr;
     return avail / c.demand_high * 100;
   });
-  const water = mean(baseCov.map((v) => Math.min(100, v)));
+  const water = irr === null ? null : mean(baseCov.map((v) => Math.min(100, v)));
   const diversity = (new Set(cropIds).size / cropIds.length) * 100;
   const resilience =
-    inp.scenarioFactor === null
+    inp.scenarioFactor === null || irr === null
       ? null
-      : mean(ranges.map((r) => Math.min(100, (r.available_water_mm as number) / (r.demand_high_mm as number) * 100)));
+      : mean(ranges.map((r) => Math.min(100, r.available_water_mm! / r.demand_high_mm! * 100)));
 
   const raw = [
     { name: "water_sufficiency", requested_weight: inp.weights.water, value: water },
@@ -387,7 +387,7 @@ export function scoreSequence(cropIds: string[], candidateId: string, inp: Score
       { rule: "season_eligibility", passed: true, note: `Seasons: ${labels.join(", ")}` },
       { rule: "farmer_exclusion", passed: true, note: null },
     ],
-    _tie: [score ?? -Infinity, mean(baseCov), diversity],
+    _tie: [score ?? -Infinity, baseCov.length ? mean(baseCov) : -Infinity, diversity],
   };
 }
 
