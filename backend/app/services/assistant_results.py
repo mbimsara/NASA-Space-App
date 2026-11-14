@@ -54,6 +54,7 @@ def _provenance(record):
         "modeled": "Model estimates, not measured NASA observations.",
         "observed": "Observed data as labeled by the supplied context; NASA origin is not independently verified.",
         "mixed": "Mixed data; individual values cannot be classified without their own provenance.",
+        "farmer_input": "Farmer-entered values, not NASA measurements.",
     }
     return labels.get(record.get("data_kind"), "Data kind is unknown; NASA origin cannot be established.")
 
@@ -66,28 +67,61 @@ def _metadata(record):
     )
 
 
-def _water(budget, delta=False, deficit_only=False):
+def _water(budget, delta=False, deficit_only=False, trace=None):
     budget = _record(budget)
+    if trace is not None:
+        trace.add(budget)
+        metric_keys = ("deficit_mm",) if deficit_only else (
+            "demand_mm", "demand_low_mm", "demand_high_mm", "balance_mm",
+            "balance_low_mm", "balance_high_mm", "rainfall_mm", "baseline_rainfall_mm",
+            "scenario_rainfall_mm", "irrigation_supply_mm", "effective_rainfall_mm",
+        )
+        if not any(budget.get(key) is not None for key in metric_keys):
+            trace.missing()
     prefix = "Supplied water-budget differences (scenario minus baseline)" if delta else "Water budget"
     fields = (("deficit_mm", "deficit"),) if deficit_only else WATER_FIELDS
     values = "; ".join(
         f"{label}: {_number(budget.get(key), ' mm')}" for key, label in fields
     )
+    if not deficit_only:
+        for key, label in (("demand_low_mm", "demand lower bound"), ("demand_high_mm", "demand upper bound"),
+                           ("baseline_rainfall_mm", "baseline rainfall"), ("scenario_rainfall_mm", "hypothetical rainfall"),
+                           ("available_water_mm", "available water"), ("balance_mm", "signed balance"),
+                           ("balance_low_mm", "signed balance lower bound"), ("balance_high_mm", "signed balance upper bound")):
+            if key in budget:
+                values += f"; {label}: {_number(budget[key], ' mm')}"
+        for key, label in (("coverage_percent", "coverage"), ("coverage_low_percent", "coverage lower bound"),
+                           ("coverage_high_percent", "coverage upper bound")):
+            if key in budget:
+                values += f"; {label}: {_number(budget[key], '%')}"
     if delta:
         return f"{prefix}: {values}."
     period = _record(budget.get("period"))
-    return (
+    answer = (
         f"{prefix} period: {_text(period.get('start'))} to {_text(period.get('end'))}; {values}. "
         f"Effective rainfall assumption: {_text(budget.get('effective_rainfall_assumption'))}."
     )
+    if any(key in budget for key in ("balance_mm", "balance_low_mm", "balance_high_mm")):
+        answer += " Signed balances are supplied values; no conversion to deficit is performed."
+    for key, label in (("demand_basis", "Demand basis"), ("model_version", "Water model version"),
+                       ("source_url", "Supplied source URL")):
+        if budget.get(key) is not None:
+            answer += f" {label}: {budget[key]}."
+    if budget.get("data_kind") is not None:
+        answer += " " + _provenance(budget)
+    if any(budget.get(key) for key in ("source_refs", "assumptions", "limitations")):
+        answer += " " + _metadata(budget)
+    return answer
 
 
-def _candidates(record, selected, views=None, deficit_only=False):
+def _candidates(record, selected, views=None, deficit_only=False, trace=None):
     """Render only requested candidate fields; the default is the full view."""
     if views is None:
         views = {"rank", "details", "water"}
     candidates = record.get("candidates")
     if candidates is None:
+        if trace is not None:
+            trace.missing()
         return "Candidates and their rankings, scores, and water budgets are unknown."
     candidates = [_record(item) for item in _items(candidates)]
     if not candidates:
@@ -95,18 +129,26 @@ def _candidates(record, selected, views=None, deficit_only=False):
     if selected is not None:
         candidates = [item for item in candidates if item.get("candidate_id") == selected]
         if not candidates:
+            if trace is not None:
+                trace.missing()
             return f"Candidate {_text(selected)} is unknown in these results."
 
     answers = []
     for candidate in candidates:
         lines = [f"Candidate {_text(candidate.get('candidate_id'))}:"]
         if views & {"rank", "score"}:
+            if trace is not None and any(candidate.get(key) is None for key in ("rank", "score")):
+                trace.missing()
             lines[0] += (
                 f" supplied rank {_number(candidate.get('rank'))}; "
                 f"supplied score {_number(candidate.get('score'))} (scale not inferred)."
             )
             if "rank" in views:
                 lines.append(f"Supplied reasons: {_notes(candidate.get('reasons'))}.")
+            if candidate.get("rank") is None:
+                lines.append("This candidate is unranked: no supplied rank is available.")
+            if candidate.get("score_kind") is not None:
+                lines.append(f"Score kind: {candidate['score_kind']} (as supplied, not a measured outcome).")
         if "details" in views:
             sequence = [
                 f"season {_text(step.get('season_index'))}: crop ID {_text(step.get('crop_id'))}"
@@ -134,22 +176,62 @@ def _candidates(record, selected, views=None, deficit_only=False):
                 missing.append(_water(None))
             if missing:
                 lines.append("Missing candidate information: " + " ".join(missing))
+        if "checks" in views or "details" in views:
+            checks = _items(candidate.get("constraint_checks"))
+            if not checks:
+                lines.append("Constraint checks: unknown (none supplied).")
+                if trace is not None and "checks" in views:
+                    trace.missing()
+            for check in checks:
+                if isinstance(check, str):
+                    lines.append(f"Supplied constraint report: {check} (structured pass status unknown).")
+                else:
+                    check = _record(check)
+                    passed = check.get("passed")
+                    status = "passed" if passed is True else "failed" if passed is False else "unknown"
+                    lines.append(f"Constraint {_text(check.get('rule'))}: {status}; note: {_text(check.get('note'))}.")
+                    if any(check.get(key) for key in ("source_refs", "assumptions", "limitations")):
+                        lines.append(_metadata(check))
+                    if trace is not None:
+                        trace.add(check)
         if "water" in views:
-            lines.append(_water(candidate.get("water_budget"), deficit_only=deficit_only))
+            budgets = candidate.get("water_budgets")
+            if budgets is None:
+                lines.append(_water(candidate.get("water_budget"), deficit_only=deficit_only, trace=trace))
+            elif not budgets:
+                lines.append("Water budgets are unknown (none supplied).")
+                if trace is not None:
+                    trace.missing()
+            else:
+                for budget in _items(budgets):
+                    budget = _record(budget)
+                    lines.append(
+                        f"Supplied crop/season budget: crop ID {_text(budget.get('crop_id'))}; "
+                        f"season index {_text(budget.get('season_index'))}; no aggregation. "
+                        + _water(budget, deficit_only=deficit_only, trace=trace)
+                    )
+        if any(candidate.get(key) for key in ("source_refs", "assumptions", "limitations")):
+            lines.append(_metadata(candidate))
+        if trace is not None:
+            trace.add(candidate)
         answers.append(" ".join(lines))
     if "rank" in views:
         answers.append("Ranks are not inferred from list order or scores; no new crop recommendation is generated.")
     return "\n".join(answers)
 
 
-def _differences(scenario, selected, include_scores=True, include_water=True, deficit_only=False):
+def _differences(scenario, selected, include_scores=True, include_water=True, deficit_only=False, trace=None):
     differences = scenario.get("differences")
     if differences is None:
+        if trace is not None:
+            trace.missing()
         return "Baseline differences are unknown; this service does not calculate them."
     records = [_record(item) for item in _items(differences)]
     if selected is not None:
         records = [item for item in records if item.get("candidate_id") == selected]
     if not records:
+        if trace is not None:
+            trace.missing()
         return "Baseline differences are unknown (none supplied for the selected results)."
     answers = []
     for item in records:
@@ -158,7 +240,7 @@ def _differences(scenario, selected, include_scores=True, include_water=True, de
             line += ("supplied score difference (scenario minus baseline): "
                      f"{_number(item.get('score_delta'))}. ")
         if include_water:
-            line += _water(item.get("water_budget"), delta=True, deficit_only=deficit_only)
+            line += _water(item.get("water_budget"), delta=True, deficit_only=deficit_only, trace=trace)
         answers.append(line)
     return "\n".join(answers)
 
@@ -166,7 +248,7 @@ def _differences(scenario, selected, include_scores=True, include_water=True, de
 def _question_views(words):
     """Explicit topic rules; loaded records alone never select an answer view."""
     full = {"full", "analysis"} <= words
-    water = bool(words & {"budget", "budgets", "demand", "demands", "deficit", "deficits"})
+    water = bool(words & {"budget", "budgets", "demand", "demands", "deficit", "deficits", "balance", "balances"})
     water |= "water" in words and bool(words & {
         "need", "needs", "needed", "require", "required", "requirement", "requirements",
         "use", "usage", "compare", "comparison",
@@ -205,6 +287,8 @@ def _question_views(words):
         views.add("score")
     if details:
         views.add("details")
+    if words & {"constraint", "constraints", "checks", "eligibility"}:
+        views.add("checks")
     deficit_only = bool(words & {"deficit", "deficits"}) and not bool(
         words & {"budget", "budgets", "demand", "demands", "rainfall", "irrigation"}
     )
@@ -225,7 +309,8 @@ def _question_candidate(analysis, scenario, question, selected):
     generic = {"all", "and", "or", "selected", "selection", "rank", "ranks", "ranking",
                "rankings", "score", "scores", "water", "budget", "budgets", "details",
                "sequence", "sequences", "information", "results", "baseline", "scenario",
-               "reasons", "with", "in", "is", "has", "does", "need", "needs", "missing", "data"}
+               "reasons", "constraints", "constraint", "checks", "eligibility", "with", "in",
+               "is", "has", "does", "need", "needs", "missing", "data"}
     requested.update(token for token in re.findall(r"\bcandidate(?:\s+id)?\s+([\w-]+)", text)
                      if token not in generic)
     for identifier in known:
@@ -249,7 +334,7 @@ def _question_candidate(analysis, scenario, question, selected):
     return selected, False, None
 
 
-def explain_results(context, words, question=""):
+def explain_results(context, words, question="", trace=None):
     """Return analytical text, or None to leave the original farm handler active."""
     if words & {"recommend", "recommendation", "recommendations", "should", "best",
                 "predict", "prediction", "yield", "fertilizer", "forecast"}:
@@ -260,7 +345,7 @@ def explain_results(context, words, question=""):
     if not any(key in context for key in ("analysis", "scenario", "observations")):
         return None
     if full:
-        views = {"rank", "details", "water"}
+        views = {"rank", "details", "water", "checks"}
         scenario_view = "scenario" in context
         observation_view = "observations" in context
         deficit_only = False
@@ -273,6 +358,8 @@ def explain_results(context, words, question=""):
     contradictory = (re.search(r"\bonly\s+baseline\b", question.casefold()) and
                      re.search(r"\bonly\s+(?:hypothetical\s+)?scenario\b", question.casefold()))
     if selection_error or contradictory:
+        if trace is not None:
+            trace.unsupported()
         return (_provenance(analysis) + " " + (selection_error or
                 "Contradictory baseline-only and scenario-only requests are unsupported."))
     if explicit_candidate and not full and not words & {"sequence", "sequences", "components"}:
@@ -288,17 +375,28 @@ def explain_results(context, words, question=""):
 
     answers = []
     sources_only = sources and not (full or views or scenario_view or observation_view)
-    if views or (sources_only and "analysis" in context):
+    rainfall_only = scenario.get("kind") == "hypothetical_rainfall_scenario"
+    # Rainfall-only scenarios have no crop-analysis baseline. Do not manufacture
+    # candidates or rankings when the question is about this climate exercise.
+    climate_only_question = not full and rainfall_only and scenario_view and not words & {
+        "rotation", "rotations", "candidate", "candidates", "rank", "ranking", "score", "scores",
+        "demand", "deficit", "deficits", "irrigation", "balance", "balances",
+    }
+    if (views and not climate_only_question) or (sources_only and "analysis" in context):
         answers.append(f"Baseline analysis {_text(baseline_id)}. {_provenance(analysis)}")
         if views:
             answers.append("Supplied model outputs, not field measurements.")
-            if "rank" in views:
+            if analysis.get("score_kind") is not None and views & {"rank", "score", "details"}:
+                answers.append(f"Supplied analysis score kind: {analysis['score_kind']}; not a measured outcome.")
+            if views & {"rank", "checks"}:
                 answers.append(
                     f"Catalog version: {_text(analysis.get('catalog_version'))}; "
                     f"model version: {_text(analysis.get('model_version'))}."
                 )
-            answers.append(_candidates(analysis, selected, views, deficit_only))
+            answers.append(_candidates(analysis, selected, views, deficit_only, trace))
         answers.append(_metadata(analysis))
+        if trace is not None:
+            trace.add(analysis)
     if scenario_view or (sources_only and "scenario" in context):
         parameters = _record(scenario.get("parameters"))
         linked = baseline_id is not None and baseline_id == scenario_baseline
@@ -307,16 +405,23 @@ def explain_results(context, words, question=""):
             f"baseline analysis ID: {_text(scenario_baseline)}. {_provenance(scenario)}"
         )
         if scenario_view:
-            answers.extend([
-                "Supplied rainfall change: " + _number(parameters.get("rainfall_change_pct"), "%")
-                + ". This is a hypothetical input change, not a rainfall observation or forecast. "
-                "Only supplied results are shown; no new scenario is calculated.",
-                _candidates(scenario, selected, views, deficit_only),
-                _differences(scenario, selected, include_scores=bool(views & {"rank", "score"}),
-                             include_water="water" in views, deficit_only=deficit_only) if linked else
-                "Baseline comparison is unknown: matching baseline IDs and baseline results are required.",
-            ])
+            if rainfall_only:
+                answers.extend(_rainfall_only(scenario, observations, trace))
+            else:
+                answers.extend([
+                    "Supplied rainfall change: " + _number(parameters.get("rainfall_change_pct"), "%")
+                    + ". This is a hypothetical input change, not a rainfall observation or forecast. "
+                    "Only supplied results are shown; no new scenario is calculated.",
+                    _candidates(scenario, selected, views, deficit_only, trace),
+                    _differences(scenario, selected, include_scores=bool(views & {"rank", "score"}),
+                                 include_water="water" in views, deficit_only=deficit_only, trace=trace) if linked else
+                    "Baseline comparison is unknown: matching baseline IDs and baseline results are required.",
+                ])
+                if not linked and trace is not None:
+                    trace.missing()
         answers.append(_metadata(scenario))
+        if trace is not None:
+            trace.add(scenario)
     if observation_view or (sources_only and "observations" in context):
         period = _record(observations.get("period"))
         summary = _record(observations.get("summary"))
@@ -330,7 +435,41 @@ def explain_results(context, words, question=""):
                 f"mean temperature: {_number(summary.get('mean_temperature_c'), ' Celsius')}. "
                 f"Retrieved at: {_text(observations.get('retrieved_at'))}."
             )
+            if observations.get("provider") is not None:
+                answers.append(f"Provider: {observations['provider']}; time standard: {_text(observations.get('time_standard'))}.")
+            coverage = observations.get("coverage") or {}
+            if coverage:
+                answers.append("Coverage: " + "; ".join(f"{key}: {_text(value)}" for key, value in coverage.items()) + ".")
+            if observations.get("spatial_resolution") is not None:
+                answers.append(f"Supplied spatial resolution: {observations['spatial_resolution']}.")
+            if trace is not None and any(summary.get(key) is None for key in ("rainfall_mm", "mean_temperature_c")):
+                trace.missing()
         answers.append(_metadata(observations))
+        if trace is not None:
+            trace.add(observations)
     if not answers:
+        if trace is not None:
+            trace.missing()
         answers.append("Requested analytical information and source references are unknown (no results supplied).")
     return "\n".join(answers)
+
+
+def _rainfall_only(scenario, observations, trace):
+    """Render supplied climate totals/difference, never crop-model outputs."""
+    summary = _record(scenario.get("summary"))
+    period = _record(scenario.get("period"))
+    change = scenario.get("parameters", {}).get("rainfall_change_pct")
+    if trace is not None:
+        trace.add(observations)
+        if any(summary.get(key) is None for key in ("baseline_rainfall_mm", "scenario_rainfall_mm", "difference_mm")):
+            trace.missing()
+    return [
+        "Rainfall-only hypothetical scenario, not a measurement or forecast. "
+        f"Supplied rainfall change: {_number(change, '%')}; "
+        f"period: {_text(period.get('start'))} to {_text(period.get('end'))}.",
+        f"Baseline rainfall: {_number(summary.get('baseline_rainfall_mm'), ' mm')}; "
+        f"hypothetical rainfall: {_number(summary.get('scenario_rainfall_mm'), ' mm')}; "
+        f"supplied difference (scenario minus baseline): {_number(summary.get('difference_mm'), ' mm')}.",
+        f"Rainfall coverage: {_text(summary.get('valid_days'))} of {_text(summary.get('expected_days'))} days.",
+        "Crop demand, effective rainfall, irrigation deficit and rotation rankings are not calculated by this scenario.",
+    ]

@@ -26,7 +26,7 @@ def _unavailable(context):
             "unit conversions, edited records, invented measurements, or invented source references.")
 
 
-def explain(context, question, language="en"):
+def _explain(context, question, language="en", *, trace=None):
     """Return an English string explaining supported farm-profile facts.
 
     ``context`` is a farm profile, or the API's ``{"profile": {...}}`` envelope.
@@ -81,8 +81,10 @@ def explain(context, question, language="en"):
     future = re.search(r"\bnext\s+(?:day|week|month|year|season)\b", question.casefold())
     make_up = re.search(r"\bmake\s+up\b", question.casefold())
     if blocked or future or make_up or any(ord(char) < 32 and not char.isspace() for char in question):
+        if trace is not None:
+            trace.unsupported()
         return _unavailable(context)
-    result = explain_results(context, words, question)
+    result = explain_results(context, words, question, trace=trace)
     if result is not None:
         return result
     answers = []
@@ -96,6 +98,8 @@ def explain(context, question, language="en"):
     if not unsupported:
         if "irrigation" in words or {"water", "supply"} <= words:
             supply = profile.get("irrigation_supply_mm_per_season")
+            if trace is not None and supply is None:
+                trace.missing()
             answers.append(
                 "Irrigation supply is unknown."
                 if supply is None
@@ -105,8 +109,12 @@ def explain(context, question, language="en"):
         if words & {"soil", "ph", "nutrient", "nutrients"}:
             measurements = profile.get("soil_tests")
             if not measurements:
+                if trace is not None:
+                    trace.missing()
                 answers.append("Soil measurements are unknown; no soil tests are recorded.")
             else:
+                if trace is not None and any(test.get("value") is None for test in measurements):
+                    trace.missing()
                 records = [
                     f"{_display(test.get('metric'))}: {_display(test.get('value'))} "
                     f"(unit: {_display(test.get('unit'))}; "
@@ -117,10 +125,14 @@ def explain(context, question, language="en"):
                 answers.append("Any soil measurement not listed here is unknown.")
 
         if "name" in words or {"farm", "called"} <= words:
+            if trace is not None and profile.get("name") is None:
+                trace.missing()
             answers.append(f"Farm name: {_display(profile.get('name'))}.")
 
         if words & {"area", "size", "hectare", "hectares"}:
             area = profile.get("area_ha")
+            if trace is not None and area is None:
+                trace.missing()
             answers.append(
                 "Farm area is unknown." if area is None
                 else f"Recorded farm area is {area} hectares."
@@ -128,6 +140,8 @@ def explain(context, question, language="en"):
 
         if words & {"location", "located", "coordinates", "latitude", "longitude"} or {"where", "farm"} <= words:
             location = profile.get("location") or {}
+            if trace is not None and any(location.get(key) is None for key in ("latitude", "longitude")):
+                trace.missing()
             answers.append(
                 f"Recorded location (WGS84): latitude {_display(location.get('latitude'))}, "
                 f"longitude {_display(location.get('longitude'))}."
@@ -136,6 +150,8 @@ def explain(context, question, language="en"):
         if words & {"history", "previous", "previously", "planted", "grown", "grow"}:
             history = profile.get("crop_history")
             if not history:
+                if trace is not None:
+                    trace.missing()
                 answers.append("Crop history is unknown; no crop history is recorded.")
             else:
                 records = [
@@ -148,6 +164,8 @@ def explain(context, question, language="en"):
 
         if words & {"priority", "priorities", "weight", "weights"}:
             weights = profile.get("priority_weights") or {}
+            if trace is not None and any(weights.get(key) is None for key in ("water", "soil", "climate")):
+                trace.missing()
             answers.append(
                 "Recorded priority weights: "
                 + ", ".join(f"{key}: {_display(weights.get(key))}"
@@ -158,6 +176,8 @@ def explain(context, question, language="en"):
         if words & {"excluded", "exclusions"}:
             excluded = profile.get("excluded_crop_ids")
             if excluded is None:
+                if trace is not None:
+                    trace.missing()
                 answers.append("Excluded crop IDs are unknown.")
             elif not excluded:
                 answers.append("No excluded crop IDs are recorded; this does not establish crop suitability.")
@@ -165,15 +185,33 @@ def explain(context, question, language="en"):
                 answers.append("Recorded excluded crop IDs: " + ", ".join(excluded) + ".")
 
         if words & {"synthetic", "real", "kind", "provenance", "nasa"}:
+            if trace is not None and profile.get("data_kind") is None:
+                trace.missing()
             answers.append(f"Recorded data kind: {_display(profile.get('data_kind'))}.")
 
     if not answers:
+        if trace is not None:
+            trace.unsupported()
         answers.append(
             "That information is unknown from the supported farm-profile facts. "
             "This service cannot provide crop recommendations, predictions, "
             "or source references."
         )
 
+    elif trace is not None:
+        trace.add(profile)
     if profile.get("data_kind") == "synthetic":
         answers.insert(0, "This profile contains synthetic demonstration inputs, not real farm observations.")
+    elif profile.get("data_kind") == "farmer_input":
+        answers.insert(0, "These are farmer-entered values, not NASA measurements.")
     return " ".join(answers)
+
+
+def explain(context, question, language="en"):
+    """Return deterministic English text; the original public interface.
+
+    For teammate dataclasses and richer provenance, first use normalize_context()
+    or call assistant_response.respond() for a structured result. No model,
+    network, database, scoring, or scientific recalculation is performed.
+    """
+    return _explain(context, question, language)
