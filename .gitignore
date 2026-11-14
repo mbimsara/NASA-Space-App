@@ -35,3 +35,6 @@ uploads/
 .DS_Store
 Thumbs.db
 *.log
+
+# Local design handoff archive (source is already tracked on Tharuka's branch)
+/Build AgroSphere AI MVP.zip
