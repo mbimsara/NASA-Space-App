@@ -53,4 +53,11 @@ React Router 6 (routing), Zustand (selected farm/analysis state, persisted), Zod
 
 ## Design
 
-Visual design follows Tharuka's prototype in [`design-prototype/`](design-prototype/README.md) (run it with `npm run dev -- --host 127.0.0.1` inside that folder; it uses sample data only). Colours, fonts, radii and shadows are tokens in `src/index.css`, with light and dark themes that follow the device setting until the user toggles them (key `agrosphere-theme`). Differences from the prototype, for accessibility: text is at least 12 px; muted text is darkened to meet WCAG AA; dark-theme primary buttons use dark text; sample values are not copied.
+This is the repository's only runnable frontend. It combines Tharuka's approved
+landing page, navigation, cards, spacing, and visual language with Shehani's
+functional routing, API/fixture integration, forms, validation, accessibility,
+offline viewing, calendar, and reporting work. Colours, fonts, radii and shadows
+are tokens in `src/index.css`; light and dark themes follow the device setting
+until the user toggles them (key `agrosphere-theme`). Accessibility adaptations
+include readable minimum text sizes, WCAG-AA muted text, keyboard focus, and
+explicit labels for synthetic or modeled values.

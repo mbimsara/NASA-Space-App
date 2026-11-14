@@ -1,20 +1,22 @@
 # Design handoff
 
 Owner: Tharuka. Implementation: Shehani.
-Interactive Prototype: [`figma-prototype/Build AgroSphere AI MVP/`](../figma-prototype/Build%20AgroSphere%20AI%20MVP/)
 
-The interactive Figma prototype has been exported and structured under [`figma-prototype/Build AgroSphere AI MVP/`](../figma-prototype/Build%20AgroSphere%20AI%20MVP/). It runs as a Vite/React application showcasing the end-to-end user experience for the Sri Lankan demonstration farm (Matale).
+Tharuka's approved landing page, navigation, visual tokens, cards, responsive
+layout, and workflow patterns are now integrated directly into Shehani's
+functional application under `frontend/`. The standalone sample prototypes were
+removed after integration so there is one maintained user interface.
 
 To run locally:
 ```bash
-cd "figma-prototype/Build AgroSphere AI MVP"
-pnpm install
-pnpm dev
+cd frontend
+npm install
+npm run dev
 ```
 
 Core journey: farm setup → observations → three rotation alternatives where feasible → climate scenario → grounded explanation → saved plan.
 
-## Required handoff
+## Integrated handoff and review criteria
 
 - Components: navigation, buttons, fields, cards, crop timeline, comparison table, source/assumption labels, status and uncertainty states.
 - Screens: farm setup, farm overview, rotation workspace, scenario comparison, assistant, saved plan.
