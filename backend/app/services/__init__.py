@@ -1,1 +1,1 @@
-"""Backend integration boundaries for independently owned domain services."""
+"""Application integration services for independently owned domain modules."""
