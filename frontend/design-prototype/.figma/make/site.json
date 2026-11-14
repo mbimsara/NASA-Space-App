@@ -1,0 +1,10 @@
+{
+  "description": "Helps farmers compare crop rotations using NASA climate data, water planning, and transparent scenario analysis to support resilient, informed decisions.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

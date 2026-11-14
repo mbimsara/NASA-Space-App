@@ -68,8 +68,14 @@ def load(relative):
 def main():
     farm = load("data/fixtures/farm.synthetic.json")
     catalog = load("data/catalogs/crops.json")
+    water = load("data/catalogs/crop-water-requirements.json")
     validate(farm, load("data/schemas/farm.schema.json"), "farm")
     validate(catalog, load("data/schemas/crop-catalog.schema.json"), "catalog")
+    validate(
+        water,
+        load("data/schemas/crop-water-requirements.schema.json"),
+        "crop_water_requirements",
+    )
     require(farm["data_kind"] == "synthetic", "Demo fixture must remain synthetic")
     require(sum(farm["priority_weights"].values()) > 0, "Priority weights need a positive total")
     for entry in farm["crop_history"]:
@@ -83,7 +89,15 @@ def main():
             require(crop["family"] is not None, "Approved crops need a reviewed family")
     if catalog["status"] == "reviewed":
         require(bool(ids) and all(c["review_status"] == "approved" for c in catalog["crops"]), "Reviewed catalog needs approved crops")
-    print("PASS: farm fixture and crop catalog satisfy current contracts.")
+    water_ids = [item["crop_id"] for item in water["requirements"]]
+    require(len(water_ids) == len(set(water_ids)), "Duplicate crop-water requirement IDs")
+    require(set(water_ids) <= set(ids), "Crop-water requirement references an unknown crop")
+    for item in water["requirements"]:
+        require(
+            item["low_mm"] <= item["nominal_mm"] <= item["high_mm"],
+            f"Invalid crop-water range for {item['crop_id']}",
+        )
+    print("PASS: farm, crop catalog, and crop-water requirements satisfy current contracts.")
     if not ids:
         print("NOTE: catalog is empty; research and approval are required before recommendations.")
 
