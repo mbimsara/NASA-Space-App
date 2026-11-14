@@ -1,6 +1,6 @@
 # Repeatable SMAP subset automation
 
-Status: implemented and verified with offline/mocked pipeline tests and an SDK-valid request. The authenticated January 2025 live run is pending private user sign-in. Do not describe the full month as downloaded until `state.json` and extraction results confirm it.
+Status: implemented and verified with offline/mocked pipeline tests and an SDK-valid request. Private user sign-in successfully submitted the January 2025 live job; NASA processing/download verification is underway. Do not describe the full month as downloaded until `state.json` and extraction results confirm it.
 
 Uses NASA's [official harmony-py client](https://github.com/nasa/harmony-py) and [Harmony service](https://harmony.earthdata.nasa.gov/docs). The dependency is pinned in `backend/requirements-smap.txt`. Spatial trimming is always requested for the fixed Sri Lankan demonstration box (80.3–80.5 E, 8.2–8.4 N). No global downloads, alternative providers or forecast products are requested.
 
@@ -19,6 +19,8 @@ Default request: SPL3SMP_E V006, January 1–31, 2025, spatially trimmed NetCDF 
 ## Resume
 
 Repeat the same command in your terminal. The job ID and request specification are saved under ignored `.cache/smap/january-2025/state.json`. The script checks the job once and downloads any ready results; it does not wait indefinitely for processing. Repeat later if NASA is still working. Existing verified files are reused, and the same directory never deliberately submits a second job.
+
+To keep checking for up to 15 minutes with a single private sign-in, run `.venv/Scripts/python.exe -m scripts.run_smap_pipeline --watch-seconds 900`. It checks roughly every 20 seconds between syncs and stops after successful processing or the watch budget. In-flight provider requests/downloads can extend beyond that budget; Ctrl+C stops locally while preserving the remote job and completed files. Failed/paused jobs stop for inspection. The script never automatically resubmits the saved request.
 
 If the saved submission has no job ID, its outcome is uncertain (for example, the client disconnected after NASA accepted the request). Inspect your Harmony/Earthdata job history before making any replacement request. Do not delete the manifest and blindly resubmit. Existing state with different settings is rejected; choose a separate directory for an intentional new period.
 
