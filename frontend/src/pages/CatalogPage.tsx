@@ -6,13 +6,15 @@
 import { useTranslation } from "react-i18next";
 import { loadedCatalog } from "../catalog";
 import { localizeToolMessage } from "../i18n/toolMessages";
+import { Icon } from "../components/ui/Icon";
+import "./CatalogPage.css";
 
 export function CatalogPage() {
   const { t } = useTranslation();
   const { ok, issues, notes, catalog } = loadedCatalog;
 
   return (
-    <div className="page">
+    <div className="page catalog-page">
       <h1>{t("catalog.title")}</h1>
       <p className="muted">{t("catalog.intro")}</p>
 
@@ -63,8 +65,10 @@ export function CatalogPage() {
       )}
 
       {catalog && catalog.crops.length > 0 && (
-        <div className="card table-scroll">
-          <table className="data">
+        <div className="card catalog-table-card">
+          <div className="catalog-table-scroll" role="region" aria-label={t("nav.catalog")} tabIndex={0}>
+          <table className="data catalog-table" aria-label={t("nav.catalog")}>
+            <colgroup><col className="catalog-col-id" /><col className="catalog-col-name" /><col className="catalog-col-family" /><col className="catalog-col-seasons" /><col className="catalog-col-water" /><col className="catalog-col-review" /><col className="catalog-col-source" /></colgroup>
             <thead>
               <tr>
                 <th scope="col">{t("catalog.identifier")}</th>
@@ -82,25 +86,27 @@ export function CatalogPage() {
                   <td>
                     <code>{c.id}</code>
                   </td>
-                  <td>{c.name}</td>
-                  <td>{c.family ?? t("common.unknown")}</td>
-                  <td>{c.season_labels.map((season) => t(`rotation.seasonLabel.${season}`, { defaultValue: season })).join(", ") || "—"}</td>
-                  <td>{c.water_demand_mm_per_cycle === null ? t("common.unknown") : `${c.water_demand_mm_per_cycle} mm`}</td>
-                  <td>{t(`catalog.status.${c.review_status}`, { defaultValue: c.review_status })}</td>
+                  <th scope="row" className="catalog-crop-name">{c.name}</th>
+                  <td className="catalog-family">{c.family ?? t("common.unknown")}</td>
+                  <td><div className="catalog-seasons">{c.season_labels.map((season) => <span className="catalog-season" key={season}>{t(`rotation.seasonLabel.${season}`, { defaultValue: season })}</span>)}{c.season_labels.length === 0 && "—"}</div></td>
+                  <td className="catalog-water">{c.water_demand_mm_per_cycle === null ? <span className="muted">{t("common.unknown")}</span> : <><strong>{c.water_demand_mm_per_cycle.toLocaleString()}</strong> <span>mm</span></>}</td>
+                  <td><span className={`catalog-review catalog-review--${c.review_status}`}><i aria-hidden="true" />{t(`catalog.status.${c.review_status}`, { defaultValue: c.review_status })}</span></td>
                   <td>
                     {c.sources.map((s, i) => (
-                      <div key={i}>
-                        <a href={s.url} target="_blank" rel="noreferrer">
-                          {new URL(s.url).host}
-                        </a>{" "}
-                        <span className="muted">({s.accessed_on})</span>
+                      <div className="catalog-source" key={i}>
+                        <a href={s.url} target="_blank" rel="noopener noreferrer">
+                          {new URL(s.url).host.replace(/^www\./, "")}<Icon name="external" />
+                        </a>
+                        <time dateTime={s.accessed_on}>{s.accessed_on}</time>
                       </div>
                     ))}
+                    {c.sources.length === 0 && <span className="muted">{t("common.unknown")}</span>}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

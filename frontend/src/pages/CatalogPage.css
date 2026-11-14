@@ -1,0 +1,35 @@
+.catalog-page .catalog-table-card { padding: 0; overflow: hidden; border-color: var(--border); }
+.catalog-table-scroll { overflow-x: auto; scrollbar-width: thin; }
+.catalog-page .catalog-table { table-layout: fixed; min-width: 1040px; margin: 0; font-size: 14px; line-height: 1.55; }
+.catalog-col-id { width: 11%; }
+.catalog-col-name { width: 25%; }
+.catalog-col-family { width: 12%; }
+.catalog-col-seasons { width: 12%; }
+.catalog-col-water { width: 13%; }
+.catalog-col-review { width: 11%; }
+.catalog-col-source { width: 16%; }
+.catalog-page .catalog-table th, .catalog-page .catalog-table td { padding: 20px 16px; vertical-align: middle; border-top: 0; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+.catalog-page .catalog-table thead th { padding-block: 17px; background: var(--surface-alt); color: var(--text-muted); font-size: 12px; font-weight: 700; letter-spacing: .02em; }
+.catalog-page .catalog-table tbody tr { background: var(--surface); }
+.catalog-page .catalog-table tbody tr:nth-child(even) { background: color-mix(in srgb, var(--surface-alt) 45%, var(--surface)); }
+.catalog-page .catalog-table tbody tr:hover { background: var(--info-bg); }
+.catalog-page .catalog-table tbody tr:last-child > * { border-bottom: 0; }
+.catalog-page .catalog-table tbody .catalog-crop-name { font-weight: 600; color: var(--text); background: transparent; }
+.catalog-table code { font-size: 11px; padding: 4px 6px; color: var(--text-muted); background: var(--surface-alt); border: 1px solid var(--border); border-radius: 5px; }
+.catalog-family { font-style: italic; color: var(--text-muted); font-size: 13px; }
+.catalog-seasons { display: flex; flex-wrap: wrap; gap: 6px; }
+.catalog-season { display: inline-block; border-radius: 6px; padding: 3px 8px; background: var(--sage); color: var(--primary); font-size: 12px; line-height: 1.6; }
+.catalog-water { font-variant-numeric: tabular-nums; }
+.catalog-water strong { font-size: 16px; font-weight: 650; }
+.catalog-water > span { color: var(--text-muted); font-size: 12px; }
+.catalog-review { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border: 1px solid var(--warn-border); border-radius: 999px; background: var(--warn-bg); color: var(--warn-text); font-size: 11px; font-weight: 600; }
+.catalog-review i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex: none; }
+.catalog-review--approved { background: var(--ok-bg); color: var(--primary); border-color: var(--ok-border); }
+.catalog-source + .catalog-source { margin-top: 10px; }
+.catalog-source a { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; font-size: 12px; font-weight: 600; text-decoration: none; }
+.catalog-source a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.catalog-source svg { width: 12px; height: 12px; flex: none; }
+.catalog-source time { display: block; color: var(--text-muted); font-size: 11px; white-space: nowrap; margin-top: 2px; font-variant-numeric: tabular-nums; }
+@media (max-width: 760px) {
+  .catalog-page .catalog-table th, .catalog-page .catalog-table td { padding: 16px 12px; }
+}
