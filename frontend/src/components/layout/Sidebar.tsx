@@ -45,7 +45,7 @@ export function Sidebar({ open, onNavigate, id }: Props) {
   );
 
   return (
-    <aside id={id} className={`sidebar${open ? " open" : ""}`} aria-label={t("nav.main")}>
+    <aside id={id} className={`sidebar${open ? " open mobile-open" : ""}`} aria-label={t("nav.main")}>
       <Link to="/" className="side-brand" onClick={onNavigate}>
         <span className="brand-mark">
           <Icon name="leaf" />
@@ -89,8 +89,16 @@ export function Sidebar({ open, onNavigate, id }: Props) {
         )}
 
         <span className="side-section">{t("nav.tools")}</span>
-        {farmId && link(`/farms/${farmId}/finance`, "coin", t("nav.finance"))}
+        {farmId && link(`/farms/${farmId}/rotations`, "climate", t("nav.waterBudget"))}
+        <NavLink to="/roadmap#soil" onClick={onNavigate}><Icon name="farm" /><span>{t("nav.soilHealth")}</span><span className="side-tag">{t("nav.soon")}</span></NavLink>
+        <NavLink to="/roadmap#weed" onClick={onNavigate}><Icon name="overview" /><span>{t("nav.weedShield")}</span><span className="side-tag">{t("nav.soon")}</span></NavLink>
+        <NavLink to="/roadmap#twins" onClick={onNavigate}><Icon name="map" /><span>{t("nav.climateTwin")}</span><span className="side-tag">{t("nav.soon")}</span></NavLink>
+        {latestPlan ? link(`/plans/${latestPlan.id}`, "save", t("nav.farmCalendar")) : <NavLink to="/roadmap" onClick={onNavigate}><Icon name="save" /><span>{t("nav.farmCalendar")}</span></NavLink>}
+        {farmId && link(`/farms/${farmId}/finance`, "coin", t("nav.financialPlanner"))}
+        {latestPlan ? link(`/plans/${latestPlan.id}`, "book", t("nav.reportsHistory")) : <NavLink to="/roadmap" onClick={onNavigate}><Icon name="book" /><span>{t("nav.reportsHistory")}</span></NavLink>}
+        <NavLink to="/roadmap" onClick={onNavigate}><Icon name="overview" /><span>{t("nav.communityWater")}</span><span className="side-tag">{t("nav.soon")}</span></NavLink>
         {link("/catalog", "book", t("nav.catalog"))}
+        <NavLink to="/roadmap" onClick={onNavigate}><Icon name="edit" /><span>{t("nav.settings")}</span></NavLink>
 
         <span className="side-section">{t("nav.planned")}</span>
         <NavLink to="/roadmap" onClick={onNavigate}>

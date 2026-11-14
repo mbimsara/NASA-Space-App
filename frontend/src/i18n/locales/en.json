@@ -31,7 +31,16 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "lightTheme": "Switch to light theme",
-    "darkTheme": "Switch to dark theme"
+    "darkTheme": "Switch to dark theme",
+    "waterBudget": "Water budget",
+    "soilHealth": "Soil health",
+    "weedShield": "WeedShield AI",
+    "climateTwin": "Climate twin",
+    "farmCalendar": "Farm calendar",
+    "financialPlanner": "Financial planner",
+    "reportsHistory": "Reports & history",
+    "communityWater": "Community water",
+    "settings": "Settings"
   },
   "farm": {
     "title": "Farm Setup",

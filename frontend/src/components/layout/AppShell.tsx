@@ -4,7 +4,7 @@
  * Owner: Shehani. Design: Tharuka.
  */
 import { useEffect, useRef, useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "../ui/LanguageSwitcher";
 import { Icon } from "../ui/Icon";
@@ -56,34 +56,14 @@ export function AppShell() {
 
   if (isHome) {
     return (
-      <div className="landing-shell">
+      <div>
         <a className="skip-link" href="#main">{t("nav.skipToContent")}</a>
-        <header className="app-header app-header--landing">
-          <div className="app-header__bar">
-            <Link to="/" className="app-header__brand">
-              <span className="app-header__mark" aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                  <path d="M19.5 4.5C13.7 4.7 9.4 7 7.2 11.2c-1.5 2.8-.8 5.6 1.5 7.1 2.4 1.5 5.4.8 7.2-1.8 2.2-3.2 2.5-7.2 3.6-12Z" />
-                  <path d="M5 20c2.2-5.1 5.5-8.3 10.4-10.7" />
-                </svg>
-              </span>
-              <span>AgroSphere <b>AI</b></span>
-            </Link>
-            <nav className="app-header__nav" aria-label={t("nav.main")}>
-              <Link to="/" className="app-header__link">{t("nav.home")}</Link>
-              <Link to="/farms/new" className="app-header__link">{t("nav.newFarm")}</Link>
-              <Link to="/catalog" className="app-header__link">{t("nav.catalog")}</Link>
-            </nav>
-            <LanguageSwitcher />
-          </div>
-        </header>
         {!online && (
           <div className="offline-banner" role="status">
             <strong>{t("offline.title")}</strong> {t("offline.body")}
           </div>
         )}
-        {USE_FIXTURES && <div className="fixture-ribbon" role="note">{t("common.fixtureMode")}</div>}
-        <main id="main" className="landing-main" ref={mainRef} tabIndex={-1} style={{ outline: "none" }}>
+        <main id="main" ref={mainRef} tabIndex={-1} style={{ outline: "none" }}>
           <Outlet />
         </main>
       </div>
@@ -91,7 +71,7 @@ export function AppShell() {
   }
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-theme={theme}>
       <a className="skip-link" href="#main">
         {t("nav.skipToContent")}
       </a>
@@ -117,19 +97,28 @@ export function AppShell() {
           >
             <Icon name={menuOpen ? "close" : "menu"} />
           </button>
-          <div className="topbar-title" title={farmName ?? undefined}>
-            {farmName ?? "AgroSphere AI"}
+          <div className="search">
+            <Icon name="overview" />
+            <input
+              type="search"
+              aria-label="Search fields, plans, or insights"
+              placeholder="Search fields, plans, or insights..."
+            />
           </div>
-          <button
-            type="button"
-            className="icon-btn"
-            onClick={toggleTheme}
-            aria-label={theme === "dark" ? t("nav.lightTheme") : t("nav.darkTheme")}
-            title={theme === "dark" ? t("nav.lightTheme") : t("nav.darkTheme")}
-          >
-            <Icon name={theme === "dark" ? "sun" : "moon"} />
-          </button>
-          <LanguageSwitcher />
+          <div className="top-actions">
+            <span className="data-state"><i /> {USE_FIXTURES ? t("nav.modeFixtures") : t("nav.modeLive")}</span>
+            {farmName && <span className="topbar-title" title={farmName}>{farmName}</span>}
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={toggleTheme}
+              aria-label={theme === "dark" ? t("nav.lightTheme") : t("nav.darkTheme")}
+              title={theme === "dark" ? t("nav.lightTheme") : t("nav.darkTheme")}
+            >
+              <Icon name={theme === "dark" ? "sun" : "moon"} />
+            </button>
+            <LanguageSwitcher />
+          </div>
         </header>
 
         {!online && (
@@ -142,7 +131,7 @@ export function AppShell() {
             {t("common.fixtureMode")}
           </div>
         )}
-        <main id="main" ref={mainRef} tabIndex={-1} style={{ outline: "none" }}>
+        <main id="main" className="workspace" ref={mainRef} tabIndex={-1} style={{ outline: "none" }}>
           <Outlet />
         </main>
       </div>

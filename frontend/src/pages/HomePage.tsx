@@ -1,149 +1,89 @@
-/** Official AgroSphere landing page: Tharuka's design with Shehani's data flow. */
-import { useState } from "react";
+/** Tharuka's landing design connected to Shehani's real navigation and fixture flow. */
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import { api } from "../api";
 import { useAppStore } from "../hooks/useAppStore";
+import { useTheme } from "../hooks/useTheme";
+import { Icon } from "../components/ui/Icon";
 import { ErrorMessage } from "../components/ui/ErrorMessage";
 import { listCachedPlanIds } from "../utils/offlineCache";
-import "./HomePage.css";
+
+const slides = ["agrosphere-hero.webp", "agrosphere-hero-aerial.webp", "agrosphere-hero-precision.webp", "agrosphere-hero-water.webp", "agrosphere-hero-global.webp"];
 
 export function HomePage() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
+  const [theme, toggleTheme] = useTheme();
   const recentFarms = useAppStore((s) => s.recentFarms);
   const recentPlans = useAppStore((s) => s.recentPlans);
   const setFarm = useAppStore((s) => s.setFarm);
+  const [menu, setMenu] = useState(false);
+  const [slide, setSlide] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
-  const [offlinePlanIds] = useState(() => new Set(listCachedPlanIds()));
+  const [offlineIds] = useState(() => new Set(listCachedPlanIds()));
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = window.setInterval(() => setSlide((value) => (value + 1) % slides.length), 6500);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const loadDemo = async () => {
     setBusy(true);
     setError(null);
     try {
-      const env = await api.createDemoFarm();
-      setFarm(env);
-      navigate(`/farms/${env.id}`);
-    } catch (err) {
-      setError(err);
+      const farm = await api.createDemoFarm();
+      setFarm(farm);
+      navigate(`/farms/${farm.id}`);
+    } catch (cause) {
+      setError(cause);
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <div className="landing-page">
-      <section className="landing-hero" aria-labelledby="landing-title">
-        <img src="/images/agrosphere-hero.webp" alt="" className="landing-hero__image" fetchPriority="high" />
-        <div className="landing-hero__content">
-          <p className="landing-eyebrow">{t("landing.eyebrow")}</p>
-          <h1 id="landing-title">
-            {t("landing.title")}<br />
-            <em>{t("landing.titleAccent")}</em>
-          </h1>
-          <p className="landing-hero__description">{t("landing.description")}</p>
-          <div className="landing-actions">
-            <Link to="/farms/new" className="landing-button landing-button--primary">
-              {t("landing.explore")} <span aria-hidden="true">↗</span>
-            </Link>
-            <button type="button" className="landing-button landing-button--outline" onClick={loadDemo} disabled={busy}>
-              {busy ? t("common.loading") : t("home.loadDemo")}
-            </button>
-          </div>
-          <a className="landing-how-link" href="#how-it-works">
-            {t("landing.how")} <span aria-hidden="true">↓</span>
-          </a>
-          <p className="landing-hero__credit">{t("landing.challenge")}</p>
+    <div className="landing" data-theme={theme}>
+      <header className="land-nav">
+        <button className="brand" type="button" onClick={() => window.scrollTo(0, 0)}><span className="brand-mark"><Icon name="leaf" /></span><span>AgroSphere <b>AI</b></span></button>
+        <nav className={menu ? "open" : ""} aria-label="Landing navigation"><a href="#platform">Platform</a><a href="#data">NASA data</a><a href="#impact">Impact</a><a href="#workspace">Workspace</a></nav>
+        <div className="land-actions">
+          <button className="icon-btn theme-toggle" type="button" onClick={toggleTheme} aria-label="Toggle theme"><Icon name={theme === "dark" ? "sun" : "moon"} /></button>
+          <button className="icon-btn mobile-menu" type="button" onClick={() => setMenu(!menu)} aria-label="Open menu"><Icon name={menu ? "close" : "menu"} /></button>
+          <button className="btn btn-secondary" type="button" onClick={loadDemo} disabled={busy}>{busy ? "Loading…" : "View demo"}</button>
+          <Link className="btn btn-primary" to="/farms/new">Open platform <Icon name="arrow" /></Link>
         </div>
-        <aside className="landing-field-note">
-          <span className="landing-eyebrow">{t("landing.fieldNote")}</span>
-          <strong>{t("landing.fieldTitle")}</strong>
-          <p>{t("landing.fieldDescription")}</p>
-          <div className="landing-crop-sequence" aria-hidden="true">
-            <span>01</span><i /><span>02</span><i /><span>03</span>
+      </header>
+      <main>
+        <section className="hero">
+          <div className="hero-images">{slides.map((name, index) => <img key={name} className={slide === index ? "active" : ""} src={`/images/${name}`} alt="" aria-hidden={slide !== index} />)}</div>
+          <div className="hero-shade" />
+          <div className="hero-content">
+            <div className="eyebrow"><span /> Earth intelligence for every field</div>
+            <h1>Grow with the planet,<br /><em>not against it.</em></h1>
+            <p>AgroSphere turns Earth observation signals and farm knowledge into clear, climate-resilient decisions for growers everywhere.</p>
+            <div className="hero-buttons"><Link className="btn btn-primary" to="/farms/new">Explore your farm <Icon name="arrow" /></Link><a className="video-btn" href="#platform"><span>▶</span> See how it works</a></div>
+            <div className="trust-row"><div className="avatar-stack"><span>N</span><span>A</span><span>S</span></div><div><strong>Built for NASA Space Apps 2026</strong><small>Working app with clearly labelled synthetic and NASA-derived data</small></div></div>
           </div>
-          <small>{t("landing.fieldFooter")}</small>
-        </aside>
-      </section>
-
-      <div className="landing-source-strip">
-        <span>{t("landing.sourceLabel")}</span>
-        <strong>NASA POWER</strong>
-        <strong>SMAP</strong>
-        <span>{t("landing.sourceNote")}</span>
-      </div>
-
-      <div className="landing-content">
-        <ErrorMessage error={error} onRetry={loadDemo} />
-        <section id="how-it-works" className="landing-platform" aria-labelledby="platform-title">
-          <p className="landing-kicker">{t("landing.platformKicker")}</p>
-          <h2 id="platform-title">{t("landing.platformTitle")}</h2>
-          <p className="landing-lead">{t("home.journey")}</p>
-          <div className="landing-feature-grid">
-            {(["observe", "plan", "understand"] as const).map((key, index) => (
-              <article className="landing-feature" key={key}>
-                <span className="landing-feature__number">0{index + 1}</span>
-                <h3>{t(`landing.${key}Title`)}</h3>
-                <p>{t(`landing.${key}Description`)}</p>
-              </article>
-            ))}
-          </div>
-          <p className="landing-status">{t("landing.status")}</p>
+          <div className="hero-float card"><div className="float-top"><span className="status-dot" /> Decision workspace <span>Ready</span></div><div className="float-score"><strong>3–5</strong><span>seasons<br /><b>compared</b></span></div><p>Compare crop, water, climate, soil, and financial trade-offs in one farm context.</p></div>
         </section>
-
-        <section className="landing-workspace" aria-labelledby="workspace-title">
-          <div className="landing-workspace__heading">
-            <div>
-              <p className="landing-kicker">{t("landing.workspaceKicker")}</p>
-              <h2 id="workspace-title">{t("landing.workspaceTitle")}</h2>
-            </div>
-            <Link to="/farms/new" className="btn btn-primary">+ {t("nav.newFarm")}</Link>
-          </div>
-          <div className="landing-workspace__grid">
-            <div>
-              <h2>{t("home.recentFarms")}</h2>
-              {recentFarms.length === 0 ? (
-                <p className="muted">{t("home.noFarms")}</p>
-              ) : (
-                <ul className="card" style={{ listStyle: "none", paddingLeft: 16 }}>
-                  {recentFarms.map((farm) => (
-                    <li key={farm.id} style={{ padding: "6px 0" }}>
-                      <Link to={`/farms/${farm.id}`}>{farm.name}</Link>
-                      <span className="muted"> ({farm.id})</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <div>
-              <h2>{t("home.recentPlans")}</h2>
-              {recentPlans.length === 0 ? (
-                <p className="muted">{t("home.noPlans")}</p>
-              ) : (
-                <ul className="card" style={{ listStyle: "none", paddingLeft: 16 }}>
-                  {recentPlans.map((plan) => (
-                    <li key={plan.id} style={{ padding: "6px 0" }}>
-                      <Link to={`/plans/${plan.id}`}>{plan.name}</Link>
-                      <span className="muted"> ({plan.id})</span>
-                      {offlinePlanIds.has(plan.id) && (
-                        <span className="badge-offline" style={{ marginLeft: 8 }}>
-                          {t("offline.availableBadge")}
-                        </span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
+        <section className="stats"><div><strong>4</strong><span>NASA data contexts</span></div><div><strong>3–5</strong><span>seasons planned</span></div><div><strong>1</strong><span>connected farm record</span></div><div><strong>3</strong><span>interface languages</span></div></section>
+        <section id="platform" className="land-section intro">
+          <div className="section-kicker">ONE CONNECTED PLATFORM</div><h2>From uncertainty to informed action.</h2><p className="lead">Plan across seasons, test climate stress, and inspect the evidence and limitations behind every result.</p>
+          <div className="feature-grid">{[
+            ["rotate", "Plan beyond one harvest", "Compare multi-season rotations, water demand, soil benefits, constraints, and uncertainty."],
+            ["climate", "Prepare for what’s next", "Test hypothetical rainfall changes without rewriting the historical NASA baseline."],
+            ["chat", "Understand every result", "Ask the assistant to explain the selected farm, analysis, scenario, and candidate."],
+          ].map(([icon, title, copy], index) => <Link className={`feature-card feature-${index}`} to="/farms/new" key={title}><div className="feature-icon"><Icon name={icon} /></div><h3>{title}</h3><p>{copy}</p><span>Open workspace <Icon name="arrow" /></span></Link>)}</div>
         </section>
-        <footer className="landing-footer">
-          <strong>AgroSphere AI</strong>
-          <span>{t("landing.footer")}</span>
-          <Link to="/catalog">{t("nav.catalog")} <span aria-hidden="true">↗</span></Link>
-        </footer>
-      </div>
+        <section id="data" className="data-section">
+          <div className="data-copy"><div className="section-kicker light">EARTH OBSERVATION, MADE USEFUL</div><h2>Global perspective.<br />Visible limitations.</h2><p>NASA POWER climate observations and regional SMAP surface-moisture context are kept separate from measured field soil properties.</p><ul><li><Icon name="check" /> Source, dates, units, and coverage</li><li><Icon name="check" /> Missing days remain visible</li><li><Icon name="check" /> Historical baselines stay distinct from scenarios</li></ul><div className="prototype-note"><Icon name="book" /><span><b>Transparency by design</b>Fixture results are labelled synthetic. Modeled NASA values are not presented as on-farm measurements.</span></div></div>
+          <div className="earth-card"><img className="earth-image" src="/images/earth-observation.webp" alt="Earth observation view centred on South Asia" /></div>
+        </section>
+        <section id="impact" className="land-section impact"><div className="section-kicker">DESIGNED FOR REAL-WORLD RESILIENCE</div><h2>Every tool supports the rotation decision.</h2><div className="impact-grid"><div><Icon name="climate" /><h3>Water security</h3><p>Compare rainfall, known field-applied irrigation, and crop demand.</p></div><div><Icon name="farm" /><h3>Soil and recovery</h3><p>Keep measured soil inputs distinct from modeled screening indicators.</p></div><div><Icon name="coin" /><h3>Financial scenarios</h3><p>Inspect ranges, sources, dates, and omitted cost categories.</p></div><div><Icon name="overview" /><h3>Climate context</h3><p>Explore observations, scenarios, and future climate-twin methods.</p></div></div></section>
+        <section id="workspace" className="land-section intro"><div className="section-kicker">YOUR WORKSPACE</div><h2>Pick up where you left off.</h2><ErrorMessage error={error} onRetry={loadDemo} /><div className="feature-grid"><article className="feature-card"><h3>Recent farms</h3>{recentFarms.length ? recentFarms.map((farm) => <Link key={farm.id} to={`/farms/${farm.id}`}>{farm.name}</Link>) : <p>No farms yet on this device.</p>}</article><article className="feature-card"><h3>Saved plans</h3>{recentPlans.length ? recentPlans.map((plan) => <Link key={plan.id} to={`/plans/${plan.id}`}>{plan.name}{offlineIds.has(plan.id) ? " · Offline" : ""}</Link>) : <p>No saved plans yet on this device.</p>}</article><article className="feature-card"><h3>Start planning</h3><p>Create a farm or load the clearly labelled synthetic demonstration.</p><Link to="/farms/new">Create farm →</Link></article></div></section>
+      </main>
+      <footer><div className="brand"><span className="brand-mark"><Icon name="leaf" /></span><span>AgroSphere <b>AI</b></span></div><p>NASA Space Apps Challenge 2026</p><span>Sources and uncertainty shown with results</span></footer>
     </div>
   );
 }
