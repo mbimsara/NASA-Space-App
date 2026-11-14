@@ -46,6 +46,33 @@ verified field classification. Adding landform/drainage behavior requires a
 coordinated farm-schema change with Dulanjaya; the engine must not infer those
 fields solely from coordinates.
 
+## Replacement water model
+
+Bhagya replaced the broken, mixed-basis numeric inputs with a separate reviewed
+demo model in `data/catalogs/crop-water-requirements.json`. It uses the working
+FAO Irrigation Water Management Training Manual No. 3, Chapter 3 indicative
+seasonal crop-water-needs table. All ranges share the
+`seasonal_crop_water_need_etc` basis:
+
+- bean proxy: 300–500 mm;
+- maize: 500–800 mm;
+- peanut/groundnut: 500–700 mm;
+- rice (paddy): 450–700 mm;
+- sorghum/millet proxy: 450–650 mm;
+- pepper proxy: 600–900 mm.
+
+The bean range is an explicit provisional proxy for mung bean, cowpea, and black
+gram; sorghum/millet is a proxy for finger millet; pepper is a proxy for chilli.
+These are indicative scenario ranges rather than Sri Lankan cultivar
+measurements. The midpoint is derived only as a display/reference value and is
+not substituted for the range in water-budget calculations.
+
+Paddy land preparation, puddling, seepage, percolation, conveyance loss, and
+irrigation efficiency are excluded from ETc and remain unknown. Therefore, the
+range calculator is a transparent screening comparison, not an irrigation
+prescription. The original catalog remains research-pending and its single
+nominal values do not drive the reviewed range calculation.
+
 ## Catalog decision
 
 The eight-crop draft is useful and follows the shared schema. Crop IDs,

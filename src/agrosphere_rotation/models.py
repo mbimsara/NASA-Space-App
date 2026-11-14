@@ -146,3 +146,53 @@ class WaterBudget:
         expected = self.available_water_mm - self.crop_demand_mm
         if abs(self.balance_mm - expected) > 1e-9:
             raise ValueError("balance_mm must equal available water minus crop demand")
+
+
+@dataclass(frozen=True, slots=True)
+class WaterDemandRange:
+    crop_id: str
+    low_mm: float
+    high_mm: float
+    nominal_mm: float
+    basis: str
+    model_version: str
+    source_url: str
+    limitations: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not self.crop_id:
+            raise ValueError("crop_id is required")
+        if not 0 < self.low_mm <= self.nominal_mm <= self.high_mm:
+            raise ValueError("water demand must satisfy 0 < low <= nominal <= high")
+        if self.basis != "seasonal_crop_water_need_etc":
+            raise ValueError("unsupported water-demand basis")
+        if urlparse(self.source_url).scheme not in {"http", "https"}:
+            raise ValueError("water-demand source must be HTTP(S)")
+
+
+@dataclass(frozen=True, slots=True)
+class WaterBudgetRange:
+    crop_id: str
+    demand_low_mm: float
+    demand_high_mm: float
+    baseline_rainfall_mm: float
+    scenario_rainfall_mm: float
+    irrigation_mm: float
+    available_water_mm: float
+    balance_low_mm: float
+    balance_high_mm: float
+    coverage_low_percent: float
+    coverage_high_percent: float
+    demand_basis: str
+    model_version: str
+    assumptions: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        if not 0 < self.demand_low_mm <= self.demand_high_mm:
+            raise ValueError("invalid demand range")
+        if self.available_water_mm < 0:
+            raise ValueError("available water cannot be negative")
+        if abs(self.balance_low_mm - (self.available_water_mm - self.demand_high_mm)) > 1e-9:
+            raise ValueError("low balance must use high demand")
+        if abs(self.balance_high_mm - (self.available_water_mm - self.demand_low_mm)) > 1e-9:
+            raise ValueError("high balance must use low demand")

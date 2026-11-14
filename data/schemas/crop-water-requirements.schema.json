@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Comparable seasonal crop-water requirement ranges v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "model_version", "basis", "status", "source", "requirements"],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "model_version": {"type": "string", "minLength": 1},
+    "basis": {"const": "seasonal_crop_water_need_etc"},
+    "status": {"const": "reviewed_for_demo"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "url", "accessed_on", "notes"],
+      "properties": {
+        "title": {"type": "string", "minLength": 1},
+        "url": {"type": "string", "format": "uri"},
+        "accessed_on": {"type": "string", "format": "date"},
+        "notes": {"type": "string", "minLength": 1}
+      }
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["crop_id", "fao_category", "low_mm", "high_mm", "nominal_mm", "applicability", "limitations"],
+        "properties": {
+          "crop_id": {"type": "string", "minLength": 1},
+          "fao_category": {"type": "string", "minLength": 1},
+          "low_mm": {"type": "number", "exclusiveMinimum": 0},
+          "high_mm": {"type": "number", "exclusiveMinimum": 0},
+          "nominal_mm": {"type": "number", "exclusiveMinimum": 0},
+          "applicability": {"type": "string", "minLength": 1},
+          "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}}
+        }
+      }
+    }
+  }
+}
