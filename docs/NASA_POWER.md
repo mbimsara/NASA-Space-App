@@ -79,6 +79,8 @@ NASA's [meteorological source documentation](https://power.larc.nasa.gov/docs/me
 
 ## Experimental climate twin finder
 
+Daily maximum/minimum support and exposure counts are documented in [temperature exposure](TEMPERATURE_EXPOSURE.md).
+
 `backend/services/climate_twins.py` compares supplied NASA POWER histories over the same reference years. Only complete months for both variables in every reference year are accepted. Source products, time standard and data kind must match; target/duplicate coordinates are excluded. It does not automatically discover or download global candidates.
 
 For each location, calculate 12 mean monthly rainfall totals and 12 mean monthly temperatures, weighting years equally. The distance is:

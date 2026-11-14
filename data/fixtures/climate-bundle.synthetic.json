@@ -39,43 +39,61 @@
       "precipitation_valid_days": 7,
       "mean_temperature_c": 26.4286,
       "rainfall_total_mm": 35,
-      "rainfall_available_days_mm": 35
+      "rainfall_available_days_mm": 35,
+      "maximum_temperature_valid_days": 0,
+      "minimum_temperature_valid_days": 0,
+      "highest_available_daily_max_c": null,
+      "lowest_available_daily_min_c": null
     },
     "daily": [
       {
         "date": "2025-01-01",
         "temperature_c": 25,
-        "precipitation_mm_per_day": 0
+        "precipitation_mm_per_day": 0,
+        "temperature_max_c": null,
+        "temperature_min_c": null
       },
       {
         "date": "2025-01-02",
         "temperature_c": 26,
-        "precipitation_mm_per_day": 0
+        "precipitation_mm_per_day": 0,
+        "temperature_max_c": null,
+        "temperature_min_c": null
       },
       {
         "date": "2025-01-03",
         "temperature_c": 30,
-        "precipitation_mm_per_day": 5
+        "precipitation_mm_per_day": 5,
+        "temperature_max_c": null,
+        "temperature_min_c": null
       },
       {
         "date": "2025-01-04",
         "temperature_c": 28,
-        "precipitation_mm_per_day": 20
+        "precipitation_mm_per_day": 20,
+        "temperature_max_c": null,
+        "temperature_min_c": null
       },
       {
         "date": "2025-01-05",
         "temperature_c": 27,
-        "precipitation_mm_per_day": 0
+        "precipitation_mm_per_day": 0,
+        "temperature_max_c": null,
+        "temperature_min_c": null
       },
       {
         "date": "2025-01-06",
         "temperature_c": 25,
-        "precipitation_mm_per_day": 10
+        "precipitation_mm_per_day": 10,
+        "temperature_max_c": null,
+        "temperature_min_c": null
       },
       {
         "date": "2025-01-07",
         "temperature_c": 24,
-        "precipitation_mm_per_day": 0
+        "precipitation_mm_per_day": 0,
+        "temperature_max_c": null,
+        "temperature_min_c": null
       }
     ],
     "monthly": [
@@ -88,7 +106,11 @@
         "precipitation_valid_days": 7,
         "mean_temperature_c": 26.4286,
         "rainfall_total_mm": 35,
-        "rainfall_available_days_mm": 35
+        "rainfall_available_days_mm": 35,
+        "maximum_temperature_valid_days": 0,
+        "minimum_temperature_valid_days": 0,
+        "highest_available_daily_max_c": null,
+        "lowest_available_daily_min_c": null
       }
     ],
     "limitations": [
@@ -188,6 +210,28 @@
       "Uniformly scale each available daily rainfall value; preserve missing values and event dates.",
       "Historical baseline is unchanged. This is not a future weather forecast.",
       "No effective rainfall, irrigation deficit, soil response, yield or rotation ranking is calculated."
+    ]
+  },
+  "temperature_exposure": {
+    "kind": "historical_temperature_exposure",
+    "start": "2025-01-01",
+    "end": "2025-01-07",
+    "hot_at_or_above_c": 35,
+    "cold_below_c": 10,
+    "expected_days": 7,
+    "maximum_valid_days": 0,
+    "minimum_valid_days": 0,
+    "hot_days": null,
+    "cold_nights": null,
+    "highest_available_daily_max_c": null,
+    "lowest_available_daily_min_c": null,
+    "longest_observed_hot_run_days": null,
+    "hot_run_is_lower_bound": true,
+    "limitations": [
+      "Thresholds are exploratory, not crop-specific stress limits or heatwave definitions.",
+      "Missing maxima break runs; counts describe available days only.",
+      "Cold nights is a label for daily minimum threshold counts, not verified nighttime measurements.",
+      "Daily extrema are gridded source estimates, not field sensor readings."
     ]
   },
   "season_inputs": {

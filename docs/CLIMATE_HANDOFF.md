@@ -50,6 +50,8 @@ Resolve farm/observation/scenario context on the server. Explain the bundle's nu
 
 ## Function inventory
 
+Bundles now also include `temperature_exposure`. Fetch with `--include-extremes` for T2M_MAX/T2M_MIN coverage; older histories remain valid with null extrema-dependent counts. See [temperature exposure](TEMPERATURE_EXPOSURE.md) for fields, settings and live verification.
+
 | Function | Output / constraint |
 | --- | --- |
 | `nasa_power.request_url` / `fetch` / `normalize` | Verified NASA endpoint, historical dates, UTC daily rows, summaries and provenance |

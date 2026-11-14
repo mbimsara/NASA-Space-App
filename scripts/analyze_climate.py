@@ -4,6 +4,7 @@ import json
 import sys
 from pathlib import Path
 from backend.services.climate import historical_indicators, rainfall_scenario
+from backend.services.temperature_exposure import temperature_exposure
 
 
 def main():
@@ -14,6 +15,8 @@ def main():
     parser.add_argument("--dry-below-mm", type=float, default=1)
     parser.add_argument("--warm-at-or-above-c", type=float, default=30)
     parser.add_argument("--rain-at-or-above-mm", type=float, default=20)
+    parser.add_argument("--hot-max-at-or-above-c", type=float, default=35)
+    parser.add_argument("--cold-min-below-c", type=float, default=10)
     args = parser.parse_args()
     try:
         if args.output.exists():
@@ -26,10 +29,11 @@ def main():
             "data_kind": observations["data_kind"],
             "historical": historical_indicators(observations, args.dry_below_mm, args.warm_at_or_above_c, args.rain_at_or_above_mm),
             "scenario": rainfall_scenario(observations, args.rainfall_change_pct),
+            "temperature_exposure": temperature_exposure(observations, args.hot_max_at_or_above_c, args.cold_min_below_c),
         }
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(result, indent=2, allow_nan=False) + "\n", encoding="utf-8")
-        print(json.dumps({"historical": result["historical"], "scenario_summary": result["scenario"]["summary"]}, indent=2))
+        print(json.dumps({"historical": result["historical"], "scenario_summary": result["scenario"]["summary"], "temperature_exposure": result["temperature_exposure"]}, indent=2))
         print(f"Saved: {args.output}")
     except (ValueError, KeyError, TypeError, OSError) as error:
         print(f"Climate analysis error: {error}", file=sys.stderr)

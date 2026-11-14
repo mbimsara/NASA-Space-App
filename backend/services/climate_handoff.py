@@ -2,6 +2,7 @@
 from copy import deepcopy
 from datetime import date
 from backend.services.climate import checked_rows, historical_indicators, rainfall_scenario
+from backend.services.temperature_exposure import temperature_exposure
 
 MODEL_VERSION = "climate-descriptive-0.1"
 
@@ -61,4 +62,5 @@ def climate_bundle(observations, farm_id, observation_id, input_version, rainfal
         "observation": observation_envelope(observations, farm_id, observation_id, input_version),
         "historical": historical_indicators(observations),
         "rainfall_scenario": rainfall_scenario(observations, rainfall_change_pct),
+        "temperature_exposure": temperature_exposure(observations),
     }
