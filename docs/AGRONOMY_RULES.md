@@ -115,3 +115,12 @@ Owner/reviewer: Bhagya. Research: Tharuka. Financial implementation and catalog 
    - Confirm policy flags (hard exclusion vs penalty scoring).
    - Formally approve catalog items (`review_status: "approved"`).
 3. Shehani implements scoring and priority weights based on approved rules once Bhagya signs off.
+
+## Financial formula review
+
+Bhagya approved the deterministic range formulas in Shehani's commit `03a46b7`
+subject to provenance and wording changes. Formula approval does not approve
+the synthetic worked-example prices, costs, or yields. See
+[`FINANCIAL_SPECIFICATION.md`](FINANCIAL_SPECIFICATION.md) for the versioned
+calculation, missing-data behavior, required sources, and implementation
+conditions.
