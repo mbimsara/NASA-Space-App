@@ -7,6 +7,7 @@ import re
 from collections.abc import Mapping
 
 from .assistant_results import explain_results
+from .assistant_errors import require_supported_language
 
 
 def _display(value):
@@ -56,8 +57,7 @@ def _explain(context, question, language="en", *, trace=None):
     ValueError; invalid context/question types raise TypeError. The input is
     never changed. This text return value is not an HTTP response contract.
     """
-    if language != "en":
-        raise ValueError("Only English ('en') is supported in this milestone.")
+    require_supported_language(language)
     if not isinstance(context, Mapping):
         raise TypeError("context must be a farm profile or profile envelope.")
     if not isinstance(question, str):
@@ -99,7 +99,7 @@ def _explain(context, question, language="en", *, trace=None):
         if "irrigation" in words or {"water", "supply"} <= words:
             supply = profile.get("irrigation_supply_mm_per_season")
             if trace is not None and supply is None:
-                trace.missing()
+                trace.missing("Farm irrigation supply was not supplied; it is unknown, not zero.")
             answers.append(
                 "Irrigation supply is unknown."
                 if supply is None
@@ -110,7 +110,7 @@ def _explain(context, question, language="en", *, trace=None):
             measurements = profile.get("soil_tests")
             if not measurements:
                 if trace is not None:
-                    trace.missing()
+                    trace.missing("No soil measurements were supplied; soil values cannot be inferred from satellite data.")
                 answers.append("Soil measurements are unknown; no soil tests are recorded.")
             else:
                 if trace is not None and any(test.get("value") is None for test in measurements):

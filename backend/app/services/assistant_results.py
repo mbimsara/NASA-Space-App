@@ -77,7 +77,13 @@ def _water(budget, delta=False, deficit_only=False, trace=None):
             "scenario_rainfall_mm", "irrigation_supply_mm", "effective_rainfall_mm",
         )
         if not any(budget.get(key) is not None for key in metric_keys):
-            trace.missing()
+            trace.missing("Requested water-budget values were not supplied; missing inputs are not assumed to be zero.")
+        if budget.get("effective_rainfall_mm") is None:
+            trace.limitation("Effective rainfall was not supplied; no efficiency factor has been applied.")
+        if budget.get("irrigation_supply_mm") is None:
+            trace.limitation("Budget irrigation supply is unknown; a zero-irrigation assumption has not been made.")
+        if any(key in budget for key in ("balance_mm", "balance_low_mm", "balance_high_mm")) and budget.get("deficit_mm") is None:
+            trace.limitation("A signed water balance is supplied; no approved balance-to-deficit conversion has been applied.")
     prefix = "Supplied water-budget differences (scenario minus baseline)" if delta else "Water budget"
     fields = (("deficit_mm", "deficit"),) if deficit_only else WATER_FIELDS
     values = "; ".join(
@@ -121,7 +127,7 @@ def _candidates(record, selected, views=None, deficit_only=False, trace=None):
     candidates = record.get("candidates")
     if candidates is None:
         if trace is not None:
-            trace.missing()
+            trace.missing("Rotation analysis candidates were not supplied; candidate scores and recommendations cannot be inferred.")
         return "Candidates and their rankings, scores, and water budgets are unknown."
     candidates = [_record(item) for item in _items(candidates)]
     if not candidates:
@@ -138,7 +144,7 @@ def _candidates(record, selected, views=None, deficit_only=False, trace=None):
         lines = [f"Candidate {_text(candidate.get('candidate_id'))}:"]
         if views & {"rank", "score"}:
             if trace is not None and any(candidate.get(key) is None for key in ("rank", "score")):
-                trace.missing()
+                trace.missing("A candidate rank or score was not supplied; neither is inferred from candidate order.")
             lines[0] += (
                 f" supplied rank {_number(candidate.get('rank'))}; "
                 f"supplied score {_number(candidate.get('score'))} (scale not inferred)."

@@ -4,6 +4,12 @@ These are pure Python integration adapters, not an HTTP contract or database
 resolver. They use only the standard library and do not import teammate apps,
 call providers, run crop calculations, or allocate IDs.
 
+Shehani has now confirmed the request and four required response fields.
+`respond_to_request(request, resolved_context, **boundary_options)` implements
+that assistant-side boundary. See [the backend handoff](../../ASSISTANT_HANDOFF.md)
+for required IDs, controlled missing-result behavior, the typed language error,
+and seven synthetic UI examples. Dulanjaya still owns the HTTP endpoint.
+
 Inspected remote-tracking snapshots:
 
 - Bhagya `zerokali20`: `454b4c1bc73cbabdf235b98d803aaf137a916666`.
@@ -178,8 +184,9 @@ fields; no claim of complete agronomic validation is made. Explicit empty
 candidate lists remain successful, with their supplied reasons.
 
 Malformed structures raise TypeError/ValueError. Unsupported languages raise
-the existing explicit English-only ValueError; no English response is labeled
-Sinhala/Tamil. Mapping these errors to HTTP codes is deferred to Dulanjaya.
+`UnsupportedLanguageError`, a ValueError subclass; no English response is labeled
+Sinhala/Tamil. Dulanjaya should map it to 422 `UNSUPPORTED_LANGUAGE` using its
+`to_error_envelope()` method, as documented in the handoff.
 
 ## Remaining boundary agreements
 
