@@ -12,8 +12,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: pip
+      - name: Install rotation package and test dependencies
+        run: python -m pip install -e ".[dev]"
       - run: python scripts/validate_data.py
-      - run: python -m unittest discover -s tests -v
+      - name: Run shared climate, SMAP, and rotation tests
+        run: python -m pytest tests -v
   smap-files:
     runs-on: ubuntu-latest
     steps:
@@ -21,5 +25,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install -r backend/requirements-smap.txt
-      - run: python -m unittest discover -s tests -v
+          cache: pip
+      - name: Install rotation, test, and optional SMAP dependencies
+        run: python -m pip install -e ".[dev]" -r backend/requirements-smap.txt
+      - name: Run shared tests with optional SMAP file support
+        run: python -m pytest tests -v
