@@ -1,0 +1,17 @@
+/* The card owns the border; the semantic fieldset stays inside its padding. */
+.farm-setup .card { min-width: 0; padding: 24px; }
+.farm-setup .farm-section { border: 0; padding: 0; margin: 0; min-inline-size: 0; }
+.farm-setup .farm-section > legend { padding: 0; margin-bottom: 14px; max-width: 100%; font-size: 1rem; line-height: 1.5; overflow-wrap: anywhere; }
+.farm-setup .grid-2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 16px; }
+.farm-setup .field label, .farm-setup .field legend { max-width: 100%; line-height: 1.5; overflow-wrap: anywhere; }
+.farm-setup .field > span { font-size: .8rem; font-weight: 400; color: var(--text-muted); }
+.farm-setup .field input:not([type="radio"]):not([type="checkbox"]), .farm-setup .field select { min-width: 0; font-size: .875rem; }
+.farm-setup .field input[type="radio"] { flex: none; }
+.farm-setup .field label[for^="priority-"] { gap: 16px; }
+.farm-setup .field label[for^="priority-"] > span:last-child { flex: none; }
+@media (max-width: 480px) {
+  .farm-setup .card { padding: 18px; }
+  .farm-setup .field > .row { flex-wrap: wrap !important; }
+  .farm-setup .field > .row > input { flex: 1 1 120px; }
+  .farm-setup .field > .row > select { flex: 1 1 100px; }
+}

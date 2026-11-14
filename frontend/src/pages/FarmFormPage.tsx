@@ -23,6 +23,7 @@ import { ErrorMessage } from "../components/ui/ErrorMessage";
 import { MapPicker } from "../components/map/MapPicker";
 import { HECTARES_PER, type AreaUnit } from "../finance/calculator";
 import { loadedCatalog } from "../catalog";
+import "./FarmFormPage.css";
 
 const DEFAULT_VALUES: FarmFormValues = {
   name: "",
@@ -170,7 +171,7 @@ export function FarmFormPage({ mode }: { mode: "new" | "edit" }) {
   const catalogIds = loadedCatalog.approvedCrops.map((c) => c.id);
 
   return (
-    <div className="page">
+    <div className="page farm-setup">
       <h1>{mode === "new" ? t("farm.title") : t("farm.editTitle")}</h1>
 
       {draft && (
@@ -221,7 +222,8 @@ export function FarmFormPage({ mode }: { mode: "new" | "edit" }) {
           </div>
         </div>
 
-        <fieldset className="card" style={{ margin: "0 0 16px" }}>
+        <div className="card">
+        <fieldset className="farm-section">
           <legend style={{ fontWeight: 600 }}>{t("farm.location")}</legend>
           <p className="muted" style={{ marginTop: 0 }}>
             {t("farm.locationHelp")}
@@ -250,6 +252,7 @@ export function FarmFormPage({ mode }: { mode: "new" | "edit" }) {
             ))}
           </div>
         </fieldset>
+        </div>
 
         <div className="card grid-2">
           <div className="field">
@@ -334,7 +337,8 @@ export function FarmFormPage({ mode }: { mode: "new" | "edit" }) {
           </fieldset>
         </div>
 
-        <fieldset className="card" style={{ margin: "0 0 16px" }}>
+        <div className="card">
+        <fieldset className="farm-section">
           <legend style={{ fontWeight: 600 }}>{t("farm.priorities")}</legend>
           <p className="muted" style={{ marginTop: 0 }}>
             {t("farm.prioritiesHelp")}
@@ -364,6 +368,7 @@ export function FarmFormPage({ mode }: { mode: "new" | "edit" }) {
           })}
           <FieldError id={errId("priority_weights")} message={err("priority_weights")} />
         </fieldset>
+        </div>
 
         <div className="card field">
           <label htmlFor="exclusions">{t("farm.excludedCrops")}</label>
@@ -386,7 +391,8 @@ export function FarmFormPage({ mode }: { mode: "new" | "edit" }) {
           </span>
         </div>
 
-        <fieldset className="card" style={{ margin: "0 0 16px" }}>
+        <div className="card">
+        <fieldset className="farm-section">
           <legend style={{ fontWeight: 600 }}>{t("farm.cropHistory")}</legend>
           {values.crop_history.length === 0 && <p className="muted">{t("farm.noHistory")}</p>}
           {values.crop_history.map((entry, i) => (
@@ -473,8 +479,10 @@ export function FarmFormPage({ mode }: { mode: "new" | "edit" }) {
             + {t("farm.addCrop")}
           </button>
         </fieldset>
+        </div>
 
-        <fieldset className="card" style={{ margin: "0 0 16px" }}>
+        <div className="card">
+        <fieldset className="farm-section">
           <legend style={{ fontWeight: 600 }}>{t("farm.soilTests")}</legend>
           <p className="notice notice-info" style={{ marginTop: 0 }}>
             {t("farm.soilUnknownNote")}
@@ -538,6 +546,8 @@ export function FarmFormPage({ mode }: { mode: "new" | "edit" }) {
             + {t("farm.addSoilTest")}
           </button>
         </fieldset>
+
+        </div>
 
         {editingFarm && <p className="muted">{t("farm.editWarning")}</p>}
 
