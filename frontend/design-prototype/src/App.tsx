@@ -37,7 +37,8 @@ type IconName =
   | "clock"
   | "shield"
   | "plus"
-  | "mic";
+  | "mic"
+  | "external";
 
 const paths: Record<IconName, React.ReactNode> = {
   leaf: (
@@ -219,6 +220,13 @@ const paths: Record<IconName, React.ReactNode> = {
     <>
       <rect x="9" y="3" width="6" height="12" rx="3" />
       <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+    </>
+  ),
+  external: (
+    <>
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
     </>
   ),
 };
@@ -476,11 +484,31 @@ function DataProvenance({ compact = false }: { compact?: boolean }) {
               <span>{source.uncertainty}</span>
             </div>
           ))}
-          <p className="source-note">
-            <Icon name="info" size={14} />
-            Dates and values are realistic sample metadata for interface demonstration only. Local
-            field measurements should be used for operational decisions.
-          </p>
+          <div className="source-provenance-footer">
+            <a
+              href="https://www.spaceappschallenge.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="provenance-spaceapps-badge"
+              title="Built for NASA Space Apps 2026 - Official Challenge Site"
+            >
+              <img
+                src="/images/nasa-space-apps-logo.png"
+                alt="NASA Space Apps Challenge"
+                className="provenance-spaceapps-img"
+              />
+              <div className="provenance-spaceapps-text">
+                <strong>Built for NASA Space Apps 2026</strong>
+                <span>Open Science Challenge Prototype · Visit spaceappschallenge.org</span>
+              </div>
+              <Icon name="external" size={14} />
+            </a>
+            <p className="source-note">
+              <Icon name="info" size={14} />
+              Dates and values are realistic sample metadata for interface demonstration only. Local
+              field measurements should be used for operational decisions.
+            </p>
+          </div>
         </div>
       )}
     </Card>
@@ -587,8 +615,9 @@ function Landing({
           <div className="hero-shade" />
           <div className="hero-content">
             <div className="eyebrow">
-              <span />
-              <Icon name="satellite" size={15} /> Earth intelligence for every field
+              <span className="eyebrow-dot" />
+              <Icon name="satellite" size={15} />
+              <span>Earth intelligence for every field</span>
             </div>
             <h1>
               Grow with the planet,
@@ -610,17 +639,26 @@ function Landing({
                 See how it works
               </button>
             </div>
-            <div className="trust-row">
-              <div className="avatar-stack">
-                <span>N</span>
-                <span>A</span>
-                <span>S</span>
-              </div>
-              <div>
+            <a
+              href="https://www.spaceappschallenge.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hero-spaceapps-badge"
+              title="Built for NASA Space Apps 2026 - Official Challenge Site"
+            >
+              <img
+                src="/images/nasa-space-apps-logo-transparent.png"
+                alt="NASA Space Apps Challenge"
+                className="hero-spaceapps-logo"
+              />
+              <span className="hero-spaceapps-divider" />
+              <div className="hero-spaceapps-text">
                 <strong>Built for NASA Space Apps 2026</strong>
-                <small>Prototype using clearly labeled sample datasets</small>
+                <small>
+                  Official Global Challenge · spaceappschallenge.org <Icon name="external" size={11} />
+                </small>
               </div>
-            </div>
+            </a>
           </div>
           <div className="hero-float card">
             <div className="float-top">
@@ -978,6 +1016,30 @@ function Shell({
           ))}
         </nav>
         <div className="side-bottom">
+          <a
+            href="https://www.spaceappschallenge.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`spaceapps-side-card ${collapsed ? "collapsed" : ""}`}
+            title="Built for NASA Space Apps 2026 - Visit official challenge site"
+          >
+            <div className="spaceapps-side-logo-wrap">
+              <img
+                src="/images/nasa-space-apps-logo.png"
+                alt="NASA Space Apps Challenge"
+                className="spaceapps-side-logo"
+              />
+            </div>
+            {!collapsed && (
+              <div className="spaceapps-side-info">
+                <span className="spaceapps-side-tag">HACKATHON 2026</span>
+                <strong className="spaceapps-side-title">NASA Space Apps</strong>
+                <span className="spaceapps-side-link">
+                  spaceappschallenge.org <Icon name="external" size={11} />
+                </span>
+              </div>
+            )}
+          </a>
           {!collapsed && (
             <div>
               <Icon name="satellite" />
@@ -1011,6 +1073,23 @@ function Shell({
             <kbd>⌘ K</kbd>
           </div>
           <div className="top-actions">
+            <a
+              href="https://www.spaceappschallenge.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="spaceapps-topbar-badge"
+              title="Built for NASA Space Apps Challenge 2026 (spaceappschallenge.org)"
+            >
+              <img
+                src="/images/nasa-space-apps-logo.png"
+                alt="NASA Space Apps Challenge"
+                className="spaceapps-topbar-logo"
+              />
+              <span className="spaceapps-topbar-text">
+                Built for <strong>NASA Space Apps 2026</strong>
+              </span>
+              <Icon name="external" size={12} className="spaceapps-topbar-ext" />
+            </a>
             <span className="data-state">
               <i /> Sample data
             </span>
