@@ -7,6 +7,7 @@ from pathlib import Path
 from time import time
 from uuid import uuid4
 
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from agrosphere_rotation import generate_candidates, load_catalog, rank_candidates
@@ -24,6 +25,10 @@ CATALOG_PATH = REPOSITORY_ROOT / "data" / "catalogs" / "crops.json"
 
 class CatalogVersionConflict(ValueError):
     pass
+
+
+class AnalysisVersionConflict(ValueError):
+    """Farm inputs changed before the analysis could be saved."""
 
 
 def _candidate_id(crop_ids: tuple[str, ...]) -> str:
@@ -148,6 +153,16 @@ def build_analysis(
 def persist_analysis(db: Session, payload: dict) -> RotationAnalysisResponse:
     validated = RotationAnalysisResponse.model_validate(payload)
     stored = validated.model_dump(mode="json")
+    # End the read transaction, then acquire the SQLite writer lock while
+    # atomically validating the original input version. A prior SELECT/refresh
+    # alone leaves a race between the last version check and the INSERT.
+    db.rollback()
+    result = db.execute(update(Farm).where(
+        Farm.id == validated.farm_id, Farm.input_version == validated.input_version,
+    ).values(input_version=Farm.input_version))
+    if result.rowcount != 1:
+        db.rollback()
+        raise AnalysisVersionConflict("Farm changed while the analysis was running. Try again.")
     db.add(RotationAnalysisSnapshot(
         id=validated.analysis_id, farm_id=validated.farm_id,
         input_version=validated.input_version, observation_id=validated.observation_id,

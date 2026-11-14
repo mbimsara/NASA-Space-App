@@ -11,9 +11,9 @@ SeasonLabel = Literal["maha", "yala", "inter-season"]
 
 
 class RotationRequest(StrictSchema):
-    input_version: int = Field(ge=1)
+    input_version: int = Field(ge=1, strict=True)
     observation_id: str = Field(min_length=1)
-    seasons: int = Field(ge=3, le=5)
+    seasons: int = Field(ge=3, le=5, strict=True)
     season_labels: list[SeasonLabel]
     catalog_version: str = Field(min_length=1)
     priority_weights: PriorityWeights

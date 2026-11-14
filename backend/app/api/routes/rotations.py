@@ -12,7 +12,7 @@ from app.services.observation_cache import (
     ObservationContextConflict, ObservationNotFound,
     require_observation_for_analysis, snapshot_response,
 )
-from app.services.rotations import CatalogVersionConflict, build_analysis, persist_analysis
+from app.services.rotations import AnalysisVersionConflict, CatalogVersionConflict, build_analysis, persist_analysis
 
 
 router = APIRouter(prefix="/farms", tags=["Rotations"])
@@ -41,11 +41,11 @@ def create_rotation_analysis(
         payload = build_analysis(
             farm=farm, observation=snapshot_response(snapshot), request=request,
         )
-        # Farm edits between calculation and persistence invalidate the result.
-        db.refresh(farm)
-        if farm.input_version != request.input_version:
-            return error(409, "VERSION_CONFLICT", "Farm changed while the analysis was running. Try again.")
+        # Persistence atomically rechecks the version and holds the writer lock.
         return persist_analysis(db, payload)
+    except AnalysisVersionConflict as exc:
+        db.rollback()
+        return error(409, "VERSION_CONFLICT", str(exc))
     except ObservationNotFound:
         return error(404, "NOT_FOUND", "Observation not found.")
     except ObservationContextConflict:
