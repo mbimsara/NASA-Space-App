@@ -125,3 +125,12 @@ To avoid conflating lowland puddle rice dynamics with well-drained upland farmin
 | **Legume Bonus** | $+15\%$ to $+25\%$ ($\alpha_{\text{legume}} = 0.20$) | Peoples et al. (1995), Herridge et al. (2008), DOA (2021) | Calibrate bonus weight in scoring engine. |
 | **Diversity Threshold** | $D \ge 0.6$ ($N_{\text{unique}} \ge 3$) | FAO CA Guidelines | Decide between ratio $D \ge 0.6$ or integer count $N \ge 3$. |
 | **Yala Cutoff** | $700\text{ mm}$ total available water | FAO 33 ($K_y > 1.0$), Bethma protocol | Validate threshold with Matheesha's irrigation input. |
+
+## Financial formula review
+
+Bhagya approved the deterministic range formulas in Shehani's commit `03a46b7`
+subject to provenance and wording changes. Formula approval does not approve
+the synthetic worked-example prices, costs, or yields. See
+[`FINANCIAL_SPECIFICATION.md`](FINANCIAL_SPECIFICATION.md) for the versioned
+calculation, missing-data behavior, required sources, and implementation
+conditions.

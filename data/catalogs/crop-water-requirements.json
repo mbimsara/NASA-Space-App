@@ -1,0 +1,89 @@
+{
+  "schema_version": "0.1",
+  "model_version": "fao-seasonal-etc-0.1",
+  "basis": "seasonal_crop_water_need_etc",
+  "status": "reviewed_for_demo",
+  "source": {
+    "title": "FAO Irrigation Water Management Training Manual No. 3, Chapter 3, indicative crop water needs",
+    "url": "https://www.fao.org/4/s2022e/s2022e07.htm#3.3.4",
+    "accessed_on": "2026-11-14",
+    "notes": "Indicative ETcrop/ETc ranges over the total growing period. Values vary with climate, crop duration and management; they are scenario ranges, not field measurements."
+  },
+  "requirements": [
+    {
+      "crop_id": "rice",
+      "fao_category": "Rice (paddy)",
+      "low_mm": 450,
+      "high_mm": 700,
+      "nominal_mm": 575,
+      "applicability": "Indicative seasonal crop evapotranspiration range used for consistent crop comparison.",
+      "limitations": [
+        "Excludes land preparation, puddling, seepage, percolation, conveyance loss and irrigation inefficiency.",
+        "Must not be labeled gross paddy irrigation demand."
+      ]
+    },
+    {
+      "crop_id": "mung-bean",
+      "fao_category": "Bean",
+      "low_mm": 300,
+      "high_mm": 500,
+      "nominal_mm": 400,
+      "applicability": "Generic FAO bean range used as a provisional proxy for mung bean.",
+      "limitations": ["Not a Sri Lankan cultivar-specific measurement."]
+    },
+    {
+      "crop_id": "maize",
+      "fao_category": "Maize",
+      "low_mm": 500,
+      "high_mm": 800,
+      "nominal_mm": 650,
+      "applicability": "Indicative seasonal crop evapotranspiration range.",
+      "limitations": ["Actual demand depends on climate, planting date, maturity group and crop duration."]
+    },
+    {
+      "crop_id": "groundnut",
+      "fao_category": "Peanut",
+      "low_mm": 500,
+      "high_mm": 700,
+      "nominal_mm": 600,
+      "applicability": "Indicative seasonal crop evapotranspiration range.",
+      "limitations": ["Not a Sri Lankan cultivar-specific measurement."]
+    },
+    {
+      "crop_id": "cowpea",
+      "fao_category": "Bean",
+      "low_mm": 300,
+      "high_mm": 500,
+      "nominal_mm": 400,
+      "applicability": "Generic FAO bean range used as a provisional proxy for cowpea.",
+      "limitations": ["Not a Sri Lankan cultivar-specific measurement."]
+    },
+    {
+      "crop_id": "finger-millet",
+      "fao_category": "Sorghum/Millet",
+      "low_mm": 450,
+      "high_mm": 650,
+      "nominal_mm": 550,
+      "applicability": "Generic FAO sorghum/millet range used as a provisional proxy for finger millet.",
+      "limitations": ["Not a Sri Lankan finger-millet cultivar-specific measurement."]
+    },
+    {
+      "crop_id": "black-gram",
+      "fao_category": "Bean",
+      "low_mm": 300,
+      "high_mm": 500,
+      "nominal_mm": 400,
+      "applicability": "Generic FAO bean range used as a provisional proxy for black gram.",
+      "limitations": ["Not a Sri Lankan cultivar-specific measurement."]
+    },
+    {
+      "crop_id": "chilli",
+      "fao_category": "Pepper",
+      "low_mm": 600,
+      "high_mm": 900,
+      "nominal_mm": 750,
+      "applicability": "Indicative seasonal crop evapotranspiration range for pepper used as a chilli proxy.",
+      "limitations": ["Not a Sri Lankan chilli cultivar-specific measurement."]
+    }
+  ]
+}

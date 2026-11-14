@@ -1,6 +1,6 @@
 """Deterministic seasonal water-budget calculations."""
 
-from .models import ClimateInput, WaterBudget
+from .models import ClimateInput, WaterBudget, WaterBudgetRange, WaterDemandRange
 
 
 def calculate_water_budget(crop_demand_mm: float, climate: ClimateInput) -> WaterBudget:
@@ -33,3 +33,38 @@ def calculate_water_budget(crop_demand_mm: float, climate: ClimateInput) -> Wate
         ),
     )
 
+
+def calculate_water_budget_range(
+    demand: WaterDemandRange, climate: ClimateInput
+) -> WaterBudgetRange:
+    """Screen a crop-water range against rainfall plus entered irrigation.
+
+    The result is deliberately a range. It uses total rainfall as a provisional
+    upper-bound input until an effective-rainfall model is approved.
+    """
+
+    multiplier = 1 + climate.rainfall_change_percent / 100
+    scenario_rainfall = climate.rainfall_mm * multiplier
+    available = scenario_rainfall + climate.irrigation_mm
+    return WaterBudgetRange(
+        crop_id=demand.crop_id,
+        demand_low_mm=demand.low_mm,
+        demand_high_mm=demand.high_mm,
+        baseline_rainfall_mm=climate.rainfall_mm,
+        scenario_rainfall_mm=scenario_rainfall,
+        irrigation_mm=climate.irrigation_mm,
+        available_water_mm=available,
+        balance_low_mm=available - demand.high_mm,
+        balance_high_mm=available - demand.low_mm,
+        coverage_low_percent=available / demand.high_mm * 100,
+        coverage_high_percent=available / demand.low_mm * 100,
+        demand_basis=demand.basis,
+        model_version=demand.model_version,
+        assumptions=(
+            "Demand is an indicative seasonal ETc range, not gross irrigation delivery.",
+            "All values must cover the same crop period and use millimetres.",
+            "Total rainfall is provisionally treated as available; effective rainfall is not modeled.",
+            "Irrigation efficiency, runoff, storage, seepage and percolation are not modeled.",
+            "The rainfall change is a hypothetical scenario, not a forecast.",
+        ),
+    )

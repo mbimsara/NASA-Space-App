@@ -49,7 +49,7 @@ def test_repeat_family_policy_can_leave_no_feasible_sequence() -> None:
     assert "repeat policy" in result.reasons[0]
 
 
-def test_empty_shared_catalog_returns_an_explanation() -> None:
+def test_research_pending_shared_catalog_returns_an_explanation() -> None:
     _, crops = load_catalog("data/catalogs/crops.json")
 
     result = generate_candidates(crops, ("maha", "yala", "maha"))
@@ -62,6 +62,7 @@ def test_catalog_loader_matches_shared_contract(tmp_path) -> None:
     catalog = {
         "schema_version": "0.1",
         "catalog_version": "test-v1",
+        "status": "reviewed",
         "crops": [
             {
                 "id": "mung-bean",
@@ -87,6 +88,39 @@ def test_catalog_loader_matches_shared_contract(tmp_path) -> None:
 
     assert version == "test-v1"
     assert crops[0].water_demand_mm is None
+
+
+def test_research_pending_catalog_cannot_enable_approved_record(tmp_path) -> None:
+    catalog = {
+        "schema_version": "0.1",
+        "catalog_version": "test-v1",
+        "status": "research_pending",
+        "crops": [
+            {
+                "id": "rice",
+                "name": "Rice",
+                "family": "Poaceae",
+                "season_labels": ["maha"],
+                "water_demand_mm_per_cycle": 1000,
+                "sources": [
+                    {
+                        "url": "https://example.org/rice",
+                        "accessed_on": "2026-11-14",
+                        "notes": "Test source",
+                    }
+                ],
+                "review_status": "approved",
+            }
+        ],
+    }
+    path = tmp_path / "pending.json"
+    path.write_text(json.dumps(catalog), encoding="utf-8")
+
+    _, crops = load_catalog(path)
+
+    assert crops[0].review_status == "draft"
+    result = generate_candidates(crops, ("maha", "maha", "maha"))
+    assert result.candidates == ()
 
 
 def test_nasa_power_incomplete_rainfall_is_not_used() -> None:
