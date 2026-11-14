@@ -23,6 +23,7 @@ The repository includes a runnable FastAPI backend with SQLite farm persistence,
 | [Attribution](docs/ATTRIBUTION.md) | NASA POWER credit and metadata requirements |
 | [Agronomy rules](docs/AGRONOMY_RULES.md) | Evidence and model review process |
 | [Design handoff](docs/DESIGN.md) | Tharuka's UI/UX handoff to Shehani |
+| [Figma UI prototype](figma-prototype/Build%20AgroSphere%20AI%20MVP/) | Tharuka's interactive UI/UX prototype & design system |
 | [Demo guide](docs/DEMO.md) | Connected walkthrough and fallback rules |
 | [Shared data](data/README.md) | Synthetic farm, catalog and schemas |
 
@@ -73,6 +74,24 @@ Use one Sri Lankan demonstration farm and a researched local crop catalog:
 **Select farm â†’ enter history, soil results, and priorities â†’ review NASA observations â†’ compare three rotations â†’ simulate reduced rainfall â†’ compare water and soil tradeoffs â†’ ask the assistant to explain â†’ save or share the plan.**
 
 Keep crop rotation central. SoilRevive and FarmRecovery are planning modes that influence the same rotation comparison rather than separate disconnected tools.
+
+## Figma UI prototype
+
+Tharuka's interactive Figma UI prototype for AgroSphere AI is located in [`figma-prototype/Build AgroSphere AI MVP/`](figma-prototype/Build%20AgroSphere%20AI%20MVP/). It provides an interactive preview of the farmer journey, Earth observation displays, climate scenario adjustments, and crop rotation comparison.
+
+### Running the prototype
+
+```bash
+cd "figma-prototype/Build AgroSphere AI MVP"
+pnpm install    # or npm install
+pnpm dev        # or npm run dev
+```
+
+Key prototype components:
+- **Farm Overview:** Demo farm location (Matale, Sri Lanka) with localized conditions and baseline soil metrics.
+- **Crop Rotation Workspace:** Visual multi-season rotation paths (Rice, Mung bean, Maize, Groundnut).
+- **Climate Adjustments:** Dynamic rainfall adjustment sliders for seasonal scenario simulations (e.g. Maha 2026).
+- **Income Range & Confidence:** Visual display of price and yield uncertainty bounds.
 
 ## Data and model requirements
 
