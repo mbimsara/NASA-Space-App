@@ -4,6 +4,25 @@ A farming decision-support platform for NASA Space Apps Challenge 2026: **Field 
 
 AgroSphere combines Earth observations, farmer inputs, and local agronomy to help farmers compare crop rotations. Every feature supports the same farm profile and rotation decision.
 
+## Start here
+
+The repository currently contains development plans, shared data contracts, and synthetic fixtures. There is no runnable frontend/backend yet.
+
+| Resource | Purpose |
+| --- | --- |
+| [Implementation plan](IMPLEMENTATION_PLAN.md) | Detailed responsibilities for all six members |
+| [Contributing](CONTRIBUTING.md) | Setup status, workflow, review and verification |
+| [Architecture](docs/ARCHITECTURE.md) | System boundaries and open decisions |
+| [API contracts](docs/API_CONTRACTS.md) | Proposed endpoints, fields, units and errors |
+| [First milestone backlog](docs/BACKLOG.md) | Concrete starting tasks and acceptance checks |
+| [Data sources](docs/DATA_SOURCES.md) | NASA integration research register |
+| [Agronomy rules](docs/AGRONOMY_RULES.md) | Evidence and model review process |
+| [Design handoff](docs/DESIGN.md) | Tharuka's UI/UX handoff to Shehani |
+| [Demo guide](docs/DEMO.md) | Connected walkthrough and fallback rules |
+| [Shared data](data/README.md) | Synthetic farm, catalog and schemas |
+
+Validate shared inputs with `python scripts/validate_data.py` (Python 3.10+). GitHub Actions runs this check on pushes and pull requests. The crop catalog is intentionally empty pending research and approval. Application startup instructions will be added to [frontend](frontend/README.md) and [backend](backend/README.md) when scaffolding is implemented.
+
 ## Product scope
 
 ### Original modules

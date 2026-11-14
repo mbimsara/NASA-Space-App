@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Regional crop catalog v0.1",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "catalog_version", "status", "region", "crops"],
+  "properties": {
+    "schema_version": {"const": "0.1"}, "catalog_version": {"type": "string", "minLength": 1},
+    "status": {"enum": ["research_pending", "reviewed"]}, "region": {"type": "string", "minLength": 1},
+    "crops": {
+      "type": "array", "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "name", "family", "season_labels", "water_demand_mm_per_cycle", "sources", "review_status"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1}, "name": {"type": "string", "minLength": 1},
+          "family": {"type": ["string", "null"], "minLength": 1},
+          "season_labels": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+          "water_demand_mm_per_cycle": {"type": ["number", "null"], "exclusiveMinimum": 0},
+          "sources": {
+            "type": "array", "items": {
+              "type": "object", "additionalProperties": false, "required": ["url", "accessed_on", "notes"],
+              "properties": {
+                "url": {"type": "string", "format": "uri"}, "accessed_on": {"type": "string", "format": "date"}, "notes": {"type": "string", "minLength": 1}
+              }
+            }
+          },
+          "review_status": {"enum": ["draft", "approved"]}
+        }
+      }
+    }
+  }
+}

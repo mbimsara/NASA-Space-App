@@ -1,0 +1,12 @@
+{
+  "schema_version": "0.1",
+  "data_kind": "synthetic",
+  "name": "Illustrative Sri Lanka demo farm — invented inputs",
+  "location": {"latitude": 8.3, "longitude": 80.4},
+  "area_ha": 1.0,
+  "irrigation_supply_mm_per_season": null,
+  "crop_history": [],
+  "soil_tests": [],
+  "priority_weights": {"water": 0.5, "soil": 0.3, "climate": 0.2},
+  "excluded_crop_ids": []
+}

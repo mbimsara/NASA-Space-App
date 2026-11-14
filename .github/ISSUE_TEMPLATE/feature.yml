@@ -1,0 +1,30 @@
+name: Implementation task
+description: Assign a concrete deliverable to a team member
+title: "[Task] "
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: What should a farmer or developer be able to do?
+    validations:
+      required: true
+  - type: input
+    id: owner
+    attributes:
+      label: Owner and reviewers
+      placeholder: "@owner; reviewers: @domain-owner"
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and contracts
+      description: Link prerequisite issues, schemas, designs, and data sources.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance checks
+      description: Describe observable results, failure handling, and verification.
+    validations:
+      required: true

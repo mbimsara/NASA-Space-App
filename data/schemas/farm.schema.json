@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Farm profile v0.1",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "data_kind", "name", "location", "area_ha", "irrigation_supply_mm_per_season", "crop_history", "soil_tests", "priority_weights", "excluded_crop_ids"],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "data_kind": {"enum": ["synthetic", "farmer_input"]},
+    "name": {"type": "string", "minLength": 1},
+    "location": {
+      "type": "object", "additionalProperties": false, "required": ["latitude", "longitude"],
+      "properties": {
+        "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+        "longitude": {"type": "number", "minimum": -180, "maximum": 180}
+      }
+    },
+    "area_ha": {"type": "number", "exclusiveMinimum": 0},
+    "irrigation_supply_mm_per_season": {"type": ["number", "null"], "minimum": 0},
+    "crop_history": {
+      "type": "array", "items": {
+        "type": "object", "additionalProperties": false, "required": ["crop_id", "planted_on", "harvested_on"],
+        "properties": {
+          "crop_id": {"type": "string", "minLength": 1},
+          "planted_on": {"type": "string", "format": "date"},
+          "harvested_on": {"type": ["string", "null"], "format": "date"}
+        }
+      }
+    },
+    "soil_tests": {
+      "type": "array", "items": {
+        "type": "object", "additionalProperties": false, "required": ["metric", "value", "unit", "sampled_on"],
+        "properties": {
+          "metric": {"type": "string", "minLength": 1}, "value": {"type": "number"},
+          "unit": {"type": "string", "minLength": 1}, "sampled_on": {"type": "string", "format": "date"}
+        }
+      }
+    },
+    "priority_weights": {
+      "type": "object", "additionalProperties": false, "required": ["water", "soil", "climate"],
+      "properties": {
+        "water": {"type": "number", "minimum": 0}, "soil": {"type": "number", "minimum": 0}, "climate": {"type": "number", "minimum": 0}
+      }
+    },
+    "excluded_crop_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+  }
+}
