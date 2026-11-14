@@ -19,6 +19,7 @@ The repository contains development plans, shared data contracts, synthetic fixt
 | [Climate handoff](docs/CLIMATE_HANDOFF.md) | Working module interface, examples and teammate integration instructions |
 | [Environment contract](docs/ENVIRONMENT_CONTRACT.md) | Unified POWER/SMAP response, reproducible examples and twin sensitivity |
 | [SMAP preparation](docs/SMAP.md) | Verified public discovery, quality filtering and account/download prerequisites |
+| [SMAP automation](docs/SMAP_AUTOMATION.md) | Private local sign-in, resumable subset jobs, retries and coverage checks |
 | [Attribution](docs/ATTRIBUTION.md) | NASA POWER credit and metadata requirements |
 | [Agronomy rules](docs/AGRONOMY_RULES.md) | Evidence and model review process |
 | [Design handoff](docs/DESIGN.md) | Tharuka's UI/UX handoff to Shehani |

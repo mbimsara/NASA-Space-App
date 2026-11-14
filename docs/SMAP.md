@@ -1,5 +1,7 @@
 # SMAP integration — access and preparation
 
+For resumable authenticated subsetting, see [automation instructions](SMAP_AUTOMATION.md). The automation is implemented/tested; full-month live verification requires private user sign-in.
+
 Status: public discovery, quality filtering, local file inspection, nearest-pixel extraction and combined time-series output are implemented. All three January 1–3, 2025 Harmony subset files have now downloaded and been extracted successfully. Missing passes remain unknown.
 
 ## Selected product
