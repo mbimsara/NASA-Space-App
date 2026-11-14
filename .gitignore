@@ -9,6 +9,9 @@
 # JavaScript
 node_modules/
 dist/
+build/
+.next/
+.turbo/
 coverage/
 *.tsbuildinfo
 
