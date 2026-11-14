@@ -41,6 +41,8 @@ export function PlanPage() {
   }, [planId, guard]);
 
   useEffect(() => {
+    // Loading the plan selected by the route is the synchronization boundary.
+    // oxlint-disable-next-line react/set-state-in-effect
     load();
   }, [load]);
 

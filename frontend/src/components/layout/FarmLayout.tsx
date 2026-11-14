@@ -37,6 +37,8 @@ export function FarmLayout() {
   }, [farmId, guard, setFarm]);
 
   useEffect(() => {
+    // Loading the URL-scoped farm is the intended synchronization boundary.
+    // oxlint-disable-next-line react/set-state-in-effect
     load();
   }, [load]);
 

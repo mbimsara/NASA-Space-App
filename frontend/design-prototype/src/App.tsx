@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type IconName =
   | "leaf"
@@ -540,7 +540,7 @@ function Landing({
       6500,
     );
     return () => window.clearInterval(timer);
-  }, []);
+  }, [heroSlides.length]);
   return (
     <div className="landing" data-theme={theme}>
       <header className="land-nav">

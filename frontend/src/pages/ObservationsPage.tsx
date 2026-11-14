@@ -65,6 +65,8 @@ export function ObservationsPage() {
   );
 
   useEffect(() => {
+    // Clear data from the previous farm before loading the current farm range.
+    // oxlint-disable-next-line react/set-state-in-effect
     setObs(null);
     const r = defaultObservationRange();
     fetchObs(r.start, r.end);

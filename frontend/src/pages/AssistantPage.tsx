@@ -34,6 +34,8 @@ export function AssistantPage() {
   const contextKey = `${farm.id}|${analysis?.analysis_id}|${scenario?.scenario_id}|${candidateId}`;
   useEffect(() => {
     guard.cancel();
+    // A conversation cannot cross farm/analysis/scenario context boundaries.
+    // oxlint-disable-next-line react/set-state-in-effect
     setMessages([]);
     setError(null);
     setLoading(false);
