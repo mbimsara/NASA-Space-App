@@ -1,0 +1,272 @@
+{
+  "observation": {
+    "schema_version": "0.1",
+    "model_version": "climate-descriptive-0.1",
+    "farm_id": "farm-synthetic-001",
+    "observation_id": "obs-synthetic-001",
+    "input_version": 1,
+    "data_kind": "synthetic",
+    "provider": "NASA POWER",
+    "period": {
+      "start": "2025-01-01",
+      "end": "2025-01-07"
+    },
+    "retrieved_at": null,
+    "source_url": null,
+    "source_refs": [
+      "synthetic-team-fixture"
+    ],
+    "api": {
+      "name": "Synthetic example",
+      "version": "test"
+    },
+    "spatial_resolution": null,
+    "time_standard": "UTC",
+    "coordinates": [
+      80.4,
+      8.3
+    ],
+    "coverage": {
+      "expected_days": 7,
+      "temperature_valid_days": 7,
+      "precipitation_valid_days": 7
+    },
+    "summary": {
+      "start": "2025-01-01",
+      "end": "2025-01-07",
+      "expected_days": 7,
+      "temperature_valid_days": 7,
+      "precipitation_valid_days": 7,
+      "mean_temperature_c": 26.4286,
+      "rainfall_total_mm": 35,
+      "rainfall_available_days_mm": 35,
+      "maximum_temperature_valid_days": 0,
+      "minimum_temperature_valid_days": 0,
+      "highest_available_daily_max_c": null,
+      "lowest_available_daily_min_c": null
+    },
+    "daily": [
+      {
+        "date": "2025-01-01",
+        "temperature_c": 25,
+        "precipitation_mm_per_day": 0,
+        "temperature_max_c": null,
+        "temperature_min_c": null
+      },
+      {
+        "date": "2025-01-02",
+        "temperature_c": 26,
+        "precipitation_mm_per_day": 0,
+        "temperature_max_c": null,
+        "temperature_min_c": null
+      },
+      {
+        "date": "2025-01-03",
+        "temperature_c": 30,
+        "precipitation_mm_per_day": 5,
+        "temperature_max_c": null,
+        "temperature_min_c": null
+      },
+      {
+        "date": "2025-01-04",
+        "temperature_c": 28,
+        "precipitation_mm_per_day": 20,
+        "temperature_max_c": null,
+        "temperature_min_c": null
+      },
+      {
+        "date": "2025-01-05",
+        "temperature_c": 27,
+        "precipitation_mm_per_day": 0,
+        "temperature_max_c": null,
+        "temperature_min_c": null
+      },
+      {
+        "date": "2025-01-06",
+        "temperature_c": 25,
+        "precipitation_mm_per_day": 10,
+        "temperature_max_c": null,
+        "temperature_min_c": null
+      },
+      {
+        "date": "2025-01-07",
+        "temperature_c": 24,
+        "precipitation_mm_per_day": 0,
+        "temperature_max_c": null,
+        "temperature_min_c": null
+      }
+    ],
+    "monthly": [
+      {
+        "month": "2025-01",
+        "start": "2025-01-01",
+        "end": "2025-01-07",
+        "expected_days": 7,
+        "temperature_valid_days": 7,
+        "precipitation_valid_days": 7,
+        "mean_temperature_c": 26.4286,
+        "rainfall_total_mm": 35,
+        "rainfall_available_days_mm": 35,
+        "maximum_temperature_valid_days": 0,
+        "minimum_temperature_valid_days": 0,
+        "highest_available_daily_max_c": null,
+        "lowest_available_daily_min_c": null
+      }
+    ],
+    "limitations": [
+      "Invented values for development; not NASA observations or farm advice.",
+      "Gridded environmental estimates, not measurements of this individual field.",
+      "Meteorological grid resolution is regional; farm coordinates do not imply field-scale precision.",
+      "Temperature means use valid days; check coverage before comparisons.",
+      "Rain totals integrate daily rates over one-day intervals; incomplete periods have null totals.",
+      "Monthly entries cover requested dates only, which may be partial calendar months.",
+      "Imported files may have unknown original retrieval dates."
+    ]
+  },
+  "historical": {
+    "kind": "historical_threshold_summary",
+    "start": "2025-01-01",
+    "end": "2025-01-07",
+    "thresholds": {
+      "dry_below_mm_per_day": 1.0,
+      "warm_daily_mean_at_or_above_c": 30.0,
+      "rain_at_or_above_mm_per_day": 20.0
+    },
+    "expected_days": 7,
+    "rain_valid_days": 7,
+    "temperature_valid_days": 7,
+    "dry_days": 4,
+    "warm_daily_mean_days": 1,
+    "high_rain_days": 1,
+    "longest_observed_dry_run_days": 2,
+    "dry_run_is_lower_bound": false,
+    "limitations": [
+      "Exploratory thresholds, not validated crop risk classifications.",
+      "Daily mean temperature is not maximum temperature or a heatwave measure.",
+      "Unknown rainfall breaks dry runs; incomplete coverage can undercount events.",
+      "One year does not establish climate trends, drought probabilities, or forecasts."
+    ]
+  },
+  "rainfall_scenario": {
+    "kind": "hypothetical_rainfall_scenario",
+    "rainfall_change_pct": -30,
+    "baseline_source_url": null,
+    "baseline_retrieved_at": null,
+    "summary": {
+      "expected_days": 7,
+      "valid_days": 7,
+      "baseline_rainfall_mm": 35,
+      "scenario_rainfall_mm": 24.5,
+      "difference_mm": -10.5
+    },
+    "monthly": [
+      {
+        "month": "2025-01",
+        "expected_days": 7,
+        "valid_days": 7,
+        "baseline_rainfall_mm": 35,
+        "scenario_rainfall_mm": 24.5,
+        "difference_mm": -10.5
+      }
+    ],
+    "daily": [
+      {
+        "date": "2025-01-01",
+        "baseline_mm_per_day": 0,
+        "scenario_mm_per_day": 0.0
+      },
+      {
+        "date": "2025-01-02",
+        "baseline_mm_per_day": 0,
+        "scenario_mm_per_day": 0.0
+      },
+      {
+        "date": "2025-01-03",
+        "baseline_mm_per_day": 5,
+        "scenario_mm_per_day": 3.5
+      },
+      {
+        "date": "2025-01-04",
+        "baseline_mm_per_day": 20,
+        "scenario_mm_per_day": 14.0
+      },
+      {
+        "date": "2025-01-05",
+        "baseline_mm_per_day": 0,
+        "scenario_mm_per_day": 0.0
+      },
+      {
+        "date": "2025-01-06",
+        "baseline_mm_per_day": 10,
+        "scenario_mm_per_day": 7.0
+      },
+      {
+        "date": "2025-01-07",
+        "baseline_mm_per_day": 0,
+        "scenario_mm_per_day": 0.0
+      }
+    ],
+    "assumptions": [
+      "Uniformly scale each available daily rainfall value; preserve missing values and event dates.",
+      "Historical baseline is unchanged. This is not a future weather forecast.",
+      "No effective rainfall, irrigation deficit, soil response, yield or rotation ranking is calculated."
+    ]
+  },
+  "temperature_exposure": {
+    "kind": "historical_temperature_exposure",
+    "start": "2025-01-01",
+    "end": "2025-01-07",
+    "hot_at_or_above_c": 35,
+    "cold_below_c": 10,
+    "expected_days": 7,
+    "maximum_valid_days": 0,
+    "minimum_valid_days": 0,
+    "hot_days": null,
+    "cold_nights": null,
+    "highest_available_daily_max_c": null,
+    "lowest_available_daily_min_c": null,
+    "longest_observed_hot_run_days": null,
+    "hot_run_is_lower_bound": true,
+    "limitations": [
+      "Thresholds are exploratory, not crop-specific stress limits or heatwave definitions.",
+      "Missing maxima break runs; counts describe available days only.",
+      "Cold nights is a label for daily minimum threshold counts, not verified nighttime measurements.",
+      "Daily extrema are gridded source estimates, not field sensor readings."
+    ]
+  },
+  "season_inputs": {
+    "start": "2025-01-01",
+    "end": "2025-01-07",
+    "expected_days": 7,
+    "rain_valid_days": 7,
+    "temperature_valid_days": 7,
+    "rainfall_total_mm": 35,
+    "mean_temperature_c": 26.428571428571427,
+    "source_refs": [
+      "synthetic-team-fixture"
+    ],
+    "source_url": null,
+    "retrieved_at": null,
+    "data_kind": "synthetic",
+    "limitations": [
+      "Invented values for development; not NASA observations or farm advice.",
+      "Gridded environmental estimates, not measurements of this individual field.",
+      "Meteorological grid resolution is regional; farm coordinates do not imply field-scale precision.",
+      "Temperature means use valid days; check coverage before comparisons.",
+      "Rain totals integrate daily rates over one-day intervals; incomplete periods have null totals.",
+      "Monthly entries cover requested dates only, which may be partial calendar months.",
+      "Imported files may have unknown original retrieval dates.",
+      "Gridded source estimate; not an on-farm rain gauge or exact field water availability.",
+      "Original provider retrieval time is unknown; no access timestamp has been invented.",
+      "Synthetic development inputs, not actual NASA observations or farm advice."
+    ],
+    "effective_rainfall_mm": null,
+    "crop_water_demand_mm": null,
+    "irrigation_deficit_mm": null,
+    "assumptions": [
+      "Historical rainfall depth over the requested inclusive UTC period.",
+      "Effective rainfall, crop demand, and irrigation deficit require Bhagya's approved model.",
+      "Temperature mean uses available days; inspect coverage."
+    ]
+  }
+}

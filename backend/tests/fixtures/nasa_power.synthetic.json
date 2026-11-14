@@ -1,0 +1,16 @@
+{
+  "header": {
+    "start": "20240228", "end": "20240301", "time_standard": "UTC",
+    "fill_value": -999, "sources": ["synthetic-test-not-nasa"],
+    "api": {"version": "synthetic-test-version"}
+  },
+  "parameters": {
+    "T2M": {"units": "C", "longname": "Synthetic test temperature"},
+    "PRECTOTCORR": {"units": "mm/day", "longname": "Synthetic test rainfall"}
+  },
+  "geometry": {"coordinates": [80.4, 8.3]},
+  "properties": {"parameter": {
+    "T2M": {"20240228": 20, "20240229": 22, "20240301": 24},
+    "PRECTOTCORR": {"20240228": 0, "20240229": 2, "20240301": 4}
+  }}
+}

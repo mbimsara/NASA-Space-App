@@ -10,12 +10,12 @@
 
 ## Local setup status
 
-This repository contains planning documents, schemas, and synthetic fixtures. There is no runnable application yet. Do not expect `npm install` or a backend start command to work until the application scaffolds are merged.
+The React frontend and FastAPI backend are runnable. Follow [frontend/README.md](frontend/README.md) and [backend/README.md](backend/README.md) for their separate installation, configuration, startup, and test commands.
 
-- Frontend owner: Shehani; initialize React/TypeScript in `frontend/` and document exact prerequisites and commands there.
-- Backend owner: Dulanjaya; initialize FastAPI in `backend/`, select persistence, and document environment setup, migrations, and startup there.
+- Frontend owner: Shehani; maintain React/TypeScript in `frontend/` and document exact prerequisites and commands there.
+- Backend owner: Dulanjaya; maintain FastAPI and SQLAlchemy/SQLite persistence in `backend/`. Existing farm APIs and schemas must stay compatible.
 - Commit dependency manifests and lockfiles when scaffolding. Agree on runtime versions and record them.
-- Copy `.env.example` to an ignored local environment file when configuring services. Configure the frontend separately using `frontend/.env.example`.
+- Copy the root `.env.example` to the ignored root `.env` when configuring the backend; process environment variables take precedence. Configure the frontend separately using `frontend/.env.example`.
 
 ## Shared conventions
 

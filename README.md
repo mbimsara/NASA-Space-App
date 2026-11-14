@@ -6,7 +6,7 @@ AgroSphere combines Earth observations, farmer inputs, and local agronomy to hel
 
 ## Start here
 
-The repository currently contains development plans, shared data contracts, and synthetic fixtures. There is no runnable frontend/backend yet.
+The repository includes a runnable React frontend and FastAPI backend with SQLite farm persistence, validation, version checks, and environment-based database/CORS configuration. Farm observations integrate Matheesha's NASA POWER adapter. Rotation scoring is implemented as a Python domain package; its HTTP endpoint and the scenario, assistant, and saved-plan endpoints remain to be connected.
 
 | Resource | Purpose |
 | --- | --- |
@@ -16,13 +16,134 @@ The repository currently contains development plans, shared data contracts, and 
 | [API contracts](docs/API_CONTRACTS.md) | Proposed endpoints, fields, units and errors |
 | [First milestone backlog](docs/BACKLOG.md) | Concrete starting tasks and acceptance checks |
 | [Data sources](docs/DATA_SOURCES.md) | NASA integration research register |
+| [Climate handoff](docs/CLIMATE_HANDOFF.md) | Working module interface, examples and teammate integration instructions |
+| [Environment contract](docs/ENVIRONMENT_CONTRACT.md) | Unified POWER/SMAP response, reproducible examples and twin sensitivity |
+| [SMAP preparation](docs/SMAP.md) | Verified public discovery, quality filtering and account/download prerequisites |
+| [SMAP automation](docs/SMAP_AUTOMATION.md) | Private local sign-in, resumable subset jobs, retries and coverage checks |
+| [Attribution](docs/ATTRIBUTION.md) | NASA POWER credit and metadata requirements |
 | [Agronomy rules](docs/AGRONOMY_RULES.md) | Evidence and model review process |
 | [Design handoff](docs/DESIGN.md) | Tharuka's UI/UX handoff to Shehani |
 | [Figma UI prototype](figma-prototype/Build%20AgroSphere%20AI%20MVP/) | Tharuka's interactive UI/UX prototype & design system |
 | [Demo guide](docs/DEMO.md) | Connected walkthrough and fallback rules |
 | [Shared data](data/README.md) | Synthetic farm, catalog and schemas |
 
-Validate shared inputs with `python scripts/validate_data.py` (Python 3.10+). GitHub Actions runs this check on pushes and pull requests. The crop catalog is intentionally empty pending research and approval. Application startup instructions will be added to [frontend](frontend/README.md) and [backend](backend/README.md) when scaffolding is implemented.
+## Repository structure
+
+| Path | Contents and owner boundary |
+| --- | --- |
+| `backend/app/` | Dulanjaya's FastAPI application, routes, configuration, SQLAlchemy models, persistence, and observation services |
+| `backend/services/` | Matheesha's provider-facing NASA POWER and climate modules used by the backend |
+| `backend/tests/` | Backend API, configuration, cache, persistence, and provider-boundary tests |
+| `frontend/src/` | Shehani's React/TypeScript application, pages, API client, fixture API, state, catalog validation, and finance calculator |
+| `frontend/design-prototype/` | Tharuka's visual design prototype; reference implementation rather than the production app |
+| `src/agrosphere_rotation/` | Bhagya's crop-rotation domain package: catalog loading, candidates, constraints, scoring, and water budgets |
+| `data/catalogs/` | Versioned crop and crop-water catalogs; all eight crops currently remain `draft` |
+| `data/fixtures/` | Explicitly synthetic farm, climate, environment, and interface-development examples |
+| `data/schemas/` | Shared JSON schemas for persisted and exchanged data |
+| `docs/` | API contracts, model specifications, evidence, architecture, data sources, and teammate handoffs |
+| `scripts/` | Data validation plus climate, NASA POWER, SMAP, and environment utilities |
+| `tests/` | Shared climate, SMAP, environment, rotation, and water-model tests |
+| `.github/workflows/` | Shared-data and backend continuous-integration checks |
+
+Generated or local-only directories such as `.venv/`, `frontend/node_modules/`,
+`frontend/dist/`, caches, SQLite databases, and `.env` files must remain uncommitted.
+
+## Quick start
+
+### Requirements
+
+- Git
+- Python 3.10 or newer (Python 3.12 is used in CI)
+- Node.js 24 and npm 11 for the frontend
+
+Clone the repository and enter it before running the following commands.
+
+### 1. Start the backend
+
+The backend loads configuration from `.env` at the repository root. On Windows
+PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r backend/requirements.txt
+Copy-Item .env.example .env
+Set-Location backend
+python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+On Linux or macOS:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r backend/requirements.txt
+cp .env.example .env
+cd backend
+python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+If `.env` already exists, edit it instead of overwriting it. The default SQLite
+database is created under `backend/` when the server is started there.
+
+- Health check: <http://127.0.0.1:8000/api/v1/health>
+- Swagger UI: <http://127.0.0.1:8000/docs>
+- OpenAPI document: <http://127.0.0.1:8000/openapi.json>
+
+Currently implemented HTTP routes cover health, farm create/read/update, NASA
+POWER observation retrieval, and stored observation snapshots. Rotation,
+scenario, assistant, and saved-plan HTTP routes still need to be connected.
+See the [complete backend guide](backend/README.md) for configuration, request
+examples, cache behavior, database paths, and tests.
+
+### 2. Start the frontend
+
+Open a second terminal from the repository root:
+
+```powershell
+Set-Location frontend
+Copy-Item .env.example .env.local
+npm ci
+npm run dev
+```
+
+Linux/macOS uses `cp .env.example .env.local` instead of `Copy-Item`. Open
+<http://localhost:5173> after Vite starts.
+
+The frontend defaults to `VITE_USE_FIXTURES=true`, which supports the complete
+demonstration journey with clearly labelled synthetic data. To exercise the
+implemented backend routes, set `VITE_USE_FIXTURES=false` in
+`frontend/.env.local` and restart Vite. The full journey cannot use live mode
+until the remaining HTTP routes are implemented. See the
+[frontend guide](frontend/README.md) for its structure and integration notes.
+
+### 3. Run verification
+
+Root data and domain checks:
+
+```bash
+python -m pip install -e ".[dev]"
+python scripts/validate_data.py
+python -m pytest tests -v
+```
+
+Frontend checks, from `frontend/`:
+
+```bash
+npm run lint
+npm test
+npm run build
+```
+
+Backend checks require the backend dependencies and run from `backend/`:
+
+```bash
+python -m pytest -q
+```
+
+GitHub Actions runs shared-data and backend checks on relevant pushes and pull
+requests. Optional SMAP HDF5 tests install the dependencies in
+`backend/requirements-smap.txt` in their separate CI job.
 
 ## Product scope
 
@@ -101,6 +222,6 @@ Key prototype components:
 
 ## Current status
 
-Product scope documented. Application implementation has not started.
+The frontend core journey, FastAPI health/farm/observation APIs, SQLite persistence, NASA POWER and SMAP processing, and the rotation-scoring domain package are implemented with automated tests. The frontend currently defaults to synthetic fixtures. Rotation, scenario, assistant, and saved-plan HTTP services remain to be connected before switching the frontend to the live API.
 
 See the [six-member implementation plan](IMPLEMENTATION_PLAN.md) for responsibilities, Tharuka's UI/UX design assignment, integration contracts, milestones, and acceptance checks.

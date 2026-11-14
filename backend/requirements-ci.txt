@@ -1,0 +1,4 @@
+# Keep application dependencies in the existing manifest.
+-r requirements.txt
+# Block accidental live HTTP requests during pytest; TestClient needs Unix sockets.
+pytest-socket==0.7.0

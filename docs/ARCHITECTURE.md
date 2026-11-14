@@ -1,6 +1,6 @@
 # Architecture — proposed v0.1
 
-Status: design agreement for the first build; none of these services is implemented yet.
+Status: FastAPI, SQLAlchemy/SQLite farm persistence, validation, version checks, and environment-based database/CORS configuration are implemented. The farm observations route integrates Matheesha's standalone NASA POWER fetch/normalization module. Other analytical services and the frontend below remain proposed. See [backend setup](../backend/README.md).
 
 ```mermaid
 flowchart TD
@@ -36,4 +36,27 @@ flowchart TD
 
 ## Decisions still needed
 
-Record decisions and reasons here as they are made: database/deployment target; runtime versions; first NASA product and access method; map tiles and license; crop region/season definitions; reviewed scoring rules; AI provider/model; authentication before accepting real farmer data; offline conflict policy; team-approved license.
+Record decisions and reasons here as they are made: production database/deployment target (SQLite is the current local default); production runtime versions; production observation retention and background refresh policy (POWER snapshots currently use a configurable 24-hour fresh-cache lifetime); map tiles and license; crop region/season definitions; reviewed scoring rules; AI provider/model; authentication before accepting real farmer data; offline conflict policy; team-approved license.
+
+## Implemented observation boundary
+
+`GET /api/v1/farms/{farm_id}/observations` reads farm coordinates and input version from
+SQLite, validates historical dates, and calls the dependency-injected `ObservationAdapter`.
+The default adapter reuses Matheesha's unchanged `backend/services/nasa_power.py` from
+commit `c580b4fc620212f5450e388ed951e7cef5c014f6`. Only that standalone module is imported;
+his separate SMAP, climate indicator, and scenario services are not exposed here.
+The HTTP layer preserves normalized results and adds farm/observation IDs, version,
+units, coverage disclosure and contract aliases. Missing or unusable services produce 503.
+POWER results remain modeled estimates, with missing values preserved.
+
+`observation_snapshots` stores immutable response JSON, the complete original farm profile,
+its input version, cache-key generations and separate cache creation/expiry timestamps.
+Startup adds this table without modifying the existing farm table. The cache key covers farm,
+version, coordinates, period and versioned provider settings. Fresh requests reuse stable IDs;
+expiry or version changes append snapshots. Unique key/generation constraints resolve concurrent
+writers to one committed ID. Network calls run outside the database read transaction.
+Old snapshots remain readable at `/api/v1/observations/{observation_id}`. Failed refreshes return
+503 rather than silently using expired or synthetic values. Cache expiry and farm-version
+staleness are separate: the future-analysis reference helper permits historical IDs for matching
+current inputs but rejects ownership/version conflicts. Future analysis saves must recheck
+input versions when committing. No crop calculations are added. See [backend details](../backend/README.md#climate-observations).

@@ -6,8 +6,11 @@ from agrosphere_rotation import (
     ClimateInput,
     Crop,
     RepeatPolicy,
+    calculate_water_budget_range,
     generate_candidates,
     load_catalog,
+    load_water_requirements,
+    rank_candidates,
 )
 
 
@@ -47,6 +50,8 @@ def test_repeat_family_policy_can_leave_no_feasible_sequence() -> None:
 
     assert result.candidates == ()
     assert "repeat policy" in result.reasons[0]
+    assert result.rejected[0].constraint_checks[-1].rule == "consecutive_family"
+    assert result.rejected[0].constraint_checks[-1].passed is False
 
 
 def test_research_pending_shared_catalog_returns_an_explanation() -> None:
@@ -150,17 +155,26 @@ def test_climate_input_accepts_complete_matheesha_season_handoff() -> None:
         "effective_rainfall_mm": None,
         "crop_water_demand_mm": None,
         "irrigation_deficit_mm": None,
+        "source_refs": ("NASA POWER API request 2025-01",),
+        "retrieved_at": "2026-11-14T08:00:00Z",
+        "data_kind": "modeled",
+        "limitations": ("Gridded estimate; not an on-farm gauge.",),
     }
 
     result = ClimateInput.from_season_inputs(
         season,
         irrigation_mm=50,
+        irrigation_basis="field_applied_depth",
         rainfall_change_percent=-20,
     )
 
     assert result.rainfall_mm == pytest.approx(221.69)
     assert result.irrigation_mm == 50
+    assert result.irrigation_basis == "field_applied_depth"
     assert result.rainfall_change_percent == -20
+    assert result.source_refs == ("NASA POWER API request 2025-01",)
+    assert result.retrieved_at == "2026-11-14T08:00:00Z"
+    assert result.limitations == ("Gridded estimate; not an on-farm gauge.",)
 
 
 @pytest.mark.parametrize(
@@ -189,3 +203,60 @@ def test_season_handoff_rejects_incomplete_or_precomputed_agronomy(
 
     with pytest.raises(ValueError, match=message):
         ClimateInput.from_season_inputs(season)
+
+
+def test_scoring_renormalizes_available_components_and_marks_climate_unknown() -> None:
+    candidate = generate_candidates(
+        (
+            crop("rice", "poaceae", {"maha"}),
+            crop("mung-bean", "fabaceae", {"yala"}),
+        ),
+        ("maha", "yala", "maha"),
+    ).candidates[0]
+    _, requirements = load_water_requirements("data/catalogs/crop-water-requirements.json")
+    climates = (
+        ClimateInput(600, "fixture", "2025-01-01", "2025-04-30", 0, "field_applied_depth"),
+        ClimateInput(400, "fixture", "2025-05-01", "2025-08-31", 0, "field_applied_depth"),
+        ClimateInput(600, "fixture", "2025-09-01", "2025-12-31", 0, "field_applied_depth"),
+    )
+    budgets = tuple(
+        calculate_water_budget_range(requirements[crop_id], climate)
+        for crop_id, climate in zip(candidate.crop_ids, climates)
+    )
+
+    result = rank_candidates(((candidate, budgets),), {"water": 0.5, "soil": 0.3, "climate": 0.2})[0]
+
+    components = {component.name: component for component in result.score_components}
+    assert result.model_version == "rotation-score-0.1"
+    assert components["scenario_resilience"].value is None
+    assert components["scenario_resilience"].effective_weight == 0
+    assert components["water_sufficiency"].effective_weight == pytest.approx(0.625)
+    assert components["crop_diversity"].effective_weight == pytest.approx(0.375)
+    assert 0 <= result.score <= 100
+
+
+def test_scoring_adds_scenario_component_when_rainfall_changes() -> None:
+    candidate = generate_candidates(
+        (crop("maize", "poaceae", {"maha", "yala"}),),
+        ("maha", "yala", "maha"),
+    ).candidates[0]
+    _, requirements = load_water_requirements("data/catalogs/crop-water-requirements.json")
+    climate = ClimateInput(
+        700,
+        "fixture",
+        "2025-01-01",
+        "2025-04-30",
+        irrigation_mm=0,
+        irrigation_basis="field_applied_depth",
+        rainfall_change_percent=-30,
+    )
+    budget = calculate_water_budget_range(requirements["maize"], climate)
+
+    result = rank_candidates(
+        ((candidate, (budget, budget, budget)),),
+        {"water": 0.5, "soil": 0.3, "climate": 0.2},
+    )[0]
+
+    scenario = next(c for c in result.score_components if c.name == "scenario_resilience")
+    assert scenario.value is not None
+    assert scenario.effective_weight == pytest.approx(0.2)

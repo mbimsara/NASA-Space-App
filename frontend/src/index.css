@@ -1,0 +1,350 @@
+/*
+ * Base styles for AgroSphere AI. Placeholder tokens until Tharuka's Figma
+ * component styles are handed off — replace values here, not in components.
+ * Owner: Shehani.
+ */
+:root {
+  --green-700: #1b5e20;
+  --green-600: #2e7d32;
+  --green-50: #f1f8f1;
+  --blue-700: #1565c0;
+  --blue-50: #e8f4fd;
+  --amber-50: #fff3cd;
+  --amber-500: #ffc107;
+  --amber-900: #856404;
+  --red-700: #c62828;
+  --red-50: #f8d7da;
+  --text: #1f2933;
+  --text-muted: #55606b;
+  --border: #d5dbe1;
+  --surface: #ffffff;
+  --surface-alt: #f6f8f9;
+  --focus: #1565c0;
+  --radius: 8px;
+  --sans: system-ui, "Segoe UI", Roboto, "Noto Sans Sinhala", "Noto Sans Tamil", sans-serif;
+
+  /* Components still use light inline colours; keep one scheme until design tokens land. */
+  color-scheme: light;
+  font: 16px/1.5 var(--sans);
+  color: var(--text);
+  background: var(--surface-alt);
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--surface-alt);
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.25;
+  color: var(--text);
+}
+
+h1 {
+  font-size: 1.5rem;
+  margin: 0 0 16px;
+}
+
+h2 {
+  font-size: 1.2rem;
+  margin: 24px 0 12px;
+}
+
+a {
+  color: var(--blue-700);
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--surface);
+  padding: 8px 12px;
+  z-index: 1000;
+}
+.skip-link:focus {
+  left: 8px;
+}
+
+/* ---------- App shell ---------- */
+.app-header {
+  background: var(--green-700);
+  color: #fff;
+}
+.app-header__bar {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.app-header__brand {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-decoration: none;
+  margin-right: auto;
+}
+.app-header label,
+.app-header select {
+  color: #fff;
+}
+.app-header select {
+  background: var(--green-600);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+}
+.app-header select option {
+  color: var(--text);
+  background: #fff;
+}
+.app-header__link {
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.fixture-ribbon {
+  background: var(--amber-50);
+  color: var(--amber-900);
+  border-bottom: 1px solid var(--amber-500);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 4px 16px;
+}
+
+.farm-nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.farm-nav__inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.farm-nav__title {
+  font-weight: 600;
+  padding: 12px 12px 12px 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+  max-width: min(220px, 40vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.farm-nav a {
+  padding: 12px 10px;
+  white-space: nowrap;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+  font-size: 0.95rem;
+}
+.farm-nav a[aria-current="page"] {
+  color: var(--green-700);
+  border-bottom-color: var(--green-600);
+  font-weight: 600;
+}
+
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 0 48px;
+}
+
+/* ---------- Generic building blocks ---------- */
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.muted {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+.row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.field label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.field input,
+.field select,
+.field textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #fff;
+  width: 100%;
+}
+.field input[aria-invalid="true"] {
+  border: 2px solid var(--red-700);
+}
+.field-error {
+  color: var(--red-700);
+  font-size: 0.8rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 600;
+  min-height: 40px;
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--green-600);
+  border-color: var(--green-600);
+  color: #fff;
+}
+.btn-secondary {
+  background: var(--blue-700);
+  border-color: var(--blue-700);
+  color: #fff;
+}
+.btn-danger {
+  color: var(--red-700);
+}
+
+.notice {
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+.notice-info {
+  background: var(--blue-50);
+  border: 1px solid #90caf9;
+}
+.notice-warn {
+  background: var(--amber-50);
+  border: 1px solid var(--amber-500);
+  color: var(--amber-900);
+}
+.notice-ok {
+  background: var(--green-50);
+  border: 1px solid #a5d6a7;
+}
+
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+table.data th,
+table.data td {
+  padding: 6px 8px;
+  border-top: 1px solid var(--border);
+  text-align: left;
+}
+table.data th {
+  background: var(--surface-alt);
+}
+.table-scroll {
+  overflow-x: auto;
+}
+
+.map-picker {
+  height: 280px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 16px 12px;
+  }
+  .app-header__bar {
+    gap: 8px;
+  }
+}
+
+/* ---------- Print (saved plan / report view) ---------- */
+@media print {
+  .app-header,
+  .farm-nav,
+  .fixture-ribbon,
+  .no-print {
+    display: none !important;
+  }
+  body,
+  :root {
+    background: #fff;
+  }
+  .card {
+    break-inside: avoid;
+    border-color: #999;
+  }
+  details {
+    display: block;
+  }
+  details > summary {
+    list-style: none;
+  }
+}

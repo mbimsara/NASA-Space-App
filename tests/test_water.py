@@ -12,6 +12,7 @@ def test_reduced_rainfall_recomputes_same_budget() -> None:
     climate = ClimateInput(
         rainfall_mm=500,
         irrigation_mm=100,
+        irrigation_basis="field_applied_depth",
         rainfall_change_percent=-20,
         source="normalized NASA observation fixture",
         observation_start="2026-05-01",
@@ -66,6 +67,7 @@ def test_range_budget_uses_conservative_demand_endpoints() -> None:
     climate = ClimateInput(
         rainfall_mm=500,
         irrigation_mm=100,
+        irrigation_basis="field_applied_depth",
         rainfall_change_percent=-20,
         source="normalized NASA observation fixture",
         observation_start="2026-05-01",
@@ -80,3 +82,29 @@ def test_range_budget_uses_conservative_demand_endpoints() -> None:
     assert result.coverage_low_percent == pytest.approx(62.5)
     assert result.coverage_high_percent == pytest.approx(100)
     assert result.demand_basis == "seasonal_crop_water_need_etc"
+
+
+def test_unknown_irrigation_does_not_silently_become_zero() -> None:
+    climate = ClimateInput(
+        rainfall_mm=500,
+        source="fixture",
+        observation_start="2026-05-01",
+        observation_end="2026-08-31",
+    )
+
+    assert climate.irrigation_mm is None
+    with pytest.raises(ValueError, match="irrigation is unknown"):
+        calculate_water_budget(600, climate)
+
+
+def test_explicit_zero_irrigation_uses_declared_basis() -> None:
+    climate = ClimateInput(
+        rainfall_mm=500,
+        irrigation_mm=0,
+        irrigation_basis="field_applied_depth",
+        source="fixture",
+        observation_start="2026-05-01",
+        observation_end="2026-08-31",
+    )
+
+    assert calculate_water_budget(600, climate).available_water_mm == 500
