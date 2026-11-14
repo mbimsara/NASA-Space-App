@@ -1,10 +1,12 @@
-"""Small, deterministic explanations of recorded farm-profile facts.
+"""Small, deterministic explanations of supplied farm and analysis facts.
 
 No model, network, file access, or agricultural calculations are used here.
 """
 
 import re
 from collections.abc import Mapping
+
+from .assistant_results import explain_results
 
 
 def _display(value):
@@ -25,6 +27,13 @@ def explain(context, question, language="en"):
     Multiple supported topics can be answered together. Soil answers list all
     recorded measurements, without inferring any unrecorded measurement.
 
+    Optional ``analysis``, ``scenario``, and ``observations`` mappings enable
+    rotation, water-budget, scenario, and source explanations. ``candidate_id``
+    selects a candidate by exact ID. See backend/tests/fixtures/README.md for
+    the local nested data shapes; these are not new API contracts. Recorded
+    ranks/differences are reported, never computed. Conflicting context IDs
+    raise ValueError rather than combining unrelated results.
+
     Only ``en`` is supported. Unsupported languages and blank questions raise
     ValueError; invalid context/question types raise TypeError. The input is
     never changed. This text return value is not an HTTP response contract.
@@ -43,6 +52,9 @@ def explain(context, question, language="en"):
         raise TypeError("profile must be a mapping.")
 
     words = set(re.findall(r"[a-z]+", question.casefold()))
+    result = explain_results(context, words)
+    if result is not None:
+        return result
     answers = []
     # These topics require information or decision-making beyond a farm profile.
     unsupported = words & {
