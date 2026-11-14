@@ -48,6 +48,24 @@ Required fields: `analysis_id`, `farm_id`, `input_version`, `observation_id`, `c
 
 Each candidate has `candidate_id`, `sequence` (season index and approved crop ID), `score`, `score_components`, `water_budget`, `reasons`, and `constraint_checks`. Score components disclose weights and direction. Water budgets disclose period, demand, rainfall, effective rainfall assumptions, irrigation supply, and deficit in consistent units. Do not use missing demand data as zero.
 
+For `rotation-score-0.1`, return `water_budget_range` per season/crop rather
+than one opaque plan-level value. Each record includes demand low/high,
+baseline/scenario rainfall, entered irrigation, conservative coverage and
+balance ranges, demand basis, water-model version, assumptions, and
+limitations. A plan aggregate is optional and must not replace per-season
+records.
+
+Until an effective-rainfall method is reviewed, preserve historical
+`rainfall_total_mm`, return `effective_rainfall_mm: null`, and disclose that
+total rainfall is used only for provisional screening. Do not expose a
+placeholder effective-rainfall fraction as approved output.
+
+Score components are `water_sufficiency`, `crop_diversity`, and nullable
+`scenario_resilience`, as specified in
+[`ROTATION_SCORING_SPEC.md`](ROTATION_SCORING_SPEC.md). Return requested and
+effective weights. Constraint checks use `{ "rule", "passed", "note" }`.
+The score is a heuristic comparison, not a yield prediction.
+
 No feasible candidates is a valid successful response with `candidates: []` and reasons. This differs from a provider or computation failure. Score formulas and catalog values require Bhagya's approval before a complete numerical analysis fixture is published.
 
 Scenario responses include `scenario_id`, `baseline_analysis_id`, parameters, recomputed candidates/metrics, baseline differences, and explicit hypothetical labels. Set effective rainfall consistently with the documented model; do not multiply the historical observation record in place.

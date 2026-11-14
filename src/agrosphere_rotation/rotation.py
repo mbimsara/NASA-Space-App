@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from itertools import product
 
-from .models import Crop
+from .models import ConstraintCheck, Crop
 
 
 @dataclass(frozen=True, slots=True)
@@ -18,13 +18,20 @@ class RepeatPolicy:
 class RotationCandidate:
     crop_ids: tuple[str, ...]
     reasons: tuple[str, ...]
-    constraint_checks: tuple[str, ...]
+    constraint_checks: tuple[ConstraintCheck, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class RejectedSequence:
+    crop_ids: tuple[str, ...]
+    constraint_checks: tuple[ConstraintCheck, ...]
 
 
 @dataclass(frozen=True, slots=True)
 class CandidateGenerationResult:
     candidates: tuple[RotationCandidate, ...]
     reasons: tuple[str, ...]
+    rejected: tuple[RejectedSequence, ...] = ()
 
 
 def generate_candidates(
@@ -62,26 +69,57 @@ def generate_candidates(
         return CandidateGenerationResult(candidates=(), reasons=tuple(reasons))
 
     candidates = []
+    rejected_sequences = []
     for sequence in product(*eligible_by_season):
         chain = ((crop_by_id.get(previous_crop_id),) if previous_crop_id else ()) + sequence
         valid_chain = tuple(crop for crop in chain if crop is not None)
-        rejected = False
-        checks = ["All crops are approved, season-eligible, and not farmer-excluded."]
+        failed_check = None
+        checks = [
+            ConstraintCheck("catalog_review", True, "Every crop is approved."),
+            ConstraintCheck("season_eligibility", True, "Every crop matches its requested season."),
+            ConstraintCheck("farmer_exclusion", True, "No crop is farmer-excluded."),
+        ]
 
         for left, right in zip(valid_chain, valid_chain[1:]):
             if repeat_policy.forbid_consecutive_crop and left.id == right.id:
-                rejected = True
+                failed_check = ConstraintCheck(
+                    "consecutive_crop",
+                    False,
+                    f"Crop '{right.id}' repeats consecutively.",
+                )
                 break
             if repeat_policy.forbid_consecutive_family and left.family == right.family:
-                rejected = True
+                failed_check = ConstraintCheck(
+                    "consecutive_family",
+                    False,
+                    f"Family '{right.family}' repeats consecutively.",
+                )
                 break
-        if rejected:
+        if failed_check is not None:
+            rejected_sequences.append(
+                RejectedSequence(
+                    crop_ids=tuple(crop.id for crop in sequence),
+                    constraint_checks=tuple(checks + [failed_check]),
+                )
+            )
             continue
 
         if repeat_policy.forbid_consecutive_crop:
-            checks.append("No consecutive crop repetition under the configured policy.")
+            checks.append(
+                ConstraintCheck(
+                    "consecutive_crop",
+                    True,
+                    "No consecutive crop repetition under the enabled policy.",
+                )
+            )
         if repeat_policy.forbid_consecutive_family:
-            checks.append("No consecutive crop-family repetition under the configured policy.")
+            checks.append(
+                ConstraintCheck(
+                    "consecutive_family",
+                    True,
+                    "No consecutive crop-family repetition under the enabled policy.",
+                )
+            )
         candidates.append(
             RotationCandidate(
                 crop_ids=tuple(crop.id for crop in sequence),
@@ -94,5 +132,8 @@ def generate_candidates(
 
     if not candidates:
         reasons.append("No sequence satisfies the configured repeat policy.")
-    return CandidateGenerationResult(candidates=tuple(candidates), reasons=tuple(reasons))
-
+    return CandidateGenerationResult(
+        candidates=tuple(candidates),
+        reasons=tuple(reasons),
+        rejected=tuple(rejected_sequences),
+    )

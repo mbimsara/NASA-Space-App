@@ -46,6 +46,7 @@ def calculate_water_budget_range(
     multiplier = 1 + climate.rainfall_change_percent / 100
     scenario_rainfall = climate.rainfall_mm * multiplier
     available = scenario_rainfall + climate.irrigation_mm
+    baseline_available = climate.rainfall_mm + climate.irrigation_mm
     return WaterBudgetRange(
         crop_id=demand.crop_id,
         demand_low_mm=demand.low_mm,
@@ -53,7 +54,10 @@ def calculate_water_budget_range(
         baseline_rainfall_mm=climate.rainfall_mm,
         scenario_rainfall_mm=scenario_rainfall,
         irrigation_mm=climate.irrigation_mm,
+        baseline_available_water_mm=baseline_available,
         available_water_mm=available,
+        baseline_coverage_low_percent=baseline_available / demand.high_mm * 100,
+        baseline_coverage_high_percent=baseline_available / demand.low_mm * 100,
         balance_low_mm=available - demand.high_mm,
         balance_high_mm=available - demand.low_mm,
         coverage_low_percent=available / demand.high_mm * 100,

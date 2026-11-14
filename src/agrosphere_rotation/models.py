@@ -178,7 +178,10 @@ class WaterBudgetRange:
     baseline_rainfall_mm: float
     scenario_rainfall_mm: float
     irrigation_mm: float
+    baseline_available_water_mm: float
     available_water_mm: float
+    baseline_coverage_low_percent: float
+    baseline_coverage_high_percent: float
     balance_low_mm: float
     balance_high_mm: float
     coverage_low_percent: float
@@ -196,3 +199,30 @@ class WaterBudgetRange:
             raise ValueError("low balance must use high demand")
         if abs(self.balance_high_mm - (self.available_water_mm - self.demand_low_mm)) > 1e-9:
             raise ValueError("high balance must use low demand")
+
+
+@dataclass(frozen=True, slots=True)
+class ConstraintCheck:
+    rule: str
+    passed: bool
+    note: str
+
+
+@dataclass(frozen=True, slots=True)
+class ScoreComponent:
+    name: str
+    value: float | None
+    raw_value: float | None
+    requested_weight: float
+    effective_weight: float
+    direction: str
+    note: str
+
+
+@dataclass(frozen=True, slots=True)
+class ScoredRotation:
+    crop_ids: tuple[str, ...]
+    score: float
+    score_components: tuple[ScoreComponent, ...]
+    reasons: tuple[str, ...]
+    model_version: str
