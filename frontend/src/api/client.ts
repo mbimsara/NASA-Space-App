@@ -21,6 +21,7 @@ import type {
   AssistantRequest,
   SavedPlan,
   ApiError,
+  SoilMoistureContext,
 } from "../types/api";
 
 // ---------------------------------------------------------------------------
@@ -133,6 +134,11 @@ export async function getObservations(
     url: `/farms/${farmId}/observations`,
     params: { start, end },
   }, signal);
+}
+
+/** GET /farms/:id/soil-moisture — quality-filtered regional SMAP context when available. */
+export async function getSoilMoisture(farmId: string, signal?: AbortSignal): Promise<SoilMoistureContext> {
+  return request<SoilMoistureContext>({ method: "GET", url: `/farms/${farmId}/soil-moisture` }, signal);
 }
 
 // ---------------------------------------------------------------------------

@@ -16,6 +16,7 @@ export const api = {
   getFarm: USE_FIXTURES ? fix.getFarmFixture : live.getFarm,
   updateFarm: USE_FIXTURES ? fix.updateFarmFixture : live.updateFarm,
   getObservations: USE_FIXTURES ? fix.getObservationsFixture : live.getObservations,
+  getSoilMoisture: USE_FIXTURES ? fix.getSoilMoistureFixture : live.getSoilMoisture,
   createRotation: USE_FIXTURES ? fix.createRotationFixture : live.createRotation,
   createScenario: USE_FIXTURES ? fix.createScenarioFixture : live.createScenario,
   sendAssistantMessage: USE_FIXTURES ? fix.sendAssistantMessageFixture : live.sendAssistantMessage,

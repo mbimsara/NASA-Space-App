@@ -8,7 +8,7 @@
 // Primitives
 // ---------------------------------------------------------------------------
 
-export type DataKind = "observed" | "modeled" | "synthetic" | "mixed";
+export type DataKind = "observed" | "modeled" | "synthetic" | "mixed" | "satellite_retrieval";
 export type Language = "en" | "si" | "ta";
 export type ReviewStatus = "draft" | "approved";
 
@@ -121,6 +121,35 @@ export interface TimeSeriesPoint {
   date: string;
   rainfall_mm: number | null;
   mean_temperature_c: number | null;
+}
+
+export interface SmapPass {
+  pass: "AM" | "PM";
+  accepted: boolean;
+  soil_moisture_m3_m3: number | null;
+  rejection_reason: string | null;
+  acquisition_time_utc_raw?: string | null;
+  retrieval_quality_flag?: number | null;
+  distance_km?: number | null;
+}
+
+export interface SoilMoistureContext {
+  schema_version: "0.1";
+  kind: "smap_surface_soil_moisture_series";
+  data_kind: "satellite_retrieval";
+  farm_id: string;
+  input_version: number;
+  product: "SPL3SMP_E";
+  version: "006";
+  units: "m3/m3";
+  requested_point: Location;
+  farm_distance_km: number;
+  period: { start: string; end: string };
+  max_distance_km: number;
+  coverage: { expected_days: number; supplied_granule_days: number; accepted_AM: number; accepted_PM: number };
+  daily: { date: string; granule_supplied: boolean; AM: SmapPass; PM: SmapPass }[];
+  source_refs: string[];
+  limitations: string[];
 }
 
 // ---------------------------------------------------------------------------

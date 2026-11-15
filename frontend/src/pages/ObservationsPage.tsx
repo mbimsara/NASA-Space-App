@@ -25,7 +25,7 @@ import {
   toChartPoints,
 } from "../utils/observations";
 import { fmtNumber } from "../utils/format";
-import type { ObservationSummary } from "../types/api";
+import type { ObservationSummary, SoilMoistureContext } from "../types/api";
 
 export function ObservationsPage() {
   const { t } = useTranslation();
@@ -36,6 +36,7 @@ export function ObservationsPage() {
   const [start, setStart] = useState(() => defaultObservationRange().start);
   const [end, setEnd] = useState(() => defaultObservationRange().end);
   const [obs, setObs] = useState<ObservationSummary | null>(null);
+  const [soilMoisture, setSoilMoisture] = useState<SoilMoistureContext | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const rangeInvalid = !isValidObservationRange(start, end);
@@ -72,6 +73,21 @@ export function ObservationsPage() {
     const r = defaultObservationRange();
     fetchObs(r.start, r.end);
   }, [fetchObs]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    // Clear context from the previously selected farm before the new request resolves.
+    // oxlint-disable-next-line react/set-state-in-effect
+    setSoilMoisture(null);
+    api.getSoilMoisture(farm.id, controller.signal)
+      .then((result) => {
+        if (result.farm_id === farm.id && result.input_version === farm.input_version) setSoilMoisture(result);
+      })
+      .catch((err) => {
+        if (!isAbortError(err) && !(err && typeof err === "object" && "status" in err && err.status === 404)) setError(err);
+      });
+    return () => controller.abort();
+  }, [farm.id, farm.input_version]);
 
   const s = obs?.summary;
   const c = obs?.coverage;
@@ -199,6 +215,22 @@ export function ObservationsPage() {
             </p>
           </div>
         </>
+      )}
+
+      {soilMoisture && (
+        <section className="card" aria-labelledby="smap-title">
+          <h2 id="smap-title" style={{ marginTop: 0 }}>SMAP surface-moisture context</h2>
+          <p>
+            {soilMoisture.product} V{soilMoisture.version} · {soilMoisture.period.start} → {soilMoisture.period.end}
+          </p>
+          <div className="row">
+            <div className="notice notice-info">Accepted AM: <strong>{soilMoisture.coverage.accepted_AM}</strong> / {soilMoisture.coverage.expected_days}</div>
+            <div className="notice notice-info">Accepted PM: <strong>{soilMoisture.coverage.accepted_PM}</strong> / {soilMoisture.coverage.expected_days}</div>
+          </div>
+          <p className="muted">Missing and quality-rejected passes remain unknown; AM and PM are not averaged.</p>
+          <SourceBadge sourceRefs={soilMoisture.source_refs} dataKind={soilMoisture.data_kind} />
+          <ul className="muted">{soilMoisture.limitations.map((item) => <li key={item}>{item}</li>)}</ul>
+        </section>
       )}
 
       <Link to={`/farms/${farm.id}/rotations`} className="btn btn-primary">

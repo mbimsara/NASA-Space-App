@@ -2,7 +2,7 @@
 
 For resumable authenticated subsetting, see [automation instructions and verified January 2025 results](SMAP_AUTOMATION.md). The full-month live run completed: all 31 files verified, with 12 accepted AM and 11 accepted PM retrievals. File delivery is complete; retrieval coverage remains partial.
 
-Status: public discovery, quality filtering, local file inspection, nearest-pixel extraction and combined time-series output are implemented. All three January 1–3, 2025 Harmony subset files have now downloaded and been extracted successfully. Missing passes remain unknown.
+Status: public discovery, quality filtering, local file inspection, nearest-pixel extraction, combined time-series output, a farm-scoped read-only API and an observation-page coverage card are implemented. The API currently serves only the locally verified January 2025 demonstration series and rejects farms outside its distance policy. Missing passes remain unknown.
 
 ## Selected product
 

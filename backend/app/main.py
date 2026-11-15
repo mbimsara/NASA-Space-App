@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from app.api.routes import climate, health, farms, observations, rotations, scenarios, assistant, plans
+from app.api.routes import climate, health, farms, observations, rotations, scenarios, assistant, plans, soil_moisture
 from app.config import settings
 from app.database.connection import Base, engine
 from app.models import farm
@@ -76,6 +76,7 @@ app.include_router(rotations.router, prefix="/api/v1")
 app.include_router(scenarios.router, prefix="/api/v1")
 app.include_router(assistant.router, prefix="/api/v1")
 app.include_router(plans.router, prefix="/api/v1")
+app.include_router(soil_moisture.router, prefix="/api/v1")
 
 
 app.add_middleware(

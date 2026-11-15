@@ -16,6 +16,7 @@ Farm mutation input follows [the farm schema](../data/schemas/farm.schema.json).
 | GET `/farms/{id}` | Farm ID | 200: farm envelope |
 | PATCH `/farms/{id}` | `expected_input_version` and a complete replacement `profile` | 200: envelope with incremented version; 409 on version conflict |
 | GET `/farms/{id}/observations?start=YYYY-MM-DD&end=YYYY-MM-DD` | Inclusive dates; start <= end | Observation summary below |
+| GET `/farms/{id}/soil-moisture` | Farm ID; local verified SMAP series must cover its location | Quality-filtered `SPL3SMP_E` V006 AM/PM context; 404 when unavailable |
 | GET `/observations/{observation_id}` | Persistent observation ID | 200: original immutable observation envelope; 404 if absent |
 | POST `/observations/{observation_id}/rainfall-scenarios` | `rainfall_change_pct` from -100 to 100 | Hypothetical uniform scaling of the stored daily rainfall baseline; missing values are preserved and the snapshot is unchanged |
 | POST `/farms/{id}/rotations` | `input_version`, `observation_id`, `seasons`, ordered `season_labels`, `catalog_version`, `priority_weights` | 201: immutable rotation analysis |
@@ -25,6 +26,11 @@ Farm mutation input follows [the farm schema](../data/schemas/farm.schema.json).
 | GET `/plans/{id}` | Plan ID | Saved candidate, input snapshot, sources, assumptions, model versions |
 
 For the prototype PATCH requires the whole profile to avoid ambiguous nested merge behavior. A changed profile makes older analyses outdated; reads remain available, but saving as a current plan requires the expected version to match. Follow-on report/calendar/feedback endpoints will be specified when their schemas are agreed.
+
+The soil-moisture response preserves separate AM/PM passes, accepted counts, null
+rejected samples, requested point, distance policy, source reference and limitations.
+It is regional surface context—not a field/root-zone measurement—and is not used
+to infer nutrients, irrigation requirements or a soil-health score.
 
 ## Observation summary shape
 

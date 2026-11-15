@@ -248,6 +248,32 @@ export async function getObservationsFixture(
   };
 }
 
+export async function getSoilMoistureFixture(farmId: string, signal?: AbortSignal) {
+  await delay(100, signal);
+  const farm = load().farms[farmId];
+  if (!farm) fail(404, "NOT_FOUND", "Farm not found.");
+  return {
+    schema_version: "0.1" as const,
+    kind: "smap_surface_soil_moisture_series" as const,
+    data_kind: "satellite_retrieval" as const,
+    farm_id: farmId,
+    input_version: farm.input_version,
+    product: "SPL3SMP_E" as const,
+    version: "006" as const,
+    units: "m3/m3" as const,
+    requested_point: farm.profile.location,
+    farm_distance_km: 0,
+    period: { start: "2025-01-01", end: "2025-01-01" },
+    max_distance_km: 15,
+    coverage: { expected_days: 1, supplied_granule_days: 1, accepted_AM: 0, accepted_PM: 0 },
+    daily: [{ date: "2025-01-01", granule_supplied: true,
+      AM: { pass: "AM" as const, accepted: false, soil_moisture_m3_m3: null, rejection_reason: "synthetic_fixture_no_retrieval" },
+      PM: { pass: "PM" as const, accepted: false, soil_moisture_m3_m3: null, rejection_reason: "synthetic_fixture_no_retrieval" } }],
+    source_refs: ["synthetic-fixture-not-nasa"],
+    limitations: ["Synthetic fixture only; no SMAP moisture value is supplied."],
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Rotations — synthetic implementation of rotation-score-0.1
 // (docs/ROTATION_SCORING_SPEC.md, Bhagya). Crop values and seasonal rainfall

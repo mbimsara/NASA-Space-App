@@ -1,6 +1,6 @@
 # Data source register
 
-Owner: Matheesha. Documentation support: Tharuka. NASA POWER is integrated through the Python adapter and persisted backend observation cache. SMAP has a separate verified processing pipeline but is not yet exposed by the observations HTTP route.
+Owner: Matheesha. Documentation support: Tharuka. NASA POWER is integrated through the Python adapter and persisted backend observation cache. The verified local SMAP demonstration series is exposed separately at `GET /api/v1/farms/{farm_id}/soil-moisture`; it returns 404 outside the series distance policy or when the local verified file is unavailable. It is never merged into field soil tests or rotation scores.
 
 ## Source selection policy
 
