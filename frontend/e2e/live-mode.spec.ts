@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
+const backendBaseURL = `http://localhost:${process.env.E2E_BACKEND_PORT ?? "8000"}/api/v1`;
 const liveNASA = process.env.E2E_LIVE_NASA === "1";
 const emptyCatalog = process.env.E2E_CATALOG === "empty";
 const fixtureMode = process.env.E2E_FRONTEND_FIXTURES === "1";
@@ -78,11 +79,11 @@ test("missing observations disable generation; backend keeps 404/409/422 semanti
   });
   await page.goto(`/farms/${farm.id}/rotations`);
   await expect(page.getByRole("button", { name: /generate|run rotation/i })).toBeDisabled();
-  expect((await request.get("http://localhost:8000/api/v1/plans/missing")).status()).toBe(404);
-  expect((await request.patch(`http://localhost:8000/api/v1/farms/${farm.id}`, {
+  expect((await request.get(`${backendBaseURL}/plans/missing`)).status()).toBe(404);
+  expect((await request.patch(`${backendBaseURL}/farms/${farm.id}`, {
     data: { expected_input_version: 999, profile: farm.profile },
   })).status()).toBe(409);
-  expect((await request.post(`http://localhost:8000/api/v1/farms/${farm.id}/rotations`, { data: {
+  expect((await request.post(`${backendBaseURL}/farms/${farm.id}/rotations`, { data: {
     input_version: 1, observation_id: null, seasons: 3, season_labels: ["maha", "yala", "maha"],
     catalog_version: "invalid-test-version", priority_weights: farm.profile.priority_weights,
   } })).status()).toBe(422);
@@ -157,7 +158,7 @@ test("Sinhala/Tamil return 422 and the existing UI retries in English; stale con
     expect((await retried).status()).toBe(200);
   }
   await page.locator("#lang-select").selectOption("en");
-  const edited = await request.patch(`http://localhost:8000/api/v1/farms/${farm.id}`, {
+  const edited = await request.patch(`${backendBaseURL}/farms/${farm.id}`, {
     data: { expected_input_version: farm.input_version, profile: { ...farm.profile, name: "Concurrent farm edit" } },
   });
   expect(edited.status()).toBe(200);
@@ -174,7 +175,7 @@ test("explicit fixture mode stays labeled and makes no FastAPI requests", async 
   test.skip(!fixtureMode);
   const apiCalls: string[] = [];
   page.on("request", request => {
-    if (request.url().startsWith("http://localhost:8000/api/v1")) apiCalls.push(request.url());
+    if (request.url().startsWith(backendBaseURL)) apiCalls.push(request.url());
   });
   await page.goto("/");
   await expect(page.locator(".fixture-ribbon")).toBeVisible();

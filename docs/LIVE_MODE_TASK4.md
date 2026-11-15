@@ -176,7 +176,9 @@ Remove-Item Env:E2E_FRONTEND_FIXTURES
 
 Installed Edge is used on Windows. Elsewhere run `npx playwright install chromium`.
 `PLAYWRIGHT_CHANNEL` selects another installed Chromium channel;
-`AGROSPHERE_PYTHON` can override the backend interpreter. The launcher always
+`AGROSPHERE_PYTHON` can override the backend interpreter. If the default ports
+are unavailable, set `E2E_BACKEND_PORT` and `E2E_FRONTEND_PORT` before running
+the suite (for example, `8011` and `5174`). The launcher always
 allocates its own DB. Only `E2E_LIVE_NASA=1` permits actual NASA calls.
 
 Remaining limits: no approved production candidates, missing dated seasonal

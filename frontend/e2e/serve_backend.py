@@ -1,6 +1,7 @@
 """Opt-in real FastAPI E2E server with disposable SQLite; never a deployed app."""
 import json
 import os
+from copy import deepcopy
 from pathlib import Path
 import sys
 from tempfile import TemporaryDirectory
@@ -14,7 +15,11 @@ def main():
         raise RuntimeError("Start through the Playwright configuration, not as a production server.")
     with TemporaryDirectory(prefix="agrosphere-browser-") as directory:
         os.environ["DATABASE_URL"] = "sqlite:///" + (Path(directory) / "test.db").as_posix()
-        os.environ["CORS_ORIGINS"] = "http://localhost:5173,http://127.0.0.1:5173"
+        backend_port = int(os.environ.get("E2E_BACKEND_PORT", "8000"))
+        frontend_port = int(os.environ.get("E2E_FRONTEND_PORT", "5173"))
+        os.environ["CORS_ORIGINS"] = (
+            f"http://localhost:{frontend_port},http://127.0.0.1:{frontend_port}"
+        )
         os.environ["NASA_POWER_ENABLED"] = "true"
         from app.main import app
         from app.database.connection import engine
@@ -31,7 +36,10 @@ def main():
                 cache_namespace = "explicit-synthetic-browser-test-v1"
 
                 def observe(self, *, latitude, longitude, start, end):
-                    result = nasa_power.normalize(raw, start.isoformat(), end.isoformat(),
+                    provider_response = deepcopy(raw)
+                    provider_response["header"]["start"] = start.strftime("%Y%m%d")
+                    provider_response["header"]["end"] = end.strftime("%Y%m%d")
+                    result = nasa_power.normalize(provider_response, start.isoformat(), end.isoformat(),
                         retrieved_at="2024-03-02T00:00:00+00:00",
                         source_url="https://example.invalid/synthetic-browser-fixture")
                     result["data_kind"] = "synthetic"
@@ -57,7 +65,7 @@ def main():
             path.write_text(json.dumps(catalog), encoding="utf-8")
             rotations.CATALOG_PATH = path
         try:
-            uvicorn.run(app, host="127.0.0.1", port=8000)
+            uvicorn.run(app, host="127.0.0.1", port=backend_port)
         finally:
             engine.dispose()
 

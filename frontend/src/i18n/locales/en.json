@@ -608,7 +608,7 @@
     "planDescription": "Explore multi-season crop comparisons and water trade-offs in the clearly labeled synthetic demo.",
     "understandTitle": "See the reasoning",
     "understandDescription": "Inspect assumptions and limitations alongside results. Keep local knowledge part of every decision.",
-    "status": "Try the synthetic demo to explore the full journey. Live farm, NASA POWER observation, and rotation-analysis APIs are available; scenario, assistant, and saved-plan API connections are still in progress. Crop entries remain drafts, so the live rotation API returns no candidates until they are reviewed and approved.",
+    "status": "Try the synthetic demo to explore the full journey. Live farm, NASA POWER observation, rotation-analysis, scenario, assistant, and saved-plan APIs are connected. Crop entries remain drafts, so the live rotation API correctly returns no candidates until they are reviewed and approved.",
     "workspaceKicker": "Your workspace",
     "workspaceTitle": "Pick up where you left off.",
     "footer": "Earth data. Local knowledge. Thoughtful farming."

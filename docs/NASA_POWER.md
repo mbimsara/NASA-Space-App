@@ -22,9 +22,9 @@ Existing outputs are protected from accidental replacement. Reuse saved files; p
 
 `daily` contains ISO dates, Celsius temperature and precipitation rates in mm/day. `monthly` summarizes each requested month's intersection with the requested period, not necessarily a complete calendar month. `summary` covers the whole requested period. Missing date keys and provider fill values become null. Zero remains valid. Unsupported units, incorrect periods, non-UTC data and invalid values fail clearly.
 
-Temperature averages use available valid days and expose their count. Rainfall totals sum the daily rate over one-day intervals and are null if any day is missing. `rainfall_available_days_mm` is a separately labeled partial sum, never a substitute for a full-period total. A dry-run rainfall scenario is not a weather forecast; scenario and water-demand models are not implemented yet.
+Temperature averages use available valid days and expose their count. Rainfall totals sum the daily rate over one-day intervals and are null if any day is missing. `rainfall_available_days_mm` is a separately labeled partial sum, never a substitute for a full-period total. The application now implements immutable hypothetical rainfall scenarios and recalculates supported rotation water-screening fields; these scenarios are not weather forecasts. Effective-rainfall and field-loss models remain unapproved and are not inferred.
 
-The domain adapter returns environmental results only. Dulanjaya must add farm/observation IDs, input versions, persistence and HTTP envelopes when integrating it with the proposed API. Shehani can use the daily and monthly arrays after agreeing those chart fields with Matheesha.
+The domain adapter returns environmental results only. The FastAPI observation service now adds farm/observation IDs, input versions, durable snapshots, cache metadata and HTTP envelopes. The frontend consumes the normalized daily and monthly arrays while preserving coverage and provenance.
 
 ## Verification on 2026-11-14
 
