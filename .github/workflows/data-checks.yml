@@ -4,6 +4,10 @@ on:
   pull_request:
 permissions:
   contents: read
+env:
+  PYTHONPATH: ${{ github.workspace }}/backend:${{ github.workspace }}
+  DATABASE_URL: "sqlite:///:memory:"
+  NASA_POWER_ENABLED: "false"
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -13,8 +17,12 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-      - name: Install rotation package and test dependencies
-        run: python -m pip install -e ".[dev]"
+          cache-dependency-path: |
+            pyproject.toml
+            backend/requirements.txt
+            backend/requirements-ci.txt
+      - name: Install rotation package, backend and test dependencies
+        run: python -m pip install -e . -r backend/requirements-ci.txt
       - run: python scripts/validate_data.py
       - name: Run shared climate, SMAP, and rotation tests
         run: python -m pytest tests -v
@@ -26,7 +34,12 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-      - name: Install rotation, test, and optional SMAP dependencies
-        run: python -m pip install -e ".[dev]" -r backend/requirements-smap.txt
+          cache-dependency-path: |
+            pyproject.toml
+            backend/requirements.txt
+            backend/requirements-ci.txt
+            backend/requirements-smap.txt
+      - name: Install rotation, backend, test and optional SMAP dependencies
+        run: python -m pip install -e . -r backend/requirements-ci.txt -r backend/requirements-smap.txt
       - name: Run shared tests with optional SMAP file support
         run: python -m pytest tests -v

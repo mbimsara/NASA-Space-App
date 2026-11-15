@@ -46,5 +46,7 @@ jobs:
         run: npm run lint
       - name: Unit and regression tests
         run: npm test
+      - name: Server-only staging gateway tests
+        run: node --test ../deploy/render-vercel/proxy.test.mjs
       - name: Production build
         run: npm run build
