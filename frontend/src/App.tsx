@@ -19,6 +19,8 @@ const RotationPage = lazy(() => import("./pages/RotationPage").then((m) => ({ de
 const ScenarioPage = lazy(() => import("./pages/ScenarioPage").then((m) => ({ default: m.ScenarioPage })));
 const AssistantPage = lazy(() => import("./pages/AssistantPage").then((m) => ({ default: m.AssistantPage })));
 const FinancePage = lazy(() => import("./pages/FinancePage").then((m) => ({ default: m.FinancePage })));
+const SoilHealthPage = lazy(() => import("./pages/SoilHealthPage").then((m) => ({ default: m.SoilHealthPage })));
+const ClimateTwinPage = lazy(() => import("./pages/ClimateTwinPage").then((m) => ({ default: m.ClimateTwinPage })));
 const PlanPage = lazy(() => import("./pages/PlanPage").then((m) => ({ default: m.PlanPage })));
 const CatalogPage = lazy(() => import("./pages/CatalogPage").then((m) => ({ default: m.CatalogPage })));
 const RoadmapPage = lazy(() => import("./pages/RoadmapPage").then((m) => ({ default: m.RoadmapPage })));
@@ -40,6 +42,8 @@ export default function App() {
             <Route path="scenario" element={page(<ScenarioPage />)} />
             <Route path="assistant" element={page(<AssistantPage />)} />
             <Route path="finance" element={page(<FinancePage />)} />
+            <Route path="soil-health" element={page(<SoilHealthPage />)} />
+            <Route path="climate-twins" element={page(<ClimateTwinPage />)} />
           </Route>
           <Route path="plans/:planId" element={page(<PlanPage />)} />
           <Route path="catalog" element={page(<CatalogPage />)} />

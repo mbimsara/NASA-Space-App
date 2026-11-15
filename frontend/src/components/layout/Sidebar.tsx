@@ -85,9 +85,9 @@ export function Sidebar({ open, onNavigate, id }: Props) {
 
         <span className="side-section">{t("nav.tools")}</span>
         {farmId && link(`/farms/${farmId}/rotations`, "climate", t("nav.waterBudget"))}
-        <NavLink to="/roadmap#soil" onClick={onNavigate}><Icon name="farm" /><span>{t("nav.soilHealth")}</span><span className="side-tag">{t("nav.soon")}</span></NavLink>
+        {farmId ? link(`/farms/${farmId}/soil-health`, "farm", t("nav.soilHealth")) : <span className="side-disabled" aria-disabled="true"><Icon name="farm" /><span>{t("nav.soilHealth")}</span></span>}
         <NavLink to="/roadmap#weed" onClick={onNavigate}><Icon name="overview" /><span>{t("nav.weedShield")}</span><span className="side-tag">{t("nav.soon")}</span></NavLink>
-        <NavLink to="/roadmap#twins" onClick={onNavigate}><Icon name="map" /><span>{t("nav.climateTwin")}</span><span className="side-tag">{t("nav.soon")}</span></NavLink>
+        {farmId ? link(`/farms/${farmId}/climate-twins`, "map", t("nav.climateTwin")) : <span className="side-disabled" aria-disabled="true"><Icon name="map" /><span>{t("nav.climateTwin")}</span></span>}
         {latestPlan ? link(`/plans/${latestPlan.id}`, "save", t("nav.farmCalendar")) : <NavLink to="/roadmap" onClick={onNavigate}><Icon name="save" /><span>{t("nav.farmCalendar")}</span></NavLink>}
         {farmId && link(`/farms/${farmId}/finance`, "coin", t("nav.financialPlanner"))}
         {latestPlan ? link(`/plans/${latestPlan.id}`, "book", t("nav.reportsHistory")) : <NavLink to="/roadmap" onClick={onNavigate}><Icon name="book" /><span>{t("nav.reportsHistory")}</span></NavLink>}
