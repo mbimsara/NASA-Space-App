@@ -18,6 +18,7 @@ import { CandidateCard } from "../components/rotations/CandidateCard";
 import { ActionCalendar } from "../components/plan/ActionCalendar";
 import { SeasonFeedbackPanel } from "../components/plan/SeasonFeedbackPanel";
 import { cachePlan, getCachedPlan } from "../utils/offlineCache";
+import { downloadPlanReport } from "../utils/planExport";
 import type { FarmEnvelope, SavedPlan } from "../types/api";
 
 export function PlanPage() {
@@ -111,8 +112,9 @@ export function PlanPage() {
 
       <div className="row no-print" style={{ marginBottom: 16 }}>
         <button type="button" className="btn" onClick={() => window.print()}>
-          🖨 {t("plan.export")}
+          🖨 Print / save PDF
         </button>
+        <button type="button" className="btn" onClick={() => downloadPlanReport(plan)}>Download snapshot (.json)</button>
         <Link className="btn" to={`/farms/${plan.farm_id}`}>
           {t("plan.openFarm")}
         </Link>
