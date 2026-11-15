@@ -6,6 +6,14 @@ The implemented climate functions and proposed serializer are documented in [the
 
 ## Conventions
 
+Restricted staging keeps these scientific/data contracts. Deployment-only
+boundaries and the additive `GET /api/v1/ready` endpoint are documented in
+[the staging guide](STAGING_DEPLOYMENT.md). Readiness returns 200
+`{"status":"ready"}` or generic 503 `SERVICE_UNAVAILABLE`. The private gateway
+requires authentication before all API and frontend requests. Staging writes also
+require the configured HTTPS `Origin` (403 `STAGING_ORIGIN_REQUIRED` otherwise);
+this defense does not implement record ownership. Development behavior is unchanged.
+
 WGS84 coordinates; hectares; millimeters; Celsius; ISO dates; timezone-bearing timestamps. Unknown values are `null`, never assumed zero. Responses carry `data_kind` (`observed`, `modeled`, `synthetic`, or `mixed`) where appropriate, source references, and assumptions. Never relabel synthetic fixtures as NASA observations.
 
 Farm mutation input follows [the farm schema](../data/schemas/farm.schema.json). Server metadata is returned as `{ "id": "farm-demo-001", "input_version": 1, "profile": { ... } }`. Client-generated fixture IDs are examples only; the server allocates persistent IDs.

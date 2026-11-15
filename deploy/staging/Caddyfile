@@ -1,0 +1,38 @@
+{
+    admin off
+    auto_https disable_redirects
+}
+
+{$STAGING_DOMAIN} {
+    tls internal
+    header {
+        Strict-Transport-Security "max-age=86400"
+        X-Content-Type-Options nosniff
+        Referrer-Policy no-referrer
+        X-Frame-Options DENY
+        Cache-Control no-store
+        -Server
+    }
+    # route preserves this order: authentication covers API, assets and SPA.
+    route {
+        basic_auth {
+            {$STAGING_USER} {$STAGING_PASSWORD_HASH}
+        }
+        request_body {
+            max_size 1MB
+        }
+        handle /api/* {
+            reverse_proxy backend:8000 {
+                # Gateway credentials must never reach application/provider code.
+                header_up -Authorization
+                header_up -Cookie
+            }
+        }
+        handle {
+            root * /srv
+            try_files {path} /index.html
+            file_server
+        }
+    }
+    # No access log: URLs may contain coordinates and record identifiers.
+}

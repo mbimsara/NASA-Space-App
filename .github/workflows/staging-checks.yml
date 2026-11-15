@@ -1,0 +1,42 @@
+name: Restricted staging checks (no deployment)
+on:
+  pull_request:
+    paths: ['deploy/staging/**', 'backend/**', 'frontend/**', 'src/**', 'data/**', 'pyproject.toml', '.dockerignore', '.github/workflows/staging-checks.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  containers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      STAGING_DOMAIN: staging.agrosphere.internal
+      STAGING_ORIGIN: https://staging.agrosphere.internal:8443
+      STAGING_USER: ci-reviewer
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate throwaway CI-only gateway credential
+        shell: bash
+        run: |
+          hash=$(docker run --rm caddy:2-alpine caddy hash-password --plaintext ci-only-not-a-secret)
+          printf 'STAGING_PASSWORD_HASH=%s\n' "$hash" >> "$GITHUB_ENV"
+      - name: Validate Compose and build both images
+        run: |
+          docker compose -f deploy/staging/compose.yaml config --quiet
+          docker compose -f deploy/staging/compose.yaml build --pull
+          docker compose -f deploy/staging/compose.yaml run --rm --no-deps gateway caddy validate --config /etc/caddy/Caddyfile
+      - name: Start private staging services
+        run: docker compose -f deploy/staging/compose.yaml up -d --wait --wait-timeout 120
+      - name: Verify gateway, CORS, write boundary and persistent restart
+        shell: bash
+        run: |
+          echo '127.0.0.1 staging.agrosphere.internal' | sudo tee -a /etc/hosts > /dev/null
+          docker compose -f deploy/staging/compose.yaml cp gateway:/data/caddy/pki/authorities/local/root.crt "$RUNNER_TEMP/staging-root.crt"
+          export STAGING_CA="$RUNNER_TEMP/staging-root.crt"
+          python deploy/staging/smoke.py
+          docker compose -f deploy/staging/compose.yaml restart backend
+          sleep 5
+          python deploy/staging/smoke.py --verify-farm "$RUNNER_TEMP/staging-farm-id"
+      - name: Stop disposable services
+        if: always()
+        run: docker compose -f deploy/staging/compose.yaml down

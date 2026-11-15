@@ -21,6 +21,7 @@ class Settings:
     observation_cache_ttl_seconds: int = 86400
     assistant_provider: str = "deterministic"
     openai_model: str | None = None
+    app_env: str = "development"
 
 
 def load_settings(env_file: Path = ENV_FILE) -> Settings:
@@ -71,11 +72,28 @@ def load_settings(env_file: Path = ENV_FILE) -> Settings:
     if assistant_provider == "openai" and not openai_model:
         raise ValueError("OPENAI_MODEL is required when ASSISTANT_PROVIDER=openai.")
 
+    app_env = (values.get("APP_ENV", "development") or "").strip().lower()
+    if app_env not in {"development", "test", "staging"}:
+        raise ValueError("APP_ENV must be development, test or staging.")
+    if app_env == "staging":
+        from sqlalchemy.engine import make_url
+        url = make_url(database_url)
+        # This release supports one SQLite writer on a persistent local volume.
+        # A PostgreSQL URL alone is not a validated database migration.
+        if (url.get_backend_name() != "sqlite" or not url.database
+                or not Path(url.database).is_absolute() or url.query):
+            raise ValueError("Staging DATABASE_URL requires an absolute SQLite file path on persistent storage.")
+        if not origins or any(urlsplit(origin).scheme != "https" for origin in origins):
+            raise ValueError("Staging CORS_ORIGINS requires explicit HTTPS origins.")
+        if assistant_provider != "deterministic":
+            raise ValueError("Staging requires ASSISTANT_PROVIDER=deterministic until external AI review.")
+
     return Settings(
         database_url=database_url, cors_origins=origins,
         nasa_power_enabled=nasa_power_enabled == "true",
         observation_cache_ttl_seconds=cache_ttl,
         assistant_provider=assistant_provider, openai_model=openai_model,
+        app_env=app_env,
     )
 
 
