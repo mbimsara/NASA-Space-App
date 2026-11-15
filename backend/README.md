@@ -19,6 +19,7 @@ FastAPI with synchronous SQLAlchemy and SQLite. Implemented endpoints:
 | POST | `/api/v1/observations/{observation_id}/rainfall-scenarios` | Uniformly scale stored daily rainfall for a labeled hypothetical sensitivity test |
 | POST | `/api/v1/farms/{farm_id}/rotations` | Validate context, invoke the shared rotation engine, and persist an immutable analysis. Optional `season_periods` (`"calendar"` or one `{start, end}` per season) retrieves rainfall separately for every planned season and returns `season_inputs` with per-season water budgets; omitted, water stays unknown |
 | GET | `/api/v1/farms/{farm_id}/climate-twins?observation_id=...` | Rank other registered farms with complete, current-version NASA POWER snapshots for the identical period; return transparent differences, exclusions and limitations |
+| POST / GET | `/api/v1/plans/{plan_id}/feedback` | Append and list farmer-entered season outcomes; feedback remains separate from NASA data and never silently retrains the model |
 | POST | `/api/v1/analyses/{analysis_id}/scenarios` | Apply a hypothetical `rainfall_change_pct` (-100 to 100) to a saved analysis, recompute season water budgets and scores, and persist a scenario snapshot (201) |
 | GET | `/api/v1/scenarios/{scenario_id}` | Reopen a persisted scenario snapshot |
 

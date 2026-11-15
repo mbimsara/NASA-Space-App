@@ -16,6 +16,7 @@ import { SyntheticDataBanner } from "../components/ui/SyntheticDataBanner";
 import { SourceBadge } from "../components/ui/SourceBadge";
 import { CandidateCard } from "../components/rotations/CandidateCard";
 import { ActionCalendar } from "../components/plan/ActionCalendar";
+import { SeasonFeedbackPanel } from "../components/plan/SeasonFeedbackPanel";
 import { cachePlan, getCachedPlan } from "../utils/offlineCache";
 import type { FarmEnvelope, SavedPlan } from "../types/api";
 
@@ -203,14 +204,7 @@ export function PlanPage() {
         />
       )}
 
-      <section className="card no-print" aria-labelledby="feedback-title">
-        <h2 id="feedback-title" style={{ marginTop: 0 }}>
-          {t("roadmap.items.feedback.title")} <span className="badge-planned">{t("common.roadmapFeature")}</span>
-        </h2>
-        <p className="muted" style={{ margin: 0 }}>
-          {t("roadmap.items.feedback.why")}
-        </p>
-      </section>
+      {plan.candidate_snapshot?.sequence && <SeasonFeedbackPanel planId={plan.plan_id} seasons={plan.candidate_snapshot.sequence.map((item) => item.season_index)} />}
 
       <h2>{t("plan.evidence")}</h2>
       <div className="card">

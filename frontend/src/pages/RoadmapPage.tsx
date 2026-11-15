@@ -7,7 +7,6 @@
 import { useTranslation } from "react-i18next";
 
 const ITEMS = [
-  { key: "feedback", owner: "Dulanjaya, Shehani" },
   { key: "export", owner: "Dulanjaya, Shehani, Tharuka" },
   { key: "offlineEdit", owner: "Dulanjaya, Shehani" },
   { key: "reminders", owner: "Dulanjaya, Shehani" },

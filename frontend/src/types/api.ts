@@ -207,6 +207,24 @@ export interface ClimateTwinsResult {
   limitations: string[];
 }
 
+export interface SeasonFeedback {
+  schema_version: "0.1";
+  feedback_id: string;
+  plan_id: string;
+  data_kind: "farmer_input";
+  season_index: number;
+  planted_on: string | null;
+  harvested_on: string | null;
+  actual_crop_id: string | null;
+  yield_value: number | null;
+  yield_unit: "kg" | "kg/ha" | "t" | "t/ha" | null;
+  notes: string;
+  created_at: string;
+  limitations: string[];
+}
+
+export type SeasonFeedbackRequest = Pick<SeasonFeedback, "season_index" | "planted_on" | "harvested_on" | "actual_crop_id" | "yield_value" | "yield_unit" | "notes">;
+
 // ---------------------------------------------------------------------------
 // Rotation analysis
 // ---------------------------------------------------------------------------

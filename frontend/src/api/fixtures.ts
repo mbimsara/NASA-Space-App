@@ -320,6 +320,21 @@ export async function getClimateTwinsFixture(farmId: string, observationId: stri
   };
 }
 
+const feedbackKey = (planId: string) => `agrosphere_fixture_feedback_${planId}`;
+export async function listPlanFeedbackFixture(planId: string, signal?: AbortSignal) {
+  await delay(50, signal);
+  return JSON.parse(localStorage.getItem(feedbackKey(planId)) ?? "[]");
+}
+export async function createPlanFeedbackFixture(planId: string, body: import("../types/api").SeasonFeedbackRequest, signal?: AbortSignal) {
+  await delay(50, signal);
+  const item = { schema_version: "0.1" as const, feedback_id: crypto.randomUUID(), plan_id: planId,
+    data_kind: "farmer_input" as const, created_at: new Date().toISOString(), ...body,
+    limitations: ["Farmer-entered fixture outcome; not independently verified."] };
+  const prior = await listPlanFeedbackFixture(planId);
+  localStorage.setItem(feedbackKey(planId), JSON.stringify([item, ...prior]));
+  return item;
+}
+
 // ---------------------------------------------------------------------------
 // Rotations — synthetic implementation of rotation-score-0.1
 // (docs/ROTATION_SCORING_SPEC.md, Bhagya). Crop values and seasonal rainfall

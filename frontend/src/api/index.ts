@@ -20,6 +20,8 @@ export const api = {
   getGpmPrecipitation: USE_FIXTURES ? fix.getGpmPrecipitationFixture : live.getGpmPrecipitation,
   getHlsVegetation: USE_FIXTURES ? fix.getHlsVegetationFixture : live.getHlsVegetation,
   getClimateTwins: USE_FIXTURES ? fix.getClimateTwinsFixture : live.getClimateTwins,
+  listPlanFeedback: USE_FIXTURES ? fix.listPlanFeedbackFixture : live.listPlanFeedback,
+  createPlanFeedback: USE_FIXTURES ? fix.createPlanFeedbackFixture : live.createPlanFeedback,
   createRotation: USE_FIXTURES ? fix.createRotationFixture : live.createRotation,
   createScenario: USE_FIXTURES ? fix.createScenarioFixture : live.createScenario,
   sendAssistantMessage: USE_FIXTURES ? fix.sendAssistantMessageFixture : live.sendAssistantMessage,

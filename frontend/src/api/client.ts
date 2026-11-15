@@ -25,6 +25,8 @@ import type {
   GpmContext,
   HlsContext,
   ClimateTwinsResult,
+  SeasonFeedback,
+  SeasonFeedbackRequest,
 } from "../types/api";
 
 // ---------------------------------------------------------------------------
@@ -157,6 +159,14 @@ export async function getHlsVegetation(farmId: string, signal?: AbortSignal): Pr
 /** Compare current-version saved farms using identical-period POWER snapshots. */
 export async function getClimateTwins(farmId: string, observationId: string, signal?: AbortSignal): Promise<ClimateTwinsResult> {
   return request<ClimateTwinsResult>({ method: "GET", url: `/farms/${farmId}/climate-twins`, params: { observation_id: observationId } }, signal);
+}
+
+export async function listPlanFeedback(planId: string, signal?: AbortSignal): Promise<SeasonFeedback[]> {
+  return request<SeasonFeedback[]>({ method: "GET", url: `/plans/${planId}/feedback` }, signal);
+}
+
+export async function createPlanFeedback(planId: string, body: SeasonFeedbackRequest, signal?: AbortSignal): Promise<SeasonFeedback> {
+  return request<SeasonFeedback>({ method: "POST", url: `/plans/${planId}/feedback`, data: body }, signal);
 }
 
 // ---------------------------------------------------------------------------
