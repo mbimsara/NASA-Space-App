@@ -12,7 +12,6 @@ const ITEMS = [
   { key: "offlineEdit", owner: "Dulanjaya, Shehani" },
   { key: "reminders", owner: "Dulanjaya, Shehani" },
   { key: "soilModes", owner: "Bhagya, Tharuka, Shehani" },
-  { key: "twins", owner: "Matheesha, Bhagya" },
   { key: "weed", owner: "Akash, Shehani" },
   { key: "voice", owner: "Akash, Shehani, Tharuka" },
 ] as const;

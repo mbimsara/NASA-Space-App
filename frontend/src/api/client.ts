@@ -24,6 +24,7 @@ import type {
   SoilMoistureContext,
   GpmContext,
   HlsContext,
+  ClimateTwinsResult,
 } from "../types/api";
 
 // ---------------------------------------------------------------------------
@@ -151,6 +152,11 @@ export async function getGpmPrecipitation(farmId: string, signal?: AbortSignal):
 /** Optional, quality-screened HLS V2.0 NDVI context. */
 export async function getHlsVegetation(farmId: string, signal?: AbortSignal): Promise<HlsContext> {
   return request<HlsContext>({ method: "GET", url: `/farms/${farmId}/hls-vegetation` }, signal);
+}
+
+/** Compare current-version saved farms using identical-period POWER snapshots. */
+export async function getClimateTwins(farmId: string, observationId: string, signal?: AbortSignal): Promise<ClimateTwinsResult> {
+  return request<ClimateTwinsResult>({ method: "GET", url: `/farms/${farmId}/climate-twins`, params: { observation_id: observationId } }, signal);
 }
 
 // ---------------------------------------------------------------------------

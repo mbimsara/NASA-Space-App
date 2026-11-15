@@ -192,6 +192,21 @@ export interface HlsContext {
   limitations: string[];
 }
 
+export interface ClimateTwinsResult {
+  schema_version: "0.1";
+  kind: "historical_climate_twins";
+  farm_id: string;
+  observation_id: string;
+  period: { start: string; end: string };
+  twins: { farm_id: string; observation_id: string; input_version: number; requested_location: Location;
+    mean_temperature_c: number; rainfall_total_mm: number; temperature_difference_c: number;
+    rainfall_difference_mm: number; similarity_score: number }[];
+  excluded: { observation_id: string | null; reason: string }[];
+  source_refs: string[];
+  assumptions: string[];
+  limitations: string[];
+}
+
 // ---------------------------------------------------------------------------
 // Rotation analysis
 // ---------------------------------------------------------------------------

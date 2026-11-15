@@ -307,6 +307,19 @@ export async function getHlsVegetationFixture(farmId: string, signal?: AbortSign
   };
 }
 
+export async function getClimateTwinsFixture(farmId: string, observationId: string, signal?: AbortSignal) {
+  await delay(100, signal);
+  const farm = load().farms[farmId];
+  if (!farm) fail(404, "NOT_FOUND", "Farm not found.");
+  return { schema_version: "0.1" as const, kind: "historical_climate_twins" as const,
+    farm_id: farmId, observation_id: observationId,
+    period: { start: "2025-01-01", end: "2025-01-31" }, twins: [], excluded: [],
+    source_refs: ["synthetic-fixture-not-nasa"],
+    assumptions: ["Fixture mode does not invent comparison farms."],
+    limitations: ["No real NASA POWER comparison snapshots exist in fixture mode."],
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Rotations — synthetic implementation of rotation-score-0.1
 // (docs/ROTATION_SCORING_SPEC.md, Bhagya). Crop values and seasonal rainfall

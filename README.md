@@ -37,7 +37,7 @@ AgroSphere AI connects Earth observations, farmer inputs, and crop-rotation mode
 | Saved plans | Immutable plan APIs, frontend reporting, action-calendar, and cached offline viewing flows. |
 | Accessible interface | Responsive layouts, light and dark themes, and English, Sinhala, and Tamil interface resources. |
 
-WeedShield, advanced climate twins, voice interaction, and other capabilities awaiting validated models or data remain on the roadmap. Interface translation availability does not imply multilingual backend assistant support.
+WeedShield, voice interaction, and other capabilities awaiting validated models or data remain on the roadmap. Historical climate-twin comparison is available for registered farms that have complete NASA POWER snapshots covering the identical period. Interface translation availability does not imply multilingual backend assistant support.
 
 ### A connected journey
 

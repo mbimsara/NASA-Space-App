@@ -25,7 +25,7 @@ import {
   toChartPoints,
 } from "../utils/observations";
 import { fmtNumber } from "../utils/format";
-import type { GpmContext, HlsContext, ObservationSummary, SoilMoistureContext } from "../types/api";
+import type { ClimateTwinsResult, GpmContext, HlsContext, ObservationSummary, SoilMoistureContext } from "../types/api";
 
 export function ObservationsPage() {
   const { t } = useTranslation();
@@ -39,6 +39,8 @@ export function ObservationsPage() {
   const [soilMoisture, setSoilMoisture] = useState<SoilMoistureContext | null>(null);
   const [gpm, setGpm] = useState<GpmContext | null>(null);
   const [hls, setHls] = useState<HlsContext | null>(null);
+  const [twins, setTwins] = useState<ClimateTwinsResult | null>(null);
+  const [twinsLoading, setTwinsLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const rangeInvalid = !isValidObservationRange(start, end);
@@ -276,6 +278,25 @@ export function ObservationsPage() {
           <p className="muted">NDVI is shown as greenness context only; it does not identify a crop or predict yield.</p>
           <SourceBadge sourceRefs={hls.source_refs} retrievedAt={hls.retrieved_at} dataKind={hls.data_kind} />
           <ul className="muted">{hls.limitations.map((item) => <li key={item}>{item}</li>)}</ul>
+        </section>
+      )}
+
+      {obs && (
+        <section className="card" aria-labelledby="twins-title">
+          <h2 id="twins-title" style={{ marginTop: 0 }}>Historical climate twins</h2>
+          <p className="muted">Compare this complete-period NASA POWER summary with current snapshots from other registered farms.</p>
+          <button className="btn btn-secondary" disabled={twinsLoading || obs.summary.rainfall_total_mm == null || obs.summary.mean_temperature_c == null}
+            onClick={() => {
+              setTwinsLoading(true); setTwins(null);
+              api.getClimateTwins(farm.id, obs.observation_id).then(setTwins).catch(setError).finally(() => setTwinsLoading(false));
+            }}>
+            {twinsLoading ? "Comparing…" : "Find climate twins"}
+          </button>
+          {twins && (twins.twins.length ? (
+            <div style={{ overflowX: "auto", marginTop: 12 }}><table><thead><tr><th>Farm</th><th>Similarity</th><th>Temperature difference</th><th>Rainfall difference</th></tr></thead>
+              <tbody>{twins.twins.map((item) => <tr key={item.observation_id}><td>{item.farm_id}</td><td>{item.similarity_score.toFixed(1)}%</td><td>{item.temperature_difference_c.toFixed(1)} °C</td><td>{item.rainfall_difference_mm.toFixed(1)} mm</td></tr>)}</tbody></table></div>
+          ) : <p className="muted">No eligible same-period farm snapshots are available yet.</p>)}
+          {twins && <ul className="muted">{twins.limitations.map((item) => <li key={item}>{item}</li>)}</ul>}
         </section>
       )}
 
