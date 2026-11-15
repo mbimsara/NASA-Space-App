@@ -1,5 +1,9 @@
 # Frontend integration notes — for the merge
 
+> Historical pre-merge record. The endpoints and live frontend described as
+> pending below are now integrated on `main`; use `API_CONTRACTS.md`,
+> `DATA_SOURCES.md`, and `COMPLETION_AUDIT.md` for current status.
+
 Owner: Shehani (`branch-shehani`). Checked against every team branch on origin on 2026-11-14. Please reply in the team chat or edit this file if something here is wrong.
 
 ## What `branch-shehani` adds

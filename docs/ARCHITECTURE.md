@@ -42,9 +42,10 @@ Record decisions and reasons here as they are made: production database/deployme
 
 `GET /api/v1/farms/{farm_id}/observations` reads farm coordinates and input version from
 SQLite, validates historical dates, and calls the dependency-injected `ObservationAdapter`.
-The default adapter reuses Matheesha's unchanged `backend/services/nasa_power.py` from
-commit `c580b4fc620212f5450e388ed951e7cef5c014f6`. Only that standalone module is imported;
-his separate SMAP, climate indicator, and scenario services are not exposed here.
+The default adapter reuses Matheesha's `backend/services/nasa_power.py`. POWER
+observations are the persisted rotation baseline. SMAP, GPM IMERG, and HLS are
+exposed through separate farm-scoped context APIs with explicit availability
+and distance policies; they are never silently substituted into that baseline.
 The HTTP layer preserves normalized results and adds farm/observation IDs, version,
 units, coverage disclosure and contract aliases. Missing or unusable services produce 503.
 POWER results remain modeled estimates, with missing values preserved.

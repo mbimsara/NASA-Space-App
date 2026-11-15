@@ -33,7 +33,7 @@ The future file reader must inspect dataset units, fill/valid attributes, coordi
 
 ## Tests and remaining gate
 
-The full optional-dependency environment runs 27 tests. SMAP coverage includes mocked discovery, quality flags, missing values, file inventory, nearest-pixel rejection, distance limits and missing-pass geolocation. Public discovery and the first downloaded science subset were also verified live; further dates and application integration remain pending.
+The full optional-dependency environment runs 27 tests. SMAP coverage includes mocked discovery, quality flags, missing values, file inventory, nearest-pixel rejection, distance limits and missing-pass geolocation. The complete January 2025 subset was processed locally. Application integration is complete through the farm-scoped API, observations page, and soil-evidence page; other dates still require an authenticated Earthdata retrieval and the same validation pipeline.
 
 ## Verified subset reader
 

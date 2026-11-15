@@ -110,17 +110,19 @@ Before integration, Bhagya and Matheesha still need to agree on:
 - irrigation efficiency, runoff, and soil-storage assumptions;
 - acceptable observation coverage and source/version metadata.
 
-SMAP can later add regional surface-moisture context, while GPM IMERG can later
-provide a precipitation comparison. Neither is needed to run the initial
-candidate generator. Landsat/HLS, MODIS/VIIRS, SRTM, and ECOSTRESS are later
-contextual inputs and should not delay the connected core.
+SMAP now supplies separately labelled regional surface-moisture context, GPM
+IMERG supplies a separately labelled precipitation comparison, and HLS supplies
+quality-screened NDVI context when verified local artifacts cover the farm.
+None is required by, or silently substituted into, the POWER-backed candidate
+generator. MODIS/VIIRS, SRTM, and ECOSTRESS remain unintegrated.
 
 ## Current shared contracts
 
 The branch includes the shared `origin/main` contract commit. The crop loader
 reads `data/catalogs/crops.json` according to
-`data/schemas/crop-catalog.schema.json`. The committed catalog is deliberately
-empty and research-pending, so it produces no recommendations.
+`data/schemas/crop-catalog.schema.json`. The committed catalog contains reviewed
+Sri Lankan demonstration screening proxies with per-crop sources. They support
+heuristic comparison only, not yield prediction or guaranteed suitability.
 
 Candidate generation example:
 

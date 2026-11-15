@@ -1,5 +1,8 @@
 # Shehani — personal implementation plan
 
+> Historical ownership plan retained for attribution, not current capability
+> status. See `COMPLETION_AUDIT.md` and the in-app Capability Status page.
+
 Owner: Shehani Weerasekara (@shehani419). Derived from [IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md) (Shehani sections, the workload-sharing update, and follow-on dependencies). Branch: `branch-shehani`. Last audited: 2026-11-14.
 
 Scope: frontend implementation, client integration, workflow QA, plus crop-catalog loading/validation and the deterministic financial calculator. Not in scope: Tharuka's design work, Dulanjaya's backend, Bhagya's scientific rules, Matheesha's adapters, Akash's model.
