@@ -10,7 +10,7 @@ from app.models.farm import Farm
 from app.models.observation import ObservationSnapshot
 from app.schemas.climate_twins import ClimateTwinsResponse
 from app.services.observation_cache import snapshot_response
-from services.climate_twins import rank_twins
+from services.climate_twins import rank_snapshot_twins
 
 
 router = APIRouter(prefix="/farms", tags=["Climate twins"])
@@ -33,7 +33,7 @@ def get_climate_twins(farm_id: str, observation_id: str = Query(...), limit: int
             if current is not None and current.input_version == row.input_version:
                 latest_by_farm[row.farm_id] = snapshot_response(row).model_dump(mode="json")
     try:
-        twins, excluded = rank_twins(target, latest_by_farm.values(), limit)
+        twins, excluded = rank_snapshot_twins(target, latest_by_farm.values(), limit)
     except ValueError:
         return JSONResponse(status_code=422, content={"error": {"code": "INCOMPLETE_BASELINE", "message": "Climate twins require complete target rainfall and available temperature."}})
     return {
