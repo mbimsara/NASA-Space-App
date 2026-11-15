@@ -1,5 +1,11 @@
 # Bhagya review — Sri Lankan crop catalog draft v0.1
 
+> Historical review. On 2026-11-15 the project owner accepted a deadline-safe
+> demo screening catalog (`0.2-demo-reviewed-proxies`) using working official
+> FAO/DOA references and explicit bean, millet and pepper proxies. The cautions
+> below still govern interpretation; unsupported hard exclusions, yield claims,
+> effective rainfall, drainage inference and numeric soil bonuses remain disabled.
+
 Review date: 2026-11-14
 
 Research commits: `486b081` and `b795585` by Tharuka

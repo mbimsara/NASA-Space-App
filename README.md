@@ -147,7 +147,7 @@ SMAP utilities --> discovery, quality filtering, regional environment context
 | `backend/app/` | FastAPI routes, validation, persistence, configuration, and application services |
 | `backend/services/` | Provider-facing NASA POWER and climate modules |
 | `src/agrosphere_rotation/` | Crop catalogs, candidates, constraints, scoring, and water budgets |
-| `data/catalogs/` | Versioned crop and water catalogs; all eight crops currently remain draft |
+| `data/catalogs/` | Versioned crop and water catalogs; eight demo-reviewed screening crops with explicit FAO proxy limitations |
 | `data/fixtures/` | Explicitly synthetic development examples |
 | `data/schemas/` | Shared JSON contracts |
 | `scripts/` | Data validation, POWER, SMAP, and environment utilities |

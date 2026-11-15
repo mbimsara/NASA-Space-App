@@ -8,6 +8,9 @@ from app.services import rotations
 from observation_fixtures import DATES
 
 
+CATALOG_VERSION = json.loads(rotations.CATALOG_PATH.read_text(encoding="utf-8"))["catalog_version"]
+
+
 def observation(client, adapter, farm):
     response = client.get(f"/api/v1/farms/{farm['id']}/observations", params=DATES)
     assert response.status_code == 200
@@ -20,7 +23,7 @@ def request_for(farm, obs, **changes):
         "observation_id": obs["observation_id"],
         "seasons": 3,
         "season_labels": ["maha", "yala", "maha"],
-        "catalog_version": "0.1-draft-referenced",
+        "catalog_version": CATALOG_VERSION,
         "priority_weights": {"water": 0.5, "soil": 0.3, "climate": 0.2},
     }
     body.update(changes)
@@ -31,7 +34,7 @@ def endpoint(farm):
     return f"/api/v1/farms/{farm['id']}/rotations"
 
 
-def test_research_pending_catalog_is_successful_empty_analysis(client, adapter, farm):
+def test_demo_reviewed_repository_catalog_produces_screening_candidates(client, adapter, farm):
     obs = observation(client, adapter, farm)
     response = client.post(endpoint(farm), json=request_for(farm, obs))
 
@@ -41,8 +44,8 @@ def test_research_pending_catalog_is_successful_empty_analysis(client, adapter, 
     assert payload["observation_id"] == obs["observation_id"]
     assert payload["model_version"] == "rotation-score-0.1"
     assert payload["data_kind"] == "synthetic"
-    assert payload["candidates"] == []
-    assert len(payload["reasons"]) == 3
+    assert payload["candidates"]
+    assert all(candidate["sequence"] for candidate in payload["candidates"])
     assert obs["observation_id"] in payload["source_refs"]
     assert any("not a yield prediction" in item for item in payload["limitations"])
 

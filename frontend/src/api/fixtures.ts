@@ -417,7 +417,7 @@ export function scoreSequence(cropIds: string[], candidateId: string, inp: Score
     },
     reasons: ["Feasible under the currently enabled documented constraints."],
     constraint_checks: [
-      { rule: "catalog_review", passed: true, note: "Fixture crops bypass review; the real catalog has no approved crops yet." },
+      { rule: "catalog_review", passed: true, note: "Fixture crops remain synthetic; the live catalog separately uses documented demo-reviewed screening proxies." },
       { rule: "season_eligibility", passed: true, note: `Seasons: ${labels.join(", ")}` },
       { rule: "farmer_exclusion", passed: true, note: null },
     ],

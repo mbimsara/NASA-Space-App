@@ -1,5 +1,11 @@
 # Crop catalog source check — 2026-11-14
 
+> Historical audit, superseded on 2026-11-15 by project-owner deadline review
+> `0.2-demo-reviewed-proxies`. Broken links were replaced with working official
+> FAO and Sri Lanka DOA sources; nominal values now match the midpoint of the
+> separately reviewed FAO ranges. Approval is for transparent hackathon
+> screening only, not cultivar-specific agronomic prescription.
+
 Scope: `data/catalogs/crops.json` (`0.1-draft-referenced`, 8 crops), checked
 against the approval criteria in [Bhagya's catalog review](BHAGYA_CATALOG_REVIEW.md).
 This is a source-availability and evidence check prepared for Bhagya. It is

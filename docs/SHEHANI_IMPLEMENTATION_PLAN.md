@@ -13,7 +13,7 @@ Legend: ✅ done · 🟡 done in the frontend, waiting on a teammate's service o
 | 1 | Core interface: app shell, farm map/forms, observation dashboard, rotation timeline/comparison, scenario controls, assistant panel, saved-plan view | ✅ | Tharuka's design adopted: sidebar, top bar, step tracker, light/dark themes (AA contrast verified on 6 pages in both themes) |
 | 2 | Shared API client and result state: typed calls, loading/error/retry, farm/analysis selection, stale-response guards | ✅ | Farms and observations verified against the live backend; rotations/scenarios/assistant/plans wait for endpoints |
 | 3 | Validate and preserve inputs; recoverable drafts with clear control | ✅ | Irrigation has three explicit choices: amount, rainfed (0), unknown (null) |
-| 4 | Crop catalog loading + validation | ✅ | Bhagya's 8-crop draft catalog validates; no approved crops yet |
+| 4 | Crop catalog loading + validation | ✅ | Eight project-owner demo-reviewed screening crops; FAO proxy limitations remain explicit |
 | 5 | Financial calculator | ✅ | Spec v0.1 approved (Bhagya); real local inputs pending (Tharuka) |
 | 6 | Make results understandable: sources, missing data, uncertainty, baseline vs scenario, outdated indicators; assistant tied to the analysis | ✅ | rotation-score-0.1 components and weights, per-season water (baseline → scenario), unknown-irrigation notice, assistant status/assumptions/source links |
 | 7 | Verify the complete journey: phone layouts, keyboard, save/reload, scenario updates, failures, plan reopening; language switching | ✅ | 11 pages pass at 375 px with labelled inputs; focus moves to content on navigation; Sinhala/Tamil strings need fluent review |
