@@ -54,13 +54,14 @@ def test_repeat_family_policy_can_leave_no_feasible_sequence() -> None:
     assert result.rejected[0].constraint_checks[-1].passed is False
 
 
-def test_research_pending_shared_catalog_returns_an_explanation() -> None:
+def test_reviewed_shared_catalog_generates_screening_candidates() -> None:
     _, crops = load_catalog("data/catalogs/crops.json")
 
     result = generate_candidates(crops, ("maha", "yala", "maha"))
 
-    assert result.candidates == ()
-    assert len(result.reasons) == 3
+    assert result.candidates
+    assert result.reasons == ()
+    assert all(candidate.constraint_checks for candidate in result.candidates)
 
 
 def test_catalog_loader_matches_shared_contract(tmp_path) -> None:

@@ -156,7 +156,13 @@ def test_scenario_snapshot_is_persisted_and_reopened(client, adapter, farm, appr
 
 
 def test_empty_analysis_is_a_valid_scenario(client, adapter, farm):
-    _, analysis = create_analysis(client, farm, catalog_version="0.1-draft-referenced")
+    profile = client.get(f"/api/v1/farms/{farm['id']}").json()["profile"]
+    profile["excluded_crop_ids"] = ["rice", "mung-bean", "maize", "groundnut", "cowpea", "finger-millet", "black-gram", "chilli"]
+    patched = client.patch(f"/api/v1/farms/{farm['id']}", json={
+        "expected_input_version": farm["input_version"], "profile": profile,
+    })
+    assert patched.status_code == 200
+    _, analysis = create_analysis(client, patched.json(), catalog_version="0.2-demo-reviewed-proxies")
     response = client.post(scenario_url(analysis["analysis_id"]), json={"rainfall_change_pct": 20})
     assert response.status_code == 201
     assert response.json()["candidates"] == []
