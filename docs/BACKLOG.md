@@ -17,4 +17,4 @@ Create issues from this list; these are planning entries, not issues already cre
 | Scenario and selected-plan persistence | Bhagya + Matheesha + Dulanjaya + Shehani | Connected flow | Baseline preserved; recalculation and reopening work |
 | Usability and grounded-answer review | Tharuka + Akash + Shehani | Connected flow | Findings recorded and blocking defects resolved |
 
-Next: specified finance calculator, soil/recovery modes, language review, reports/calendar/feedback. Later: climate twins, validated weed analysis, offline writes, and voice. See the implementation plan for full ownership.
+Implemented since this backlog was drafted: finance calculator v0.1, immutable saved-plan reports, action-calendar/ICS export, season feedback, registered-farm climate twins, and an optional grounded LLM wording layer. Remaining research-dependent work is SoilRevive/FarmRecovery rule review, validated weed-image analysis, offline writes/conflict policy, reminder delivery, and reviewed multilingual assistant/voice behavior. See the implementation plan for ownership; do not treat those remaining items as implemented.

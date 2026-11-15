@@ -13,7 +13,7 @@
   <p>
     <img src="https://img.shields.io/badge/React-TypeScript-149ECA?style=flat-square" alt="React and TypeScript" />
     <img src="https://img.shields.io/badge/FastAPI-Python-009688?style=flat-square" alt="FastAPI and Python" />
-    <img src="https://img.shields.io/badge/Data-NASA_POWER_%2B_SMAP-166534?style=flat-square" alt="NASA POWER and SMAP data" />
+    <img src="https://img.shields.io/badge/Data-POWER_%2B_SMAP_%2B_GPM_%2B_HLS-166534?style=flat-square" alt="NASA POWER, SMAP, GPM, and HLS integration paths" />
     <img src="https://img.shields.io/badge/Stage-Development-F0B429?style=flat-square" alt="Development stage" />
   </p>
 </div>
@@ -35,6 +35,8 @@ AgroSphere AI connects Earth observations, farmer inputs, and crop-rotation mode
 | Financial scenarios | Frontend cost and income comparisons using explicit inputs and ranges. |
 | Grounded assistant | Deterministic explanations from persisted analysis context, without an external AI provider. The backend currently supports English. |
 | Saved plans | Immutable plan APIs, frontend reporting, action-calendar, and cached offline viewing flows. |
+| Follow-through | Farmer-entered season feedback, print/PDF output, and exact JSON snapshot export. |
+| Assistant | Grounded deterministic explanations with preserved sources/limitations; optional server-side OpenAI Responses API wording with deterministic fallback. |
 | Accessible interface | Responsive layouts, light and dark themes, and English, Sinhala, and Tamil interface resources. |
 
 WeedShield, voice interaction, and other capabilities awaiting validated models or data remain on the roadmap. Historical climate-twin comparison is available for registered farms that have complete NASA POWER snapshots covering the identical period. Interface translation availability does not imply multilingual backend assistant support.
