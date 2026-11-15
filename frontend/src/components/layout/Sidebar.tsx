@@ -99,7 +99,6 @@ export function Sidebar({ open, onNavigate, id }: Props) {
         <NavLink to="/roadmap" onClick={onNavigate}>
           <Icon name="map" />
           <span>{t("nav.roadmap")}</span>
-          <span className="side-tag">{t("nav.soon")}</span>
         </NavLink>
       </nav>
 

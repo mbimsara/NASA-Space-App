@@ -539,8 +539,10 @@
     "harvestDate": "Harvest must be on or after the season's planting date"
   },
   "roadmap": {
-    "title": "Planned features",
-    "intro": "These capabilities are part of AgroSphere AI's scope but are not implemented yet. Each is waiting for the dependency shown.",
+    "title": "Capability status",
+    "intro": "Working tools are listed first. Research-dependent capabilities remain clearly separated so demonstrations never imply unsupported results.",
+    "availableTitle": "Available now",
+    "remainingTitle": "Not yet available",
     "waitingFor": "Waiting for",
     "owners": "Owners",
     "items": {
@@ -566,7 +568,7 @@
       },
       "soilModes": {
         "title": "SoilRevive and FarmRecovery modes",
-        "what": "Soil-recovery and post-drought/flood planning options.",
+        "what": "Advanced prescriptive soil amendments and post-drought/flood recovery rules. The evidence dashboard and rainfall-stress workflow are available now.",
         "why": "Approved soil/recovery rules"
       },
       "twins": {
