@@ -1,0 +1,3 @@
+# Optional authenticated NASA Earthdata granule discovery/download.
+# Credentials stay in the user's local Earthdata configuration.
+earthaccess>=0.16,<1

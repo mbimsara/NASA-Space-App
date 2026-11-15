@@ -20,6 +20,20 @@ Official references:
 These products use NASA Earthdata authentication. Credentials and tokens must
 remain outside the repository.
 
+Install the optional official access client and download only the requested
+point/date granules:
+
+```powershell
+.venv312\Scripts\python.exe -m pip install -r backend\requirements-earthdata.txt
+.venv312\Scripts\python.exe -m scripts.download_earthdata_context gpm --latitude 8.3 --longitude 80.4 --start 2025-01-01 --end 2025-01-31
+.venv312\Scripts\python.exe -m scripts.download_earthdata_context hls --latitude 8.3 --longitude 80.4 --start 2025-01-01 --end 2025-01-31
+```
+
+`earthaccess` checks the user's local Earthdata login configuration and otherwise
+prompts locally. Do not paste credentials into chat, commit them, or add them to
+command arguments. Raw NetCDF/COG files are downloaded under `.cache` and still
+require the documented quality-aware extraction step before normalization.
+
 ## Reproducible normalization
 
 The repository deliberately does not commit large or account-derived downloads.
