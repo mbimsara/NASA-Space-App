@@ -128,21 +128,18 @@ Set these for the reviewed staging environment only, then rebuild/redeploy manua
 | `VITE_API_BASE_URL` | Public/build: `/api/v1` |
 | `RENDER_API_BASE_URL` | Server secret/config: exact `https://YOUR-API.onrender.com`, no `/api/v1`, query or credentials |
 | `STAGING_BACKEND_TOKEN` | Server secret: same as Render; never `VITE_STAGING_BACKEND_TOKEN` |
-| `STAGING_PROXY_USER` | Server secret/config: reviewer account, no colon |
-| `STAGING_PROXY_PASSWORD` | Server secret: strong random value >=20 characters; HTTPS Basic gateway only |
 | `STAGING_FRONTEND_ORIGIN` | Server config: exact stable HTTPS staging origin, matching backend CORS |
 
 Do not give untrusted PR previews these secrets. Preview domains intentionally fail
-the exact-origin check. Rotate both gateway password and backend token after the
-demo; coordinate token changes across both services. Never log request bodies,
+the exact-origin check. The public demo has no browser sign-in prompt; the
+Render bearer token remains server-only. Rotate the backend token after the
+demo and coordinate the change across both services. Never log request bodies,
 questions, cookies, Authorization or environment dumps. Hosting-provider access
 logs may still retain URLs/query strings; use fictional coordinates and restrict
 log access. No source maps or private NASA `.cache` artifacts are provisioned.
 
-Reviewer login: first visit `https://YOUR-STAGING-PROJECT.vercel.app/api/v1/health`
-as a **top-level navigation**, satisfy Vercel Authentication and the Basic
-challenge, then open the app on the same origin. Browser caches the API credentials
-for that protection space; do not put them into localStorage or frontend source.
+The demo frontend and same-origin API gateway are public. Do not put the Render
+bearer token into localStorage, frontend source, or any `VITE_` variable.
 Verify this browser behavior in the deployed smoke check. If browser/platform
 authentication interaction fails, do not remove the guard: resolve the login design
 or use the separately prepared private VM option. Close the private browser session

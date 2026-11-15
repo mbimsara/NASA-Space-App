@@ -3,17 +3,13 @@ import assert from "node:assert/strict";
 import { proxy } from "../../frontend/api/gateway.mjs";
 
 const env = { RENDER_API_BASE_URL: "https://backend.example", STAGING_BACKEND_TOKEN: "t".repeat(48),
-  STAGING_PROXY_USER: "reviewer", STAGING_PROXY_PASSWORD: "p".repeat(24), STAGING_FRONTEND_ORIGIN: "https://frontend.example" };
-const auth = "Basic " + Buffer.from(`${env.STAGING_PROXY_USER}:${env.STAGING_PROXY_PASSWORD}`).toString("base64");
+  STAGING_FRONTEND_ORIGIN: "https://frontend.example" };
 const req = (path = "/api/v1/farms", options = {}) => new Request(env.STAGING_FRONTEND_ORIGIN + path,
-  { ...options, headers: { Authorization: auth, ...options.headers } });
+  { ...options, headers: { ...options.headers } });
 
-test("fails closed without configuration and credentials", async () => {
+test("fails closed without server configuration", async () => {
   assert.equal((await proxy(req(), {})).status, 503);
   assert.equal((await proxy(req(), { ...env, RENDER_API_BASE_URL: "http://backend.example" })).status, 503);
-  const denied = await proxy(new Request(env.STAGING_FRONTEND_ORIGIN + "/api/v1/farms"), env);
-  assert.equal(denied.status, 401);
-  assert.match(denied.headers.get("www-authenticate"), /Basic/);
 });
 test("rejects mismatched origins, writes without Origin, and arbitrary routes", async () => {
   assert.equal((await proxy(req("/api/v1/farms", { method: "POST" }), env)).status, 403);

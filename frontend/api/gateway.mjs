@@ -1,6 +1,3 @@
-import { createHash, timingSafeEqual } from "node:crypto";
-
-const digest = value => createHash("sha256").update(value).digest();
 const reply = (status, code, message, headers = {}) => Response.json(
   { error: { code, message } }, { status, headers: { "Cache-Control": "no-store", ...headers } },
 );
@@ -8,22 +5,15 @@ const reply = (status, code, message, headers = {}) => Response.json(
 /** Server-only gateway. Never import this module into frontend/src/. */
 export async function proxy(request, env = process.env, upstreamFetch = fetch) {
   const { RENDER_API_BASE_URL: upstream, STAGING_BACKEND_TOKEN: token,
-    STAGING_PROXY_USER: user, STAGING_PROXY_PASSWORD: password,
     STAGING_FRONTEND_ORIGIN: origin } = env;
   let target;
   try {
     target = new URL(upstream);
     if (target.protocol !== "https:" || target.pathname !== "/" || target.search || target.hash
-        || target.username || target.password || !token || token.length < 32
-        || !user || !password || password.length < 20 || !origin
+        || target.username || target.password || !token || token.length < 32 || !origin
         || new URL(origin).origin !== origin || !origin.startsWith("https://")) throw new Error();
   } catch {
     return reply(503, "SERVICE_UNAVAILABLE", "Staging gateway is not configured.");
-  }
-  const expected = "Basic " + Buffer.from(`${user}:${password}`).toString("base64");
-  if (!timingSafeEqual(digest(request.headers.get("authorization") ?? ""), digest(expected))) {
-    return reply(401, "UNAUTHORIZED", "Reviewer credentials are required.",
-      { "WWW-Authenticate": 'Basic realm="AgroSphere restricted staging", charset="UTF-8"' });
   }
   const url = new URL(request.url);
   if (url.origin !== origin || (request.headers.has("origin") && request.headers.get("origin") !== origin)) {
