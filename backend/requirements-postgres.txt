@@ -1,0 +1,2 @@
+# Optional driver only; no database URL rewrite or data migration is performed.
+psycopg[binary]==3.2.10

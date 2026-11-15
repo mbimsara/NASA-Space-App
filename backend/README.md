@@ -1,5 +1,10 @@
 # AgroSphere AI backend
 
+For the separate Render/Vercel staging option, read
+[deployment preparation and blockers](../docs/RENDER_VERCEL_DEPLOYMENT.md).
+Hosted mode adds server-side reviewer access protection, not farmer ownership.
+Existing local APIs and the separate Linux VM deployment work are preserved.
+
 See the [selective backend review](../docs/DULANJAYA_BACKEND_REVIEW.md) for the
 old-branch inclusion/exclusion inventory, canonical regression additions and
 Task 4 compatibility results. Rotation saves now atomically recheck farm versions;

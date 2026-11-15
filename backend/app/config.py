@@ -21,6 +21,9 @@ class Settings:
     observation_cache_ttl_seconds: int = 86400
     assistant_provider: str = "deterministic"
     openai_model: str | None = None
+    deployment_mode: str = "local"
+    staging_backend_token: str | None = field(default=None, repr=False)
+    trusted_hosts: tuple[str, ...] = ()
 
 
 def load_settings(env_file: Path = ENV_FILE) -> Settings:
@@ -71,11 +74,40 @@ def load_settings(env_file: Path = ENV_FILE) -> Settings:
     if assistant_provider == "openai" and not openai_model:
         raise ValueError("OPENAI_MODEL is required when ASSISTANT_PROVIDER=openai.")
 
+    deployment_mode = (values.get("DEPLOYMENT_MODE", "local") or "").strip()
+    if deployment_mode not in {"local", "hosted-staging"}:
+        raise ValueError("DEPLOYMENT_MODE must be local or hosted-staging.")
+    if values.get("RENDER") == "true" and deployment_mode != "hosted-staging":
+        raise ValueError("Render requires DEPLOYMENT_MODE=hosted-staging; local mode would expose unprotected APIs.")
+    token = values.get("STAGING_BACKEND_TOKEN") or None
+    hosts = tuple(h.strip() for h in (values.get("TRUSTED_HOSTS", "") or "").split(",") if h.strip())
+    if deployment_mode == "hosted-staging":
+        from sqlalchemy.engine import make_url
+        if not token or len(token) < 32 or not token.isascii() or any(c.isspace() for c in token):
+            raise ValueError("Hosted staging requires a random STAGING_BACKEND_TOKEN of at least 32 ASCII characters without whitespace.")
+        if not origins or any(urlsplit(o).scheme != "https" for o in origins):
+            raise ValueError("Hosted staging requires explicit HTTPS CORS_ORIGINS.")
+        if not hosts or any(not h or any(c in h for c in "*/:@?# ") for h in hosts):
+            raise ValueError("Hosted staging TRUSTED_HOSTS requires exact hostnames without ports or wildcards.")
+        if assistant_provider != "deterministic":
+            raise ValueError("Hosted staging requires the deterministic assistant.")
+        url = make_url(database_url)
+        if url.get_backend_name() == "sqlite":
+            if (values.get("ALLOW_EPHEMERAL_SQLITE") != "true" or not url.database
+                    or not Path(url.database).is_absolute() or url.query):
+                raise ValueError("Disposable hosted SQLite requires an absolute file path and ALLOW_EPHEMERAL_SQLITE=true; it is not persistent storage.")
+        elif url.drivername == "postgresql+psycopg":
+            if values.get("POSTGRES_COMPATIBILITY_VERIFIED") != "true":
+                raise ValueError("PostgreSQL requires explicit compatibility verification before hosted use.")
+        else:
+            raise ValueError("Hosted database driver must be explicitly sqlite or postgresql+psycopg.")
+
     return Settings(
         database_url=database_url, cors_origins=origins,
         nasa_power_enabled=nasa_power_enabled == "true",
         observation_cache_ttl_seconds=cache_ttl,
         assistant_provider=assistant_provider, openai_model=openai_model,
+        deployment_mode=deployment_mode, staging_backend_token=token, trusted_hosts=hosts,
     )
 
 

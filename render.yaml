@@ -1,0 +1,34 @@
+# Preparation only. Do not apply until docs/RENDER_VERCEL_DEPLOYMENT.md is reviewed.
+services:
+  - type: web
+    name: agrosphere-staging-api
+    runtime: python
+    plan: free
+    autoDeployTrigger: "off"
+    # Root directory intentionally omitted: shared src/ and data/ are required.
+    buildCommand: pip install . -r backend/requirements.txt -r backend/requirements-postgres.txt
+    startCommand: uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT --workers 1 --no-access-log --no-proxy-headers
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.12
+      - key: DEPLOYMENT_MODE
+        value: hosted-staging
+      - key: DATABASE_URL
+        sync: false
+      - key: ALLOW_EPHEMERAL_SQLITE
+        value: "false"
+      - key: POSTGRES_COMPATIBILITY_VERIFIED
+        value: "false"
+      - key: STAGING_BACKEND_TOKEN
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false
+      - key: TRUSTED_HOSTS
+        sync: false
+      - key: NASA_POWER_ENABLED
+        value: "true"
+      - key: ASSISTANT_PROVIDER
+        value: deterministic
+      - key: OBSERVATION_CACHE_TTL_SECONDS
+        value: "86400"

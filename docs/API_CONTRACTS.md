@@ -6,6 +6,12 @@ The implemented climate functions and proposed serializer are documented in [the
 
 ## Conventions
 
+Optional `DEPLOYMENT_MODE=hosted-staging` requires server-side Bearer access for
+every endpoint except GET/HEAD `/api/v1/health`. Anonymous requests return 401
+`UNAUTHORIZED`; docs/OpenAPI are disabled. The protected Vercel server function
+adds that token and preserves underlying JSON/status codes. No token belongs in
+browser configuration. See [Render/Vercel staging](RENDER_VERCEL_DEPLOYMENT.md).
+
 WGS84 coordinates; hectares; millimeters; Celsius; ISO dates; timezone-bearing timestamps. Unknown values are `null`, never assumed zero. Responses carry `data_kind` (`observed`, `modeled`, `synthetic`, or `mixed`) where appropriate, source references, and assumptions. Never relabel synthetic fixtures as NASA observations.
 
 Farm mutation input follows [the farm schema](../data/schemas/farm.schema.json). Server metadata is returned as `{ "id": "farm-demo-001", "input_version": 1, "profile": { ... } }`. Client-generated fixture IDs are examples only; the server allocates persistent IDs.

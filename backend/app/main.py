@@ -11,6 +11,8 @@ from app.database.connection import Base, engine
 from app.models import farm
 
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
+from app.hosted_access import HostedAccessMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,7 +24,10 @@ app = FastAPI(
     title="AgroSphere AI API",
     description="Backend API for AgroSphere AI",
     version="0.1.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    docs_url=None if settings.deployment_mode == "hosted-staging" else "/docs",
+    redoc_url=None if settings.deployment_mode == "hosted-staging" else "/redoc",
+    openapi_url=None if settings.deployment_mode == "hosted-staging" else "/openapi.json",
 )
 
 
@@ -89,3 +94,9 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PATCH"],
     allow_headers=["*"],
 )
+
+if settings.deployment_mode == "hosted-staging":
+    # Outermost guard covers every router, unknown path and preflight. CORS is
+    # not an authorization mechanism; browsers use the same-origin Vercel proxy.
+    app.add_middleware(HostedAccessMiddleware, token=settings.staging_backend_token)
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=list(settings.trusted_hosts))
