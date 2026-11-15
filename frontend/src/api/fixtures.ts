@@ -274,6 +274,39 @@ export async function getSoilMoistureFixture(farmId: string, signal?: AbortSigna
   };
 }
 
+export async function getGpmPrecipitationFixture(farmId: string, signal?: AbortSignal) {
+  await delay(100, signal);
+  const farm = load().farms[farmId];
+  if (!farm) fail(404, "NOT_FOUND", "Farm not found.");
+  return {
+    schema_version: "0.1" as const, kind: "gpm_imerg_daily_series" as const,
+    data_kind: "synthetic" as const, farm_id: farmId, input_version: farm.input_version,
+    product: "GPM_3IMERGDF" as const, version: "07" as const, units: "mm/day" as const,
+    requested_point: farm.profile.location, farm_distance_km: 0,
+    period: { start: "2025-01-01", end: "2025-01-01" }, spatial_resolution_degrees: 0.1,
+    coverage: { expected_days: 1, valid_days: 0 },
+    daily: [{ date: "2025-01-01", precipitation_mm: null }],
+    source_refs: ["synthetic-fixture-not-nasa"], retrieved_at: null,
+    limitations: ["Synthetic interface fixture; no GPM precipitation value is supplied."],
+  };
+}
+
+export async function getHlsVegetationFixture(farmId: string, signal?: AbortSignal) {
+  await delay(100, signal);
+  const farm = load().farms[farmId];
+  if (!farm) fail(404, "NOT_FOUND", "Farm not found.");
+  return {
+    schema_version: "0.1" as const, kind: "hls_vegetation_series" as const,
+    data_kind: "synthetic" as const, farm_id: farmId, input_version: farm.input_version,
+    products: ["HLSL30" as const, "HLSS30" as const], version: "2.0" as const, index: "NDVI" as const,
+    requested_point: farm.profile.location, farm_distance_km: 0, spatial_resolution_m: 30,
+    period: { start: "2025-01-01", end: "2025-01-01" },
+    coverage: { supplied_observations: 0, accepted_observations: 0 }, observations: [],
+    source_refs: ["synthetic-fixture-not-nasa"], retrieved_at: null,
+    limitations: ["Synthetic interface fixture; no HLS vegetation value is supplied."],
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Rotations — synthetic implementation of rotation-score-0.1
 // (docs/ROTATION_SCORING_SPEC.md, Bhagya). Crop values and seasonal rainfall

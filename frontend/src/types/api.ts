@@ -136,7 +136,7 @@ export interface SmapPass {
 export interface SoilMoistureContext {
   schema_version: "0.1";
   kind: "smap_surface_soil_moisture_series";
-  data_kind: "satellite_retrieval";
+  data_kind: "satellite_retrieval" | "synthetic";
   farm_id: string;
   input_version: number;
   product: "SPL3SMP_E";
@@ -149,6 +149,46 @@ export interface SoilMoistureContext {
   coverage: { expected_days: number; supplied_granule_days: number; accepted_AM: number; accepted_PM: number };
   daily: { date: string; granule_supplied: boolean; AM: SmapPass; PM: SmapPass }[];
   source_refs: string[];
+  limitations: string[];
+}
+
+export interface GpmContext {
+  schema_version: "0.1";
+  kind: "gpm_imerg_daily_series";
+  data_kind: "satellite_retrieval" | "synthetic";
+  farm_id: string;
+  input_version: number;
+  product: "GPM_3IMERGDF";
+  version: "07";
+  units: "mm/day";
+  requested_point: Location;
+  farm_distance_km: number;
+  period: { start: string; end: string };
+  spatial_resolution_degrees: number;
+  coverage: { expected_days: number; valid_days: number };
+  daily: { date: string; precipitation_mm: number | null }[];
+  source_refs: string[];
+  retrieved_at: string | null;
+  limitations: string[];
+}
+
+export interface HlsContext {
+  schema_version: "0.1";
+  kind: "hls_vegetation_series";
+  data_kind: "satellite_retrieval" | "synthetic";
+  farm_id: string;
+  input_version: number;
+  products: ("HLSL30" | "HLSS30")[];
+  version: "2.0";
+  index: "NDVI";
+  requested_point: Location;
+  farm_distance_km: number;
+  spatial_resolution_m: number;
+  period: { start: string; end: string };
+  coverage: { supplied_observations: number; accepted_observations: number };
+  observations: { date: string; product: "HLSL30" | "HLSS30"; ndvi: number | null; cloud_percent: number; quality_accepted: boolean; rejection_reason: string | null }[];
+  source_refs: string[];
+  retrieved_at: string | null;
   limitations: string[];
 }
 

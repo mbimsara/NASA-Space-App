@@ -25,7 +25,7 @@ import {
   toChartPoints,
 } from "../utils/observations";
 import { fmtNumber } from "../utils/format";
-import type { ObservationSummary, SoilMoistureContext } from "../types/api";
+import type { GpmContext, HlsContext, ObservationSummary, SoilMoistureContext } from "../types/api";
 
 export function ObservationsPage() {
   const { t } = useTranslation();
@@ -37,6 +37,8 @@ export function ObservationsPage() {
   const [end, setEnd] = useState(() => defaultObservationRange().end);
   const [obs, setObs] = useState<ObservationSummary | null>(null);
   const [soilMoisture, setSoilMoisture] = useState<SoilMoistureContext | null>(null);
+  const [gpm, setGpm] = useState<GpmContext | null>(null);
+  const [hls, setHls] = useState<HlsContext | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const rangeInvalid = !isValidObservationRange(start, end);
@@ -86,6 +88,24 @@ export function ObservationsPage() {
       .catch((err) => {
         if (!isAbortError(err) && !(err && typeof err === "object" && "status" in err && err.status === 404)) setError(err);
       });
+    return () => controller.abort();
+  }, [farm.id, farm.input_version]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    // Optional satellite layers must never block the primary POWER workflow.
+    // oxlint-disable-next-line react/set-state-in-effect
+    setGpm(null); setHls(null);
+    const ignoreUnavailable = (err: unknown) => {
+      if (isAbortError(err) || (err && typeof err === "object" && "status" in err && err.status === 404)) return;
+      setError(err);
+    };
+    api.getGpmPrecipitation(farm.id, controller.signal).then((result) => {
+      if (result.farm_id === farm.id && result.input_version === farm.input_version) setGpm(result);
+    }).catch(ignoreUnavailable);
+    api.getHlsVegetation(farm.id, controller.signal).then((result) => {
+      if (result.farm_id === farm.id && result.input_version === farm.input_version) setHls(result);
+    }).catch(ignoreUnavailable);
     return () => controller.abort();
   }, [farm.id, farm.input_version]);
 
@@ -230,6 +250,32 @@ export function ObservationsPage() {
           <p className="muted">Missing and quality-rejected passes remain unknown; AM and PM are not averaged.</p>
           <SourceBadge sourceRefs={soilMoisture.source_refs} dataKind={soilMoisture.data_kind} />
           <ul className="muted">{soilMoisture.limitations.map((item) => <li key={item}>{item}</li>)}</ul>
+        </section>
+      )}
+
+      {gpm && (
+        <section className="card" aria-labelledby="gpm-title">
+          <h2 id="gpm-title" style={{ marginTop: 0 }}>GPM IMERG precipitation context</h2>
+          <p>{gpm.product} V{gpm.version} · {gpm.period.start} → {gpm.period.end}</p>
+          <div className="notice notice-info">
+            Valid daily estimates: <strong>{gpm.coverage.valid_days}</strong> / {gpm.coverage.expected_days}
+          </div>
+          <p className="muted">This remains separate from the POWER rainfall series and is not substituted into the rotation baseline.</p>
+          <SourceBadge sourceRefs={gpm.source_refs} retrievedAt={gpm.retrieved_at} dataKind={gpm.data_kind} />
+          <ul className="muted">{gpm.limitations.map((item) => <li key={item}>{item}</li>)}</ul>
+        </section>
+      )}
+
+      {hls && (
+        <section className="card" aria-labelledby="hls-title">
+          <h2 id="hls-title" style={{ marginTop: 0 }}>HLS vegetation context</h2>
+          <p>{hls.products.join(" + ")} V{hls.version} · {hls.index} at {hls.spatial_resolution_m} m</p>
+          <div className="notice notice-info">
+            Quality-accepted observations: <strong>{hls.coverage.accepted_observations}</strong> / {hls.coverage.supplied_observations}
+          </div>
+          <p className="muted">NDVI is shown as greenness context only; it does not identify a crop or predict yield.</p>
+          <SourceBadge sourceRefs={hls.source_refs} retrievedAt={hls.retrieved_at} dataKind={hls.data_kind} />
+          <ul className="muted">{hls.limitations.map((item) => <li key={item}>{item}</li>)}</ul>
         </section>
       )}
 

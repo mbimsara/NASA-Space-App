@@ -29,7 +29,7 @@ AgroSphere AI connects Earth observations, farmer inputs, and crop-rotation mode
 | Capability | What you can explore |
 | --- | --- |
 | Farm workspace | Location, crop history, goals, constraints, irrigation, and measured soil inputs in a shared farm record. |
-| Earth observations | NASA POWER climate observations with persisted snapshots and caching; SMAP preparation and regional soil-moisture processing tools. |
+| Earth observations | NASA POWER climate observations with persisted snapshots and caching; SMAP surface moisture plus optional, location-gated GPM IMERG V07 rainfall and HLS V2.0 NDVI artifacts. |
 | Crop rotation | Candidate sequences, constraints, rankings, explanations, and seasonal water budgets. |
 | Climate scenarios | Hypothetical rainfall sensitivity applied to saved analyses without changing the original observations. |
 | Financial scenarios | Frontend cost and income comparisons using explicit inputs and ranges. |
@@ -195,7 +195,7 @@ Additional checks are available through `npm run lint` and `npm run test:e2e`; b
 - **Explanations use actual context:** assistant responses resolve stored farm and analysis records.
 - **Demonstrations stay labelled:** synthetic fixtures are for development and walkthroughs.
 
-POWER and SMAP have implemented integration or processing paths. GPM and HLS remain sources to evaluate for appropriate access, coverage, licensing, and resolution.
+POWER, SMAP, GPM IMERG, and HLS now have provenance-preserving integration or processing paths. GPM and HLS are shown only when a locally verified Earthdata artifact covers the selected farm; missing products never fall back to synthetic values. See [GPM/HLS integration](docs/GPM_HLS_INTEGRATION.md).
 
 ## Roadmap
 

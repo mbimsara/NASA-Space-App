@@ -22,6 +22,8 @@ import type {
   SavedPlan,
   ApiError,
   SoilMoistureContext,
+  GpmContext,
+  HlsContext,
 } from "../types/api";
 
 // ---------------------------------------------------------------------------
@@ -139,6 +141,16 @@ export async function getObservations(
 /** GET /farms/:id/soil-moisture — quality-filtered regional SMAP context when available. */
 export async function getSoilMoisture(farmId: string, signal?: AbortSignal): Promise<SoilMoistureContext> {
   return request<SoilMoistureContext>({ method: "GET", url: `/farms/${farmId}/soil-moisture` }, signal);
+}
+
+/** Optional, separately provenanced GPM IMERG V07 daily rainfall context. */
+export async function getGpmPrecipitation(farmId: string, signal?: AbortSignal): Promise<GpmContext> {
+  return request<GpmContext>({ method: "GET", url: `/farms/${farmId}/gpm-precipitation` }, signal);
+}
+
+/** Optional, quality-screened HLS V2.0 NDVI context. */
+export async function getHlsVegetation(farmId: string, signal?: AbortSignal): Promise<HlsContext> {
+  return request<HlsContext>({ method: "GET", url: `/farms/${farmId}/hls-vegetation` }, signal);
 }
 
 // ---------------------------------------------------------------------------
