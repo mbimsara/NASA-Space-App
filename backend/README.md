@@ -1,5 +1,10 @@
 # AgroSphere AI backend
 
+Restricted staging: see [deployment, security audit and verification](../docs/STAGING_DEPLOYMENT.md).
+The prepared gateway is private and authenticated; application ownership checks
+remain unimplemented. Use fictional records only. `GET /api/v1/ready` adds a
+database/schema readiness check without changing `/api/v1/health`.
+
 See the [selective backend review](../docs/DULANJAYA_BACKEND_REVIEW.md) for the
 old-branch inclusion/exclusion inventory, canonical regression additions and
 Task 4 compatibility results. Rotation saves now atomically recheck farm versions;

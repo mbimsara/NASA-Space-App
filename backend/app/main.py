@@ -11,6 +11,9 @@ from app.database.connection import Base, engine
 from app.models import farm
 
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
+from urllib.parse import urlsplit
+from app.staging import StagingBoundaryMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,7 +25,10 @@ app = FastAPI(
     title="AgroSphere AI API",
     description="Backend API for AgroSphere AI",
     version="0.1.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    docs_url=None if settings.app_env == "staging" else "/docs",
+    redoc_url=None if settings.app_env == "staging" else "/redoc",
+    openapi_url=None if settings.app_env == "staging" else "/openapi.json",
 )
 
 
@@ -89,3 +95,10 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PATCH"],
     allow_headers=["*"],
 )
+
+if settings.app_env == "staging":
+    app.add_middleware(StagingBoundaryMiddleware, origins=settings.cors_origins)
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=[
+        *(urlsplit(origin).hostname for origin in settings.cors_origins),
+        "127.0.0.1", "localhost",
+    ])

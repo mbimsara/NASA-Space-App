@@ -5,6 +5,20 @@
 !**/.env.example
 *.pem
 *.key
+.netrc
+_netrc
+.aws/
+.ssh/
+*.p12
+*.pfx
+*.db-wal
+*.db-shm
+*.db-journal
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-wal
+*.sqlite3-shm
+backups/
 
 # JavaScript
 node_modules/
