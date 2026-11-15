@@ -35,7 +35,7 @@
     "darkTheme": "Switch to dark theme",
     "waterBudget": "Water budget",
     "soilHealth": "Soil health",
-    "weedShield": "WeedShield AI",
+    "weedShield": "WeedShield triage",
     "climateTwin": "Climate twin",
     "farmCalendar": "Farm calendar",
     "financialPlanner": "Financial planner",
@@ -243,10 +243,18 @@
     "mode": "Planning mode",
     "modes": {
       "standard": "Standard rotation",
-      "soilRevive": "SoilRevive (soil recovery)",
-      "farmRecovery": "FarmRecovery (after drought/flood)"
+      "soil_revive": "SoilRevive screening",
+      "drought_recovery": "FarmRecovery — drought",
+      "flood_recovery": "FarmRecovery — flood"
     },
-    "modeHelp": "Soil and recovery modes are waiting for approved soil/recovery rules."
+    "modeHelp": "Modes change the explainable screening order, not the underlying farmer-priority score. They do not prescribe fertilizer or guarantee recovery.",
+    "planningEvidence": "Planning-mode evidence",
+    "legumeSeasons_one": "{{count}} legume season",
+    "legumeSeasons_other": "{{count}} legume seasons",
+    "cropFamilies_one": "{{count}} crop family",
+    "cropFamilies_other": "{{count}} crop families",
+    "meanDemand": "mean nominal demand {{value}} mm/season",
+    "localChecks": "Local checks required"
   },
   "scenario": {
     "title": "Scenario Comparison",

@@ -33,13 +33,17 @@ test("complete browser journey over real FastAPI HTTP (explicit synthetic server
   const obs = await observations(page);
   expect(obs.data_kind).toBe("synthetic");
   await page.goto(`/farms/${farm.id}/rotations`);
+  await page.getByRole("radio", { name: /drought/i }).check();
   const generated = page.waitForResponse(r => r.url().endsWith("/rotations") && r.request().method() === "POST");
   await page.getByRole("button", { name: /generate|run rotation/i }).click();
   const response = await generated;
   expect(response.status()).toBe(201);
   const analysis = await response.json();
   expect(analysis.observation_id).toBe(obs.observation_id);
+  expect(analysis.planning_mode).toBe("drought_recovery");
+  expect(analysis.candidates[0].planning_evidence.mode).toBe("drought_recovery");
   expect(analysis.candidates).toHaveLength(1);
+  await expect(page.getByText(/planning-mode evidence/i)).toBeVisible();
   await expect(page.getByText("Synthetic browser crop", { exact: false }).first()).toBeVisible();
   await page.goto(`/farms/${farm.id}/scenario`);
   const scenarioResponse = page.waitForResponse(r => r.url().endsWith("/scenarios") && r.request().method() === "POST");
@@ -60,10 +64,14 @@ test("complete browser journey over real FastAPI HTTP (explicit synthetic server
   await expect(page.getByText("Synthetic browser crop", { exact: false }).first()).toBeVisible();
   await page.reload();
   await expect(page.getByText("Synthetic browser crop", { exact: false }).first()).toBeVisible();
-  await page.screenshot({ path: test.info().outputPath("saved-plan-desktop.png"), fullPage: true });
+  await page.goto(`/farms/${farm.id}/weed-shield`);
+  await expect(page.getByRole("heading", { name: /field-photo triage/i })).toBeVisible();
+  await expect(page.getByText(/not a trained weed detector/i)).toBeVisible();
+  await expect(page.getByText(/cannot identify individual weeds/i)).toBeVisible();
+  await page.screenshot({ path: test.info().outputPath("weedshield-desktop.png"), fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator(".app-main")).toHaveCSS("margin-left", "0px");
-  await page.screenshot({ path: test.info().outputPath("saved-plan-mobile.png"), fullPage: true });
+  await page.screenshot({ path: test.info().outputPath("weedshield-mobile.png"), fullPage: true });
 });
 
 test("missing observations disable generation; backend keeps 404/409/422 semantics", async ({ page, request }) => {

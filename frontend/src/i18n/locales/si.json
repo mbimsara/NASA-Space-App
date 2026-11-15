@@ -40,7 +40,7 @@
     "darkTheme": "අඳුරු තේමාවට මාරු වන්න",
     "waterBudget": "ජල අයවැය",
     "soilHealth": "පාංශු සෞඛ්‍යය",
-    "weedShield": "වල් පැළෑටි හඳුනාගැනීම",
+    "weedShield": "WeedShield ක්ෂේත්‍ර පරීක්ෂාව",
     "climateTwin": "සමාන දේශගුණ කලාප",
     "farmCalendar": "ගොවිබිම් දින දර්ශනය",
     "financialPlanner": "මූල්‍ය සැලසුම්කරු",
@@ -212,10 +212,18 @@
     "mode": "සැලසුම් මාදිලිය",
     "modes": {
       "standard": "සාමාන්‍ය බෝග භ්‍රමණය",
-      "soilRevive": "SoilRevive (පස යථා තත්ත්වයට පත් කිරීම)",
-      "farmRecovery": "FarmRecovery (නියඟය / ගංවතුරෙන් පසු)"
+      "soil_revive": "SoilRevive පරීක්ෂාව",
+      "drought_recovery": "FarmRecovery — නියඟය",
+      "flood_recovery": "FarmRecovery — ගංවතුර"
     },
-    "modeHelp": "පාංශු හා ප්‍රතිසාධන මාදිලි අනුමත නීති ලැබෙන තෙක් බලා සිටී."
+    "modeHelp": "මෙම මාදිලි පැහැදිලි පරීක්ෂණ අනුපිළිවෙළ පමණක් වෙනස් කරයි; පොහොර නිර්දේශ හෝ ප්‍රතිසාධන සහතික නොදේ.",
+    "planningEvidence": "සැලසුම් මාදිලි සාක්ෂි",
+    "legumeSeasons_one": "රනිල කන්න {{count}}",
+    "legumeSeasons_other": "රනිල කන්න {{count}}",
+    "cropFamilies_one": "බෝග කුල {{count}}",
+    "cropFamilies_other": "බෝග කුල {{count}}",
+    "meanDemand": "සාමාන්‍ය නාමික ඉල්ලුම කන්නයකට {{value}} mm",
+    "localChecks": "අවශ්‍ය දේශීය පරීක්ෂා"
   },
   "scenario": {
     "title": "තත්ත්ව සංසන්දනය",

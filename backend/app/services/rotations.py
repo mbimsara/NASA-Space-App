@@ -47,6 +47,57 @@ def _unavailable_components(weights: dict[str, float], crop_ids: tuple[str, ...]
     ]
 
 
+def _planning_evidence(crop_ids: tuple[str, ...], crop_by_id: dict, mode: str) -> dict:
+    crops = [crop_by_id[crop_id] for crop_id in crop_ids]
+    legume_seasons = sum(crop.family == "Fabaceae" for crop in crops)
+    demands = [crop.water_demand_mm for crop in crops if crop.water_demand_mm is not None]
+    mean_demand = sum(demands) / len(demands) if len(demands) == len(crops) else None
+    refs = list(dict.fromkeys(url for crop in crops for url in crop.source_urls))
+    local_checks: list[str] = []
+    if mode == "soil_revive":
+        interpretation = [
+            f"{legume_seasons} of {len(crops)} seasons use a reviewed Fabaceae crop.",
+            "Family diversity and legume presence are structural screening evidence only; no nitrogen addition or soil-health improvement is quantified.",
+        ]
+        local_checks = ["Confirm crop and inoculant suitability with local extension advice.", "Use a field soil test before nutrient or amendment decisions."]
+    elif mode == "drought_recovery":
+        interpretation = [
+            f"Mean reviewed nominal crop-water demand is {mean_demand:.0f} mm per season." if mean_demand is not None else "A complete reviewed water-demand comparison is unavailable.",
+            "This demand comparison uses crop-cycle screening proxies; run a negative-rainfall scenario to inspect the dated water ranges.",
+        ]
+        local_checks = ["Confirm actual irrigation delivery and field losses.", "Check current crop establishment conditions before planting."]
+    elif mode == "flood_recovery":
+        interpretation = [
+            "The sequence remains ranked by the standard farmer-selected priorities because the farm profile has no measured drainage, inundation duration, or crop-damage fields.",
+            "NASA rainfall and regional satellite context cannot establish field trafficability, root damage, pathogens, or planting readiness.",
+        ]
+        local_checks = ["Inspect drainage and standing water in the field.", "Assess erosion, crop damage, and soil condition locally before planting.", "Seek local agronomy advice where flood damage is material."]
+    else:
+        interpretation = ["Standard comparison uses farmer-selected water, crop-diversity, and climate priorities."]
+    return {
+        "mode": mode,
+        "legume_seasons": legume_seasons,
+        "unique_crop_families": len({crop.family for crop in crops}),
+        "mean_crop_water_demand_mm": mean_demand,
+        "source_refs": refs,
+        "interpretation": interpretation,
+        "local_checks_required": local_checks,
+    }
+
+
+def _sort_candidates(candidates: list[dict], mode: str) -> None:
+    """Mode evidence is an explicit tie-break/screening order, not a new scientific score."""
+    def standard(candidate: dict):
+        return (candidate["score"] is None, -(candidate["score"] or 0), candidate["candidate_id"])
+
+    if mode == "soil_revive":
+        candidates.sort(key=lambda c: (-c["planning_evidence"]["legume_seasons"], -c["planning_evidence"]["unique_crop_families"], *standard(c)))
+    elif mode == "drought_recovery":
+        candidates.sort(key=lambda c: (c["planning_evidence"]["mean_crop_water_demand_mm"] is None, c["planning_evidence"]["mean_crop_water_demand_mm"] or float("inf"), *standard(c)))
+    else:
+        candidates.sort(key=standard)
+
+
 def build_analysis(
     *, farm: Farm, observation: ObservationResponse, request: RotationRequest,
     season_inputs: list[dict] | None = None,
@@ -132,14 +183,16 @@ def build_analysis(
             "water_budget_range": per_season,
             "reasons": list(candidate.reasons) + score_reasons,
             "constraint_checks": [asdict(check) for check in candidate.constraint_checks],
+            "planning_evidence": _planning_evidence(candidate.crop_ids, crop_by_id, request.planning_mode),
         })
-    candidates.sort(key=lambda value: (value["score"] is None, -(value["score"] or 0), value["candidate_id"]))
+    _sort_candidates(candidates, request.planning_mode)
 
     now = datetime.now(timezone.utc)
     return {
         "analysis_id": str(uuid4()), "farm_id": farm.id,
         "input_version": farm.input_version, "observation_id": observation.observation_id,
         "catalog_version": catalog_version, "model_version": MODEL_VERSION,
+        "planning_mode": request.planning_mode,
         "data_kind": observation.data_kind, "created_at": now.isoformat(),
         "candidates": candidates, "reasons": list(generated.reasons),
         "assumptions": [
@@ -228,8 +281,9 @@ def _build_seasonal_analysis(
             "water_budget_range": per_season,
             "reasons": list(candidate.reasons) + score_reasons,
             "constraint_checks": [asdict(check) for check in candidate.constraint_checks],
+            "planning_evidence": _planning_evidence(candidate.crop_ids, crop_by_id, request.planning_mode),
         })
-    candidates.sort(key=lambda value: (value["score"] is None, -(value["score"] or 0), value["candidate_id"]))
+    _sort_candidates(candidates, request.planning_mode)
 
     kinds = {observation.data_kind, *(season["data_kind"] for season in season_inputs)}
     source_refs = [observation.observation_id]
@@ -248,6 +302,7 @@ def _build_seasonal_analysis(
         "analysis_id": str(uuid4()), "farm_id": farm.id,
         "input_version": farm.input_version, "observation_id": observation.observation_id,
         "catalog_version": catalog_version, "model_version": MODEL_VERSION,
+        "planning_mode": request.planning_mode,
         "data_kind": kinds.pop() if len(kinds) == 1 else "mixed",
         "created_at": now.isoformat(),
         "candidates": candidates, "reasons": list(generated.reasons),

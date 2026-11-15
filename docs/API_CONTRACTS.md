@@ -19,7 +19,16 @@ Farm mutation input follows [the farm schema](../data/schemas/farm.schema.json).
 | GET `/farms/{id}/soil-moisture` | Farm ID; local verified SMAP series must cover its location | Quality-filtered `SPL3SMP_E` V006 AM/PM context; 404 when unavailable |
 | GET `/observations/{observation_id}` | Persistent observation ID | 200: original immutable observation envelope; 404 if absent |
 | POST `/observations/{observation_id}/rainfall-scenarios` | `rainfall_change_pct` from -100 to 100 | Hypothetical uniform scaling of the stored daily rainfall baseline; missing values are preserved and the snapshot is unchanged |
-| POST `/farms/{id}/rotations` | `input_version`, `observation_id`, `seasons`, ordered `season_labels`, `catalog_version`, `priority_weights` | 201: immutable rotation analysis |
+| POST `/farms/{id}/rotations` | `input_version`, `observation_id`, `seasons`, ordered `season_labels`, `catalog_version`, `priority_weights`, optional `planning_mode` | 201: immutable rotation analysis |
+
+`planning_mode` is one of `standard`, `soil_revive`, `drought_recovery`, or
+`flood_recovery` (default `standard`). Each candidate includes sourced
+`planning_evidence`: legume-season count, crop-family count, mean nominal
+crop-water demand when complete, interpretation, and required local checks.
+SoilRevive and drought recovery use these transparent metrics as screening-order
+tie breakers without rewriting the farmer-priority score. Flood recovery retains
+score order and requires local field checks. No mode estimates nutrients,
+prescribes amendments, or guarantees recovery.
 | POST `/analyses/{id}/scenarios` | `rainfall_change_pct` from -100 to 100 for the prototype | New hypothetical scenario linked to baseline, recalculated candidates and deltas |
 | POST `/assistant/messages` | `farm_id`, `analysis_id`, optional `scenario_id`/`candidate_id`, `language` (`en`; `si`/`ta` return 422 `UNSUPPORTED_LANGUAGE`), `message` (1 to 2000 characters) | Explanation, source IDs, limitations; server verifies context IDs belong together |
 | POST `/farms/{id}/plans` | `analysis_id`, optional `scenario_id`, `candidate_id`, `expected_input_version` | 201: saved plan ID and snapshot references |

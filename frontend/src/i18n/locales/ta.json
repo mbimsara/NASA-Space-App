@@ -40,7 +40,7 @@
     "darkTheme": "இருண்ட தோற்றத்திற்கு மாற்றவும்",
     "waterBudget": "நீர் வரவுசெலவு",
     "soilHealth": "மண் ஆரோக்கியம்",
-    "weedShield": "களை கண்டறிதல்",
+    "weedShield": "WeedShield களத் திரையிடல்",
     "climateTwin": "ஒத்த காலநிலைப் பகுதிகள்",
     "farmCalendar": "பண்ணை நாட்காட்டி",
     "financialPlanner": "நிதித் திட்டமிடல்",
@@ -212,10 +212,18 @@
     "mode": "திட்டமிடல் முறை",
     "modes": {
       "standard": "வழக்கமான பயிர் சுழற்சி",
-      "soilRevive": "SoilRevive (மண் மீட்பு)",
-      "farmRecovery": "FarmRecovery (வறட்சி / வெள்ளத்திற்குப் பின்)"
+      "soil_revive": "SoilRevive திரையிடல்",
+      "drought_recovery": "FarmRecovery — வறட்சி",
+      "flood_recovery": "FarmRecovery — வெள்ளம்"
     },
-    "modeHelp": "மண் மற்றும் மீட்பு முறைகள் அங்கீகரிக்கப்பட்ட விதிகளுக்காகக் காத்திருக்கின்றன."
+    "modeHelp": "இந்த முறைகள் விளக்கக்கூடிய திரையிடல் வரிசையை மட்டும் மாற்றும்; உர பரிந்துரை அல்லது மீட்பு உத்தரவாதம் வழங்காது.",
+    "planningEvidence": "திட்டமிடல் முறை ஆதாரம்",
+    "legumeSeasons_one": "{{count}} பயறு பருவம்",
+    "legumeSeasons_other": "{{count}} பயறு பருவங்கள்",
+    "cropFamilies_one": "{{count}} பயிர் குடும்பம்",
+    "cropFamilies_other": "{{count}} பயிர் குடும்பங்கள்",
+    "meanDemand": "சராசரி பெயரளவு தேவை {{value}} mm/பருவம்",
+    "localChecks": "தேவையான உள்ளூர் சோதனைகள்"
   },
   "scenario": {
     "title": "காட்சி ஒப்பீடு",

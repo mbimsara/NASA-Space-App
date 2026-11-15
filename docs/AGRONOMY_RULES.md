@@ -1,5 +1,25 @@
 # Agronomy and financial model register
 
+## Implemented planning modes (screening, not prescriptions)
+
+The rotation request supports `standard`, `soil_revive`, `drought_recovery`,
+and `flood_recovery`. These modes retain the documented `rotation-score-0.1`
+score and attach candidate-level evidence:
+
+- **SoilRevive:** orders candidates by reviewed Fabaceae seasons and then crop
+  family diversity. This is rotation-structure evidence only; it does not
+  quantify nitrogen, organic matter, nutrient balance, or soil improvement.
+- **Drought recovery:** orders candidates by the lowest mean nominal reviewed
+  crop-cycle water-demand proxy. A negative-rainfall scenario provides the
+  dated comparison; actual field-applied irrigation must be confirmed locally.
+- **Flood recovery:** does not infer drainage or flood damage from POWER, SMAP,
+  HLS, or coordinates, so it retains score order and returns required local
+  field checks instead.
+
+Every mode carries the selected crops' catalog references. SMAP remains regional
+surface-moisture context and HLS remains 30 m vegetation context; neither is
+converted into nutrients, root-zone water, weed identity, or a recovery score.
+
 Owner/reviewer: Bhagya. Research: Tharuka. Financial implementation and catalog validation: Shehani.
 
 > [!IMPORTANT]

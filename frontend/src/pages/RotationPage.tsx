@@ -20,7 +20,7 @@ import { SourceBadge } from "../components/ui/SourceBadge";
 import { IrrigationUnknownNotice } from "../components/ui/IrrigationUnknownNotice";
 import { CandidateCard } from "../components/rotations/CandidateCard";
 import { CATALOG_VERSION, loadedCatalog } from "../catalog";
-import { SEASON_LABELS, type SeasonLabel } from "../api/client";
+import { SEASON_LABELS, type PlanningMode, type SeasonLabel } from "../api/client";
 import { normalizeWeights } from "../utils/validation";
 import type { PriorityWeights } from "../types/api";
 import { SeasonInputsCard } from "../components/rotations/SeasonInputsCard";
@@ -56,6 +56,7 @@ export function RotationPage() {
     setSeasonLabels((cur) => [...cur.slice(0, n), ...defaultLabels(n).slice(cur.length)].slice(0, n));
   };
   const [weights, setWeights] = useState<PriorityWeights>(farm.profile.priority_weights);
+  const [planningMode, setPlanningMode] = useState<PlanningMode>(analysis?.planning_mode ?? "standard");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
@@ -83,6 +84,7 @@ export function RotationPage() {
           season_labels: seasonLabels,
           catalog_version: CATALOG_VERSION,
           priority_weights: normalizeWeights(weights),
+          planning_mode: planningMode,
           // Each planned season gets its own dated rainfall period (live API).
           season_periods: "calendar",
         },
@@ -158,16 +160,15 @@ export function RotationPage() {
         <fieldset style={{ border: 0, padding: 0, margin: "12px 0 0" }}>
           <legend style={{ fontWeight: 600 }}>{t("rotation.mode")}</legend>
           <div className="row" style={{ alignItems: "flex-start" }}>
-            {(["standard", "soilRevive", "farmRecovery"] as const).map((m) => (
-              <label key={m} style={{ display: "flex", gap: 6, alignItems: "center", fontWeight: 400, opacity: m === "standard" ? 1 : 0.75 }}>
-                <input type="radio" name="planning-mode" checked={m === "standard"} disabled={m !== "standard"} readOnly />
+            {(["standard", "soil_revive", "drought_recovery", "flood_recovery"] as const).map((m) => (
+              <label key={m} style={{ display: "flex", gap: 6, alignItems: "center", fontWeight: 400 }}>
+                <input type="radio" name="planning-mode" checked={planningMode === m} onChange={() => setPlanningMode(m)} />
                 {t(`rotation.modes.${m}`)}
-                {m !== "standard" && <span className="badge-planned">{t("common.roadmapFeature")}</span>}
               </label>
             ))}
           </div>
           <p className="muted">
-            {t("rotation.modeHelp")} <Link to="/roadmap">{t("nav.roadmap")}</Link>
+            {t("rotation.modeHelp")}
           </p>
         </fieldset>
         <fieldset style={{ border: 0, padding: 0, margin: "12px 0 0" }}>

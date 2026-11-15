@@ -40,6 +40,16 @@ export function CandidateCard({ candidate: cand, rank, selected = false, childre
       <SeasonWaterTable ranges={asSeasonRanges(cand.water_budget_range)} sequence={cand.sequence} />
       <WaterBudgetCard budget={cand.water_budget} />
 
+      {cand.planning_evidence && <div className="notice notice-info" style={{ marginTop: 12 }}>
+        <strong>{t("rotation.planningEvidence")}</strong>
+        <p style={{ margin: "6px 0" }}>
+          {t("rotation.legumeSeasons", { count: cand.planning_evidence.legume_seasons })} · {t("rotation.cropFamilies", { count: cand.planning_evidence.unique_crop_families })}
+          {cand.planning_evidence.mean_crop_water_demand_mm !== null && ` · ${t("rotation.meanDemand", { value: Math.round(cand.planning_evidence.mean_crop_water_demand_mm) })}`}
+        </p>
+        <ul style={{ margin: "4px 0" }}>{cand.planning_evidence.interpretation.map((item) => <li key={item}>{item}</li>)}</ul>
+        {cand.planning_evidence.local_checks_required.length > 0 && <details><summary>{t("rotation.localChecks")}</summary><ul>{cand.planning_evidence.local_checks_required.map((item) => <li key={item}>{item}</li>)}</ul></details>}
+      </div>}
+
       {cand.reasons.length > 0 && (
         <details style={{ marginTop: 12, fontSize: 13 }}>
           <summary style={{ cursor: "pointer", fontWeight: 600 }}>{t("rotation.reasons")}</summary>

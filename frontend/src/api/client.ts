@@ -175,6 +175,7 @@ export async function createPlanFeedback(planId: string, body: SeasonFeedbackReq
 
 export type SeasonLabel = "maha" | "yala" | "inter-season";
 export const SEASON_LABELS: SeasonLabel[] = ["maha", "yala", "inter-season"];
+export type PlanningMode = "standard" | "soil_revive" | "drought_recovery" | "flood_recovery";
 
 export interface RotationRequest {
   input_version: number;
@@ -185,6 +186,7 @@ export interface RotationRequest {
   season_labels?: SeasonLabel[];
   catalog_version: string;
   priority_weights: { water: number; soil: number; climate: number };
+  planning_mode?: PlanningMode;
   /**
    * Season-specific rainfall: "calendar" lets the server pick one historical season
    * per planned season; a list gives explicit chronological dates. Omit to keep water unknown.

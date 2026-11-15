@@ -27,7 +27,7 @@ from app.models.rotation import RotationAnalysisSnapshot
 from app.models.scenario import RotationScenarioSnapshot
 from app.schemas.scenario import AnalysisScenarioResponse
 from app.services.observation_cache import snapshot_response
-from app.services.rotations import _unavailable_components
+from app.services.rotations import _sort_candidates, _unavailable_components
 from services.climate import rainfall_scenario
 
 
@@ -172,7 +172,7 @@ def build_scenario(
         _recalculate_candidate(candidate, change_pct, period, baseline["data_kind"])
         for candidate in baseline["candidates"]
     ]
-    candidates.sort(key=lambda value: (value["score"] is None, -(value["score"] or 0), value["candidate_id"]))
+    _sort_candidates(candidates, baseline.get("planning_mode", "standard"))
 
     baseline_rank = {c["candidate_id"]: index for index, c in enumerate(baseline["candidates"], 1)}
     baseline_by_id = {c["candidate_id"]: c for c in baseline["candidates"]}

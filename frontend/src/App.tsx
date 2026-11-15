@@ -21,6 +21,7 @@ const AssistantPage = lazy(() => import("./pages/AssistantPage").then((m) => ({ 
 const FinancePage = lazy(() => import("./pages/FinancePage").then((m) => ({ default: m.FinancePage })));
 const SoilHealthPage = lazy(() => import("./pages/SoilHealthPage").then((m) => ({ default: m.SoilHealthPage })));
 const ClimateTwinPage = lazy(() => import("./pages/ClimateTwinPage").then((m) => ({ default: m.ClimateTwinPage })));
+const WeedShieldPage = lazy(() => import("./pages/WeedShieldPage").then((m) => ({ default: m.WeedShieldPage })));
 const PlanPage = lazy(() => import("./pages/PlanPage").then((m) => ({ default: m.PlanPage })));
 const CatalogPage = lazy(() => import("./pages/CatalogPage").then((m) => ({ default: m.CatalogPage })));
 const RoadmapPage = lazy(() => import("./pages/RoadmapPage").then((m) => ({ default: m.RoadmapPage })));
@@ -44,6 +45,7 @@ export default function App() {
             <Route path="finance" element={page(<FinancePage />)} />
             <Route path="soil-health" element={page(<SoilHealthPage />)} />
             <Route path="climate-twins" element={page(<ClimateTwinPage />)} />
+            <Route path="weed-shield" element={page(<WeedShieldPage />)} />
           </Route>
           <Route path="plans/:planId" element={page(<PlanPage />)} />
           <Route path="catalog" element={page(<CatalogPage />)} />

@@ -1,6 +1,6 @@
 /**
  * Sidebar — Tharuka's dark-forest navigation: brand, current-farm switcher,
- * core journey links, tools, planned features, and data-mode footer.
+ * core journey links, working tools, capability status, and data-mode footer.
  * Fixed on desktop; an off-canvas drawer below 960 px.
  * Owner: Shehani. Design: Tharuka.
  */
@@ -86,19 +86,15 @@ export function Sidebar({ open, onNavigate, id }: Props) {
         <span className="side-section">{t("nav.tools")}</span>
         {farmId && link(`/farms/${farmId}/rotations`, "climate", t("nav.waterBudget"))}
         {farmId ? link(`/farms/${farmId}/soil-health`, "farm", t("nav.soilHealth")) : <span className="side-disabled" aria-disabled="true"><Icon name="farm" /><span>{t("nav.soilHealth")}</span></span>}
-        <NavLink to="/roadmap#weed" onClick={onNavigate}><Icon name="overview" /><span>{t("nav.weedShield")}</span><span className="side-tag">{t("nav.soon")}</span></NavLink>
+        {farmId ? link(`/farms/${farmId}/weed-shield`, "overview", t("nav.weedShield")) : <span className="side-disabled" aria-disabled="true"><Icon name="overview" /><span>{t("nav.weedShield")}</span></span>}
         {farmId ? link(`/farms/${farmId}/climate-twins`, "map", t("nav.climateTwin")) : <span className="side-disabled" aria-disabled="true"><Icon name="map" /><span>{t("nav.climateTwin")}</span></span>}
         {latestPlan ? link(`/plans/${latestPlan.id}`, "save", t("nav.farmCalendar")) : <NavLink to="/roadmap" onClick={onNavigate}><Icon name="save" /><span>{t("nav.farmCalendar")}</span></NavLink>}
         {farmId && link(`/farms/${farmId}/finance`, "coin", t("nav.financialPlanner"))}
         {latestPlan ? link(`/plans/${latestPlan.id}`, "book", t("nav.reportsHistory")) : <NavLink to="/roadmap" onClick={onNavigate}><Icon name="book" /><span>{t("nav.reportsHistory")}</span></NavLink>}
-        <NavLink to="/roadmap" onClick={onNavigate}><Icon name="overview" /><span>{t("nav.communityWater")}</span><span className="side-tag">{t("nav.soon")}</span></NavLink>
         {link("/catalog", "book", t("nav.catalog"))}
-        <NavLink to="/roadmap" onClick={onNavigate}><Icon name="edit" /><span>{t("nav.settings")}</span></NavLink>
-
-        <span className="side-section">{t("nav.planned")}</span>
         <NavLink to="/roadmap" onClick={onNavigate}>
           <Icon name="map" />
-          <span>{t("nav.roadmap")}</span>
+          <span>{t("roadmap.title")}</span>
         </NavLink>
       </nav>
 

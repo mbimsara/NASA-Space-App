@@ -380,6 +380,7 @@ interface ScoreInputs {
   scenarioFactor: number | null;
   /** Explicit season identity per season (defaults to alternating maha/yala). */
   labels?: string[];
+  planningMode?: RotationRequest["planning_mode"];
 }
 
 /** Score one sequence per rotation-score-0.1. Unknown inputs stay null; nothing becomes 0. */
@@ -388,6 +389,9 @@ export function scoreSequence(cropIds: string[], candidateId: string, inp: Score
   const crops = cropIds.map((id) => FIXTURE_CROPS[id]);
   const factor = inp.scenarioFactor ?? 1;
   const irr = inp.irrigationPerSeason;
+  const planningMode = inp.planningMode ?? "standard";
+  const legumeIds = new Set(["cowpea", "soybean", "groundnut", "mung-bean", "black-gram"]);
+  const legumeSeasons = cropIds.filter((id) => legumeIds.has(id)).length;
 
   const ranges: WaterBudgetRange[] = crops.map((c, i) => {
     const base = FIXTURE_SEASON_RAINFALL[labels[i]];
@@ -482,14 +486,27 @@ export function scoreSequence(cropIds: string[], candidateId: string, inp: Score
       { rule: "season_eligibility", passed: true, note: `Seasons: ${labels.join(", ")}` },
       { rule: "farmer_exclusion", passed: true, note: null },
     ],
+    planning_evidence: {
+      mode: planningMode,
+      legume_seasons: legumeSeasons,
+      unique_crop_families: new Set(cropIds.map((id) => legumeIds.has(id) ? "Fabaceae" : id === "vegetables" ? "mixed-fixture" : "Poaceae")).size,
+      mean_crop_water_demand_mm: mean(crops.map((crop) => (crop.demand_low + crop.demand_high) / 2)),
+      source_refs: [SOURCE],
+      interpretation: ["Synthetic fixture evidence for interface testing only."],
+      local_checks_required: planningMode === "standard" ? [] : ["Confirm field conditions and crop suitability locally."],
+    },
     _tie: [score ?? -Infinity, baseCov.length ? mean(baseCov) : -Infinity, diversity],
   };
 }
 
 /** Spec ordering: score ↓, conservative baseline coverage ↓, diversity ↓, crop-ID sequence ↑. */
-function rank(cands: (RotationCandidate & { _tie: number[] })[]): RotationCandidate[] {
+function rank(cands: (RotationCandidate & { _tie: number[] })[], mode: RotationRequest["planning_mode"] = "standard"): RotationCandidate[] {
   return [...cands]
     .sort((a, b) => {
+      const ae = a.planning_evidence;
+      const be = b.planning_evidence;
+      if (mode === "soil_revive" && ae && be && be.legume_seasons !== ae.legume_seasons) return be.legume_seasons - ae.legume_seasons;
+      if (mode === "drought_recovery" && ae?.mean_crop_water_demand_mm != null && be?.mean_crop_water_demand_mm != null && ae.mean_crop_water_demand_mm !== be.mean_crop_water_demand_mm) return ae.mean_crop_water_demand_mm - be.mean_crop_water_demand_mm;
       for (let i = 0; i < 3; i++) if (b._tie[i] !== a._tie[i]) return b._tie[i] - a._tie[i];
       return a.sequence.map((s) => s.crop_id).join(",").localeCompare(b.sequence.map((s) => s.crop_id).join(","));
     })
@@ -533,6 +550,7 @@ export async function createRotationFixture(
         irrigationPerSeason: farm.profile.irrigation_supply_mm_per_season,
         scenarioFactor: null,
         labels: body.season_labels,
+        planningMode: body.planning_mode,
       }),
     );
   });
@@ -546,9 +564,10 @@ export async function createRotationFixture(
     observation_id: body.observation_id,
     catalog_version: body.catalog_version,
     model_version: FIXTURE_MODEL_VERSION,
+    planning_mode: body.planning_mode ?? "standard",
     data_kind: "synthetic",
     created_at: new Date().toISOString(),
-    candidates: rank(scored),
+    candidates: rank(scored, body.planning_mode),
     reasons,
     assumptions: [
       "All values are synthetic fixtures for UI development.",
@@ -592,9 +611,10 @@ export async function createScenarioFixture(
           irrigationPerSeason: farm?.profile.irrigation_supply_mm_per_season ?? null,
           scenarioFactor: 1 + rainfallChangePct / 100,
           labels: asSeasonRanges(b.water_budget_range).map((r) => r.season_label ?? ""),
+          planningMode: baseline.planning_mode,
         },
       ),
-    ),
+    ), baseline.planning_mode,
   );
 
   const differences = Object.fromEntries(

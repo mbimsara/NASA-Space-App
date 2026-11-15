@@ -314,6 +314,15 @@ export interface RotationCandidate {
   water_budget_range?: WaterBudgetRange[] | WaterBudgetRange | null;
   reasons: string[];
   constraint_checks: ConstraintCheck[];
+  planning_evidence?: {
+    mode: "standard" | "soil_revive" | "drought_recovery" | "flood_recovery";
+    legume_seasons: number;
+    unique_crop_families: number;
+    mean_crop_water_demand_mm: number | null;
+    source_refs: string[];
+    interpretation: string[];
+    local_checks_required: string[];
+  };
 }
 
 export interface RotationAnalysis {
@@ -323,6 +332,7 @@ export interface RotationAnalysis {
   observation_id: string | null;
   catalog_version: string;
   model_version: string;
+  planning_mode?: "standard" | "soil_revive" | "drought_recovery" | "flood_recovery";
   data_kind: DataKind;
   created_at: string;
   candidates: RotationCandidate[];  // empty array is valid when no feasible plans

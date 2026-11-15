@@ -109,3 +109,31 @@ def test_analysis_ids_are_immutable_snapshots(client, adapter, farm):
     first = client.post(endpoint(farm), json=request_for(farm, obs)).json()
     second = client.post(endpoint(farm), json=request_for(farm, obs)).json()
     assert first["analysis_id"] != second["analysis_id"]
+
+
+@pytest.mark.parametrize("mode", ["soil_revive", "drought_recovery", "flood_recovery"])
+def test_planning_modes_return_explainable_reviewed_evidence(client, adapter, farm, mode):
+    obs = observation(client, adapter, farm)
+    response = client.post(endpoint(farm), json=request_for(farm, obs, planning_mode=mode))
+
+    assert response.status_code == 201
+    payload = response.json()
+    assert payload["planning_mode"] == mode
+    evidence = [candidate["planning_evidence"] for candidate in payload["candidates"]]
+    assert all(item["mode"] == mode for item in evidence)
+    assert all(item["source_refs"] for item in evidence)
+    assert all("china" not in ref.lower() for item in evidence for ref in item["source_refs"])
+    assert all(item["interpretation"] for item in evidence)
+    assert all(item["local_checks_required"] for item in evidence)
+    if mode == "soil_revive":
+        assert evidence[0]["legume_seasons"] == max(item["legume_seasons"] for item in evidence)
+    if mode == "drought_recovery":
+        demands = [item["mean_crop_water_demand_mm"] for item in evidence]
+        assert demands[0] == min(demands)
+
+
+def test_unknown_planning_mode_is_rejected(client, adapter, farm):
+    obs = observation(client, adapter, farm)
+    response = client.post(endpoint(farm), json=request_for(farm, obs, planning_mode="magic"))
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "VALIDATION_ERROR"

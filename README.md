@@ -39,7 +39,7 @@ AgroSphere AI connects Earth observations, farmer inputs, and crop-rotation mode
 | Assistant | Grounded deterministic explanations with preserved sources/limitations; optional server-side OpenAI Responses API wording with deterministic fallback. |
 | Accessible interface | Responsive layouts, light and dark themes, and English, Sinhala, and Tamil interface resources. |
 
-WeedShield, voice interaction, and other capabilities awaiting validated models or data remain on the roadmap. Historical climate-twin comparison is available for registered farms that have complete NASA POWER snapshots covering the identical period. Interface translation availability does not imply multilingual backend assistant support.
+WeedShield field-photo triage and reviewed English voice interaction are available. WeedShield processes the photo in the browser with a disclosed green-pixel heuristic and requires farmer confirmation; it is not a trained weed/species classifier. Historical climate-twin comparison is available for registered farms that have complete NASA POWER snapshots covering the identical period. Interface translation availability does not imply multilingual backend assistant support.
 
 ### A connected journey
 
@@ -205,7 +205,7 @@ POWER, SMAP, GPM IMERG, and HLS now have provenance-preserving integration or pr
 | --- | --- |
 | Connected core | Farm records, historical observations, rotations, water budgets, rainfall scenarios, grounded explanations, and saved plans |
 | Planning and follow-through | SoilRevive and FarmRecovery planning modes, cover crops, financial scenarios, reminders, reporting, and season feedback |
-| Advanced capabilities | Validated weed analysis, climate twins, and reviewed multilingual voice interaction |
+| Advanced capabilities | Validated weed-species classification and reviewed multilingual voice interaction (field-photo vegetation triage and historical climate twins are available now) |
 
 These phases describe product direction, not a claim that every feature is complete. See the [implementation plan](IMPLEMENTATION_PLAN.md) and [backlog](docs/BACKLOG.md) for responsibilities and acceptance criteria.
 

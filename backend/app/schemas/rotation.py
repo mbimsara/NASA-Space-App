@@ -9,6 +9,7 @@ from app.schemas.farm import PriorityWeights, StrictSchema
 
 
 SeasonLabel = Literal["maha", "yala", "inter-season"]
+PlanningMode = Literal["standard", "soil_revive", "drought_recovery", "flood_recovery"]
 
 
 class SeasonPeriodRequest(StrictSchema):
@@ -40,6 +41,7 @@ class RotationRequest(StrictSchema):
     season_labels: list[SeasonLabel]
     catalog_version: str = Field(min_length=1)
     priority_weights: PriorityWeights
+    planning_mode: PlanningMode = "standard"
     # Optional season-specific water inputs. Omitted: water stays unknown (original
     # behavior). "calendar": the server picks the latest matching historical season
     # for each planned season. A list: one explicit chronological period per season.
@@ -70,6 +72,18 @@ class ConstraintCheckResponse(StrictSchema):
     rule: str
     passed: bool
     note: str | None
+
+
+class PlanningEvidenceResponse(StrictSchema):
+    """Explainable screening evidence; never a soil-health or recovery score."""
+
+    mode: PlanningMode
+    legume_seasons: int = Field(ge=0)
+    unique_crop_families: int = Field(ge=0)
+    mean_crop_water_demand_mm: float | None = Field(default=None, gt=0)
+    source_refs: list[str]
+    interpretation: list[str]
+    local_checks_required: list[str]
 
 
 class WaterBudgetResponse(StrictSchema):
@@ -118,6 +132,7 @@ class RotationCandidateResponse(StrictSchema):
     water_budget_range: list[WaterBudgetRangeResponse]
     reasons: list[str]
     constraint_checks: list[ConstraintCheckResponse]
+    planning_evidence: PlanningEvidenceResponse | None = None
 
 
 class RotationAnalysisResponse(StrictSchema):
@@ -127,6 +142,7 @@ class RotationAnalysisResponse(StrictSchema):
     observation_id: str
     catalog_version: str
     model_version: str
+    planning_mode: PlanningMode = "standard"
     data_kind: Literal["observed", "modeled", "synthetic", "mixed"]
     created_at: AwareDatetime
     candidates: list[RotationCandidateResponse]

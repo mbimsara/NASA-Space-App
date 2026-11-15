@@ -4,14 +4,15 @@ Owner: Matheesha. Documentation support: Tharuka. NASA POWER is integrated throu
 
 ## Source selection policy
 
-Use resources listed on the [competition resources page](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/?tab=resources), verified in the browser on 2026-11-14. Per the project owner's instruction, do not add China-related data providers, datasets, locations, or examples. Current integration uses the NASA POWER endpoint and a Sri Lankan demonstration point only. No additional source is approved merely because it appears in an older plan.
+Use resources listed on the [competition resources page](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/?tab=resources), verified in the browser on 2026-11-14. Per the project owner's instruction, do not add China-related data providers, datasets, locations, or examples. Current integration uses NASA POWER plus location-gated Sri Lankan SMAP, GPM IMERG, and HLS artifacts. No additional source is approved merely because it appears in an older plan.
 
 | Candidate | Intended investigation | Status |
 | --- | --- | --- |
 | NASA POWER | Daily T2M and PRECTOTCORR via AG community, UTC | Connected to the farm observations API; live 2025 demo retrieval and cache reuse verified |
-| GPM | Precipitation observations | Product/version, access, coverage and resolution to verify |
+| GPM IMERG `GPM_3IMERGDF` V07 | Daily satellite precipitation context (`mm/day`) | Earthdata workflow, normalization, coverage checks, farm-distance gate, API and UI implemented; kept separate from the POWER rotation baseline |
 | SMAP SPL3SMP_E V006 | Regional soil-moisture context | January 2025 Sri Lankan subset automation verified: 31 files, 12 accepted AM / 11 accepted PM retrievals. See [SMAP guide](SMAP.md) |
-| Landsat / MODIS / VIIRS | Competition-listed vegetation/land-surface history | Specific products, access and quality processing to verify; HLS is not currently approved |
+| HLS V2.0 (`HLSL30` / `HLSS30`) | Quality-screened 30 m NDVI context | Earthdata workflow, normalization, cloud/quality rejection, farm-distance gate, API and UI implemented; not a weed/species, nutrient, or yield detector |
+| Landsat / MODIS / VIIRS | Other competition-listed vegetation/land-surface history | Not integrated; no fallback or implied coverage |
 
 Additional listed candidates include SRTM, ECOSTRESS, GLDAS/NLDAS, FAO GAEZ, and partner resources Sentinel-2/ERA5. Evaluate geographic coverage and relevance before adding integrations; many other resources on the page focus on the United States.
 
