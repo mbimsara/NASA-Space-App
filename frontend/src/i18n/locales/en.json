@@ -511,6 +511,7 @@
     "body": "Saved plans you opened before are available to view. Changes can't be sent until you reconnect.",
     "writeBlocked": "Offline: this needs the server. Try again when you are back online.",
     "formBlocked": "Offline: your changes are kept as a draft on this device. Save again when you are back online.",
+    "formQueued": "Offline: updating this existing farm will queue one version-checked edit on this device and sync it after reconnection.",
     "planCopy": "Showing the copy saved on this device on {{date}}. It may be out of date.",
     "planCached": "Saved on this device for offline viewing ({{date}}).",
     "availableBadge": "Available offline"

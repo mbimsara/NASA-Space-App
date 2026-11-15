@@ -19,6 +19,8 @@ import { serverFieldErrors } from "../utils/validation";
 import { useAppStore } from "../hooks/useAppStore";
 import { useLatestRequest } from "../hooks/useLatestRequest";
 import { useCanWrite } from "../hooks/useCanWrite";
+import { useOnlineStatus } from "../hooks/useOnlineStatus";
+import { queueFarmEdit } from "../utils/offlineFarmQueue";
 import { ErrorMessage } from "../components/ui/ErrorMessage";
 import { MapPicker } from "../components/map/MapPicker";
 import { HECTARES_PER, type AreaUnit } from "../finance/calculator";
@@ -57,6 +59,7 @@ export function FarmFormPage({ mode }: { mode: "new" | "edit" }) {
   const setFarm = useAppStore((s) => s.setFarm);
   const guard = useLatestRequest();
   const canWrite = useCanWrite();
+  const online = useOnlineStatus();
 
   const editingFarm = mode === "edit" ? farm : null;
   const draftKey = editingFarm?.id ?? "new";
@@ -125,7 +128,16 @@ export function FarmFormPage({ mode }: { mode: "new" | "edit" }) {
     setSubmitError(null);
     const ticket = guard.next();
     try {
-      const profile = { ...parsed.data, data_kind: editingFarm?.profile.data_kind ?? ("farmer_input" as const) };
+      const profile = { ...parsed.data, schema_version: "0.1" as const,
+        data_kind: editingFarm?.profile.data_kind ?? ("farmer_input" as const) };
+      if (!online && editingFarm) {
+        queueFarmEdit({ farmId: editingFarm.id, expectedInputVersion: editingFarm.input_version,
+          profile, queuedAt: new Date().toISOString() });
+        clearDraft(draftKey); dirty.current = false;
+        setFarm({ ...editingFarm, profile });
+        navigate(`/farms/${editingFarm.id}`);
+        return;
+      }
       const env = editingFarm
         ? await api.updateFarm(editingFarm.id, editingFarm.input_version, profile, ticket.signal)
         : await api.createFarm(profile, ticket.signal);
@@ -551,8 +563,8 @@ export function FarmFormPage({ mode }: { mode: "new" | "edit" }) {
 
         {editingFarm && <p className="muted">{t("farm.editWarning")}</p>}
 
-        {!canWrite && <p className="muted" role="note">{t("offline.formBlocked")}</p>}
-        <button type="submit" className="btn btn-primary" disabled={saving || !canWrite} style={{ width: "100%", padding: 12 }}>
+        {!canWrite && <p className="muted" role="note">{mode === "edit" ? t("offline.formQueued") : t("offline.formBlocked")}</p>}
+        <button type="submit" className="btn btn-primary" disabled={saving || (!canWrite && mode !== "edit")} style={{ width: "100%", padding: 12 }}>
           {saving ? t("common.loading") : mode === "new" ? t("farm.save") : t("farm.update")}
         </button>
       </form>
