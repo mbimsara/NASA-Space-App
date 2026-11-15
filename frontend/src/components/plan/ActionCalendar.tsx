@@ -3,7 +3,7 @@
  * stored on this device, exportable as .ics. No reminders are sent.
  * Owner: Shehani.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { localizeToolMessage } from "../../i18n/toolMessages";
 import {
@@ -18,6 +18,7 @@ import {
   type CalendarEntry,
   type SeasonInfo,
 } from "../../utils/calendar";
+import { markReminded, remindersDue, wasReminded } from "../../utils/reminders";
 
 interface Props {
   planId: string;
@@ -28,6 +29,7 @@ export function ActionCalendar({ planId, seasons }: Props) {
   const { t } = useTranslation();
   const [entries, setEntries] = useState<CalendarEntry[]>(() => loadCalendar(planId) ?? initialEntries(seasons));
   const [seq, setSeq] = useState(1);
+  const [remindersEnabled, setRemindersEnabled] = useState(() => localStorage.getItem(`agrosphere_reminders_${planId}`) === "1");
 
   useEffect(() => {
     saveCalendar(planId, entries);
@@ -35,8 +37,30 @@ export function ActionCalendar({ planId, seasons }: Props) {
 
   const errors = useMemo(() => validateCalendar(entries), [entries]);
   const dated = sortedDated(entries);
-  const kindLabel = (k: ActionKind) => t(`calendar.kind.${k}`);
-  const crop = (i: number) => seasons.find((s) => s.season_index === i)?.crop_name ?? String(i);
+  const kindLabel = useCallback((k: ActionKind) => t(`calendar.kind.${k}`), [t]);
+  const crop = useCallback((i: number) => seasons.find((s) => s.season_index === i)?.crop_name ?? String(i), [seasons]);
+
+  useEffect(() => {
+    if (!remindersEnabled || !("Notification" in window) || Notification.permission !== "granted") return;
+    const today = new Date().toISOString().slice(0, 10);
+    for (const entry of remindersDue(entries, today, 1)) {
+      if (wasReminded(planId, entry)) continue;
+      new Notification(`AgroSphere: ${kindLabel(entry.kind)}`, {
+        body: `${entry.date} · Season ${entry.season_index}: ${crop(entry.season_index)}${entry.note ? ` · ${entry.note}` : ""}`,
+        tag: `agrosphere-${planId}-${entry.id}-${entry.date}`,
+      });
+      markReminded(planId, entry);
+    }
+  }, [crop, entries, kindLabel, planId, remindersEnabled]);
+
+  const enableReminders = async () => {
+    if (!("Notification" in window)) return;
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      localStorage.setItem(`agrosphere_reminders_${planId}`, "1");
+      setRemindersEnabled(true);
+    }
+  };
 
   const update = (id: string, patch: Partial<CalendarEntry>) =>
     setEntries((es) => es.map((e) => (e.id === id ? { ...e, ...patch } : e)));
@@ -149,8 +173,12 @@ export function ActionCalendar({ planId, seasons }: Props) {
         <button type="button" className="btn btn-secondary" onClick={download} disabled={dated.length === 0 || Object.keys(errors).length > 0}>
           {t("calendar.export")}
         </button>
+        <button type="button" className="btn" onClick={enableReminders}
+          disabled={remindersEnabled || !("Notification" in window)}>
+          {remindersEnabled ? "Browser reminders enabled" : "Enable browser reminders"}
+        </button>
         <span className="muted" style={{ fontSize: 12 }}>
-          {t("calendar.localOnly")}
+          {t("calendar.localOnly")} Browser reminders are checked when AgroSphere is open; the .ics export remains the reliable background-calendar option.
         </span>
       </div>
     </section>

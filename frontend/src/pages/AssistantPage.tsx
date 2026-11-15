@@ -16,6 +16,7 @@ import { ErrorMessage } from "../components/ui/ErrorMessage";
 import { ApiClientError } from "../api/client";
 import type { Language } from "../types/api";
 import type { AssistantMessage } from "../types/api";
+import { recognitionConstructor, speakText, type SpeechRecognitionLike } from "../utils/speech";
 
 export function AssistantPage() {
   const { t } = useTranslation();
@@ -36,7 +37,9 @@ export function AssistantPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
+  const [listening, setListening] = useState(false);
   const logRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
 
   const contextKey = `${farm.id}|${farm.input_version}|${analysis?.analysis_id}|${scenario?.scenario_id}|${candidateId}`;
   useEffect(() => {
@@ -125,6 +128,18 @@ export function AssistantPage() {
   };
 
   const suggestions = [t("assistant.q1"), t("assistant.q2"), t("assistant.q3")];
+  const voiceAvailable = language === "en" && recognitionConstructor() !== null;
+  const startVoice = () => {
+    const Constructor = recognitionConstructor();
+    if (!Constructor || language !== "en") return;
+    recognitionRef.current?.stop();
+    const recognition = new Constructor(); recognitionRef.current = recognition;
+    recognition.lang = "en-US"; recognition.interimResults = false; recognition.maxAlternatives = 1;
+    recognition.onresult = (event) => setInput(event.results[0]?.[0]?.transcript ?? "");
+    recognition.onerror = () => setListening(false);
+    recognition.onend = () => setListening(false);
+    setListening(true); recognition.start();
+  };
 
   return (
     <div className="page">
@@ -252,6 +267,12 @@ export function AssistantPage() {
                 ))}
               </div>
             )}
+            {msg.role === "assistant" && (
+              <button type="button" className="btn no-print" style={{ minHeight: 0, padding: "3px 8px", marginTop: 4 }}
+                onClick={() => speakText(msg.content)} disabled={!('speechSynthesis' in window)}>
+                Read aloud
+              </button>
+            )}
             {msg.role === "assistant" && msg.status && msg.status !== "answered" && (
               <div className="notice notice-warn" role="note" style={{ fontSize: 12, margin: "6px 0 0", padding: "4px 8px" }}>
                 {t(`assistant.status.${msg.status}`, { defaultValue: msg.status })}
@@ -314,6 +335,11 @@ export function AssistantPage() {
         </div>
         <button type="submit" className="btn btn-secondary" disabled={loading || !input.trim() || !canWrite || outdated}>
           {t("assistant.send")}
+        </button>
+        <button type="button" className="btn" onClick={startVoice}
+          disabled={!voiceAvailable || listening || loading || !canWrite || outdated}
+          title={language !== "en" ? "Voice input is available only for the reviewed English assistant." : undefined}>
+          {listening ? "Listening…" : "🎤 Voice input"}
         </button>
       </form>
     </div>

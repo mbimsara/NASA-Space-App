@@ -16,7 +16,11 @@ export function ClimateTwinPage() {
   const [error, setError] = useState<unknown>(null);
   const observationId = latest?.farmId === farm.id && latest.inputVersion === farm.input_version ? latest.observationId : null;
 
-  useEffect(() => { setResult(null); setError(null); }, [farm.id, farm.input_version, observationId]);
+  useEffect(() => {
+    // The selected farm/observation is the result-context boundary.
+    // oxlint-disable-next-line react/set-state-in-effect
+    setResult(null); setError(null);
+  }, [farm.id, farm.input_version, observationId]);
 
   if (!observationId) return <div className="page"><h1>Historical climate twins</h1><div className="card"><p>Load a complete NASA POWER observation for this farm first.</p><Link className="btn btn-primary" to={`/farms/${farm.id}`}>Open NASA observations</Link></div></div>;
 

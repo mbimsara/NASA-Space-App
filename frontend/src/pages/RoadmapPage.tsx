@@ -4,22 +4,22 @@ import { useTranslation } from "react-i18next";
 import { useAppStore } from "../hooks/useAppStore";
 
 const ITEMS = [
-  { key: "offlineEdit", owner: "Dulanjaya, Shehani" },
-  { key: "reminders", owner: "Dulanjaya, Shehani" },
   { key: "soilModes", owner: "Bhagya, Tharuka, Shehani" },
   { key: "weed", owner: "Akash, Shehani" },
-  { key: "voice", owner: "Akash, Shehani, Tharuka" },
 ] as const;
 
 export function RoadmapPage() {
   const { t } = useTranslation();
   const farmId = useAppStore((state) => state.selectedFarmId);
+  const latestPlan = useAppStore((state) => state.recentPlans.find((plan) => plan.farmId === state.selectedFarmId));
   const available = farmId ? [
     { title: "NASA observations", detail: "POWER weather with optional SMAP, GPM and HLS context.", to: `/farms/${farmId}` },
     { title: "Soil health evidence", detail: "Local soil tests plus quality-screened SMAP and HLS context.", to: `/farms/${farmId}/soil-health` },
     { title: "Climate twins", detail: "Same-period comparison of registered farms using NASA POWER snapshots.", to: `/farms/${farmId}/climate-twins` },
     { title: "Rotation, water and recovery workflow", detail: "Crop comparison, water ranges and rainfall-stress scenarios.", to: `/farms/${farmId}/rotations` },
     { title: "Grounded AI review", detail: "Answers tied to the selected farm, analysis, scenario and candidate.", to: `/farms/${farmId}/assistant` },
+    { title: "English voice and read-aloud", detail: "Browser speech input for the reviewed English assistant and browser read-aloud for answers.", to: `/farms/${farmId}/assistant` },
+    ...(latestPlan ? [{ title: "Calendar reminders", detail: "Opt-in browser reminders while AgroSphere is open, plus reliable .ics calendar export.", to: `/plans/${latestPlan.id}` }] : []),
   ] : [];
   return (
     <div className="page">

@@ -17,6 +17,8 @@ export function SoilHealthPage() {
 
   useEffect(() => {
     const controller = new AbortController();
+    // Reset context before loading another farm version.
+    // oxlint-disable-next-line react/set-state-in-effect
     setLoading(true); setError(null); setSmap(null); setHls(null);
     Promise.allSettled([
       api.getSoilMoisture(farm.id, controller.signal),
