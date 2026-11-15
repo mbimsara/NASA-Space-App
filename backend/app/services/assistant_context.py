@@ -1,5 +1,6 @@
 """HTTP-independent bridge from canonical snapshots to the deterministic assistant."""
 from app.services.assistant_response import respond_to_request
+from app.services.assistant_llm import enhance
 from app.services.snapshot_context import resolve_context
 
 
@@ -20,4 +21,4 @@ def answer_request(db, request):
     if "scenario" in context:
         disclosures.append("The selected scenario is hypothetical, not a weather forecast or a new NASA observation.")
     response["limitations"] = list(dict.fromkeys([*response["limitations"], *disclosures]))
-    return response
+    return enhance(body, response)

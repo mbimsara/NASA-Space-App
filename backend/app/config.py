@@ -19,6 +19,8 @@ class Settings:
     cors_origins: tuple[str, ...]
     nasa_power_enabled: bool = True
     observation_cache_ttl_seconds: int = 86400
+    assistant_provider: str = "deterministic"
+    openai_model: str | None = None
 
 
 def load_settings(env_file: Path = ENV_FILE) -> Settings:
@@ -62,10 +64,18 @@ def load_settings(env_file: Path = ENV_FILE) -> Settings:
     if cache_ttl <= 0:
         raise ValueError("OBSERVATION_CACHE_TTL_SECONDS must be a positive integer.")
 
+    assistant_provider = (values.get("ASSISTANT_PROVIDER", "deterministic") or "").strip().lower()
+    if assistant_provider not in {"deterministic", "openai"}:
+        raise ValueError("ASSISTANT_PROVIDER must be deterministic or openai.")
+    openai_model = (values.get("OPENAI_MODEL", "") or "").strip() or None
+    if assistant_provider == "openai" and not openai_model:
+        raise ValueError("OPENAI_MODEL is required when ASSISTANT_PROVIDER=openai.")
+
     return Settings(
         database_url=database_url, cors_origins=origins,
         nasa_power_enabled=nasa_power_enabled == "true",
         observation_cache_ttl_seconds=cache_ttl,
+        assistant_provider=assistant_provider, openai_model=openai_model,
     )
 
 

@@ -2,8 +2,12 @@
 
 import math
 
-from backend.services.climate import number
-from backend.services.climate_baseline import compare_monthly
+try:  # Repository-root imports used by standalone tests.
+    from backend.services.climate import number
+    from backend.services.climate_baseline import compare_monthly
+except ModuleNotFoundError:  # Backend working-directory imports used by the API.
+    from services.climate import number
+    from services.climate_baseline import compare_monthly
 
 
 def profile(observations, start_year, end_year):

@@ -1,7 +1,10 @@
 """Monthly historical reference means, using complete months only."""
 from calendar import monthrange
 from datetime import date
-from backend.services.climate import checked_rows
+try:
+    from backend.services.climate import checked_rows
+except ModuleNotFoundError:
+    from services.climate import checked_rows
 
 
 def compare_monthly(observations, reference_start_year, reference_end_year, target_year):

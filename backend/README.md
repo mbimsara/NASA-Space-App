@@ -26,6 +26,18 @@ FastAPI with synchronous SQLAlchemy and SQLite. Implemented endpoints:
 See [API contracts](../docs/API_CONTRACTS.md) for fields, units, and errors.
 Assistant and immutable saved-plan endpoints are implemented; see [the integration handoff](../docs/ASSISTANT_SAVED_PLANS_INTEGRATION.md) for contracts and offline regression commands. POWER observations, database-backed caching, stable snapshot IDs, observation-based rainfall scenarios, crop-rotation analyses, and analysis climate scenarios are implemented. Analysis scenarios never modify the saved analysis or the NASA observation snapshot; seasons whose baseline water inputs are unknown keep scenario water and `scenario_resilience` as `null`. Live retrieval and cache reuse were verified on 2026-11-14.
 
+The assistant is deterministic by default. An optional OpenAI Responses API wording layer can be enabled without changing its grounded source IDs, assumptions, or limitations:
+
+```powershell
+.venv312\Scripts\python.exe -m pip install -r backend\requirements-assistant.txt
+# In the uncommitted root .env:
+# ASSISTANT_PROVIDER=openai
+# OPENAI_MODEL=<model available to your API project>
+# OPENAI_API_KEY=<local secret>
+```
+
+The key remains server-side. The request uses `store=False`; provider failure falls back to the validated deterministic answer with an explicit limitation. The model receives only the question and the already-grounded draft/citations/disclosures, not the full raw farm or satellite snapshot.
+
 ## Installation
 
 Use Python 3.10 or newer (verified with Python 3.12). Run these commands from the repository root.

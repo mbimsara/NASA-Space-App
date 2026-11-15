@@ -1,0 +1,2 @@
+# Optional OpenAI Responses API wording layer. The deterministic assistant remains the default.
+openai>=2,<3
