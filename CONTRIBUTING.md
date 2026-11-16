@@ -33,4 +33,4 @@ Tharuka reviews visible design changes; Matheesha reviews NASA/climate meaning; 
 
 Run checks relevant to the change. For shared sample data, run `python scripts/validate_data.py` using Python 3.10 or newer (standard library only). For application changes, record the actual lint/type/build/test commands once available. Include screenshots for visible changes, calculation examples for model changes, and limitations where validation is incomplete.
 
-Merge only when the feature's acceptance checks pass and the connected demo still works. Keep follow-on features out of the critical path until the core journey is complete.
+Merge only when the feature's acceptance checks pass and the connected demo still works. Keep follow-on features out of the critical path until the core journey is complete. Keep Coding
